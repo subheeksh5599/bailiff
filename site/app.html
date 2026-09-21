@@ -121,9 +121,9 @@ textarea{min-height:150px;resize:vertical;font-family:ui-monospace,monospace;fon
   <div>
     <section class="card">
       <h2>New case</h2>
-      <p class="hint">Paste the case text. Bailiff creates a real case, extracts the fields and keeps it open until the handoff is confirmed.</p>
+      <p class="hint">Paste the case text. Bailiff creates a real case, extracts the fields and keeps it open until the outcome is verified.</p>
       <label for="text">Case text</label>
-      <textarea id="text" spellcheck="false" placeholder="Paste the case letter, portal export or email thread here."></textarea>
+      <textarea id="text" spellcheck="false" placeholder="Paste the email thread, order confirmation or portal export here."></textarea>
       <div class="row">
         <div><label for="label">Data label</label>
           <select id="label">
@@ -369,7 +369,7 @@ function renderCase(d){
     ${sec("Correct a field", "The only route out of NEEDS_HUMAN or BLOCKED after an uncertain extraction.",
       `<div class="row">
          <div><label for="cf">Field</label><select id="cf">
-           ${["customer_name","case_sender","requested_outcome","urgency","counterparty","received_date"]
+           ${["customer_name","case_sender","requested_outcome","priority","counterparty","received_date"]
              .map(f => `<option value="${f}">${f}</option>`).join("")}</select></div>
          <div><label for="cv">Value</label><input id="cv" type="text"/></div>
        </div>
