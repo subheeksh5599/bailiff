@@ -135,7 +135,7 @@ describe("the re-check takes a closure back when the evidence stops being curren
       actor: "intake",
       requirements: [{ key: "refund_issued", label: "Refund issued", kind: "payment_record" }],
     });
-    await t.mutation(api.cases.attachEvidence, {
+    await t.mutation(internal.ingest.evidenceFromFetch, {
       caseId,
       kind: "payment_record",
       sourceKind: "counterparty",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
-import { api } from "../convex/_generated/api";
+import { api, internal } from "../convex/_generated/api";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -32,7 +32,7 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
     const t = harness();
     const caseId = await openCase(t);
     await t.mutation(api.cases.freezeRequirements, { caseId, requirements: RULES, actor: "intake" });
-    await t.mutation(api.cases.attachEvidence, {
+    await t.mutation(internal.ingest.evidenceFromFetch, {
       caseId,
       kind: "email_reply",
       sourceKind: "counterparty",
@@ -57,7 +57,7 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
       ["email_reply", "support reply", "order 12345 shipped"],
       ["payment_record", "https://example.com/orders/12345", "refund 41.20 issued"],
     ] as const) {
-      await t.mutation(api.cases.attachEvidence, {
+      await t.mutation(internal.ingest.evidenceFromFetch, {
         caseId,
         kind,
         sourceKind: "counterparty",
@@ -84,7 +84,7 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
     await t.mutation(api.cases.freezeRequirements, { caseId, requirements: RULES, actor: "intake" });
     const long_ago = Date.now() - 7 * 24 * 60 * 60 * 1000;
     for (const kind of ["email_reply", "payment_record"]) {
-      await t.mutation(api.cases.attachEvidence, {
+      await t.mutation(internal.ingest.evidenceFromFetch, {
         caseId,
         kind,
         sourceKind: "counterparty",
@@ -134,7 +134,7 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
   it("records a claim with no evidence as unverifiable rather than fine", async () => {
     const t = harness();
     const caseId = await openCase(t);
-    const claim = await t.mutation(api.cases.recordClaim, {
+    const claim = await t.mutation(internal.ingest.recordClaim, {
       caseId,
       text: "the agent told the customer Monday",
       kind: "promise",

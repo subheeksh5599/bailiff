@@ -126,30 +126,36 @@ export const freezeRequirements = mutation({
   },
 });
 
-export const attachEvidence = mutation({
+/**
+ * What the browser is allowed to attach: the customer's own documents.
+ *
+ * Evidence that speaks for the counterparty is filled in only by the ingest path
+ * (a fetch of their page, a reply they sent, a transcript of a call), never by
+ * anything a browser asks for. Otherwise a case could be argued to closure by
+ * whoever wants it closed. That is why sourceKind is not a parameter here.
+ */
+export const attachOwnEvidence = mutation({
   args: {
     caseId: v.id("cases"),
     kind: v.string(),
-    sourceKind: v.string(),
     source: v.string(),
     value: v.optional(v.string()),
     valueUnits: v.optional(v.number()),
     excerpt: v.string(),
     ingestedBy: v.string(),
-    fetchedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const caseDoc = await ctx.db.get(args.caseId);
     if (!caseDoc) throw new Error("no such case");
 
-    const fetchedAt = args.fetchedAt ?? Date.now();
+    const fetchedAt = Date.now();
     const contentHash = await sha256Hex(
       `${args.kind}|${args.source}|${args.value ?? ""}|${args.excerpt}`
     );
     const evidenceId = await ctx.db.insert("evidence", {
       caseId: args.caseId,
       kind: args.kind,
-      sourceKind: args.sourceKind,
+      sourceKind: "own_record",
       source: args.source,
       fetchedAt,
       contentHash,
@@ -159,18 +165,16 @@ export const attachEvidence = mutation({
       ingestedBy: args.ingestedBy,
     });
 
-    // A requirement becomes satisfied only by evidence of its own kind, from the
-    // counterparty or the customer's own record, read after the case opened.
     const requirements = await ctx.db
       .query("requirements")
       .withIndex("by_case", (q) => q.eq("caseId", args.caseId))
       .collect();
-    let newlySatisfied: string[] = [];
+    const newlySatisfied: string[] = [];
     for (const req of requirements) {
       if (req.satisfied) continue;
       const matches = requirementMatchedBy(
         { kind: req.kind },
-        { kind: args.kind, sourceKind: args.sourceKind, fetchedAt },
+        { kind: args.kind, sourceKind: "own_record", fetchedAt },
         caseDoc.openedAt
       );
       if (matches) {
@@ -182,57 +186,12 @@ export const attachEvidence = mutation({
     await writeAudit(ctx, {
       caseId: args.caseId,
       actor: args.ingestedBy,
-      action: "evidence.read",
+      action: "evidence.attached",
       detail: `${args.kind} from ${args.source} (hash ${contentHash.slice(0, 12)})${
         newlySatisfied.length ? ` satisfies ${newlySatisfied.join(", ")}` : ""
       }`,
     });
     return { evidenceId, contentHash, newlySatisfied, fresh: isFresh(fetchedAt, caseDoc.openedAt) };
-  },
-});
-
-export const recordClaim = mutation({
-  args: {
-    caseId: v.id("cases"),
-    text: v.string(),
-    kind: v.string(),
-    evidenceId: v.optional(v.id("evidence")),
-    actor: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const caseDoc = await ctx.db.get(args.caseId);
-    if (!caseDoc) throw new Error("no such case");
-    const evidence = args.evidenceId ? await ctx.db.get(args.evidenceId) : null;
-    const assertedAt = Date.now();
-    const { verdict, reason } = claimVerdict(
-      { assertedAt },
-      evidence
-        ? {
-            kind: evidence.kind,
-            sourceKind: evidence.sourceKind,
-            source: evidence.source,
-            fetchedAt: evidence.fetchedAt,
-            excerpt: evidence.excerpt,
-          }
-        : undefined,
-      caseDoc.openedAt
-    );
-    const claimId = await ctx.db.insert("claims", {
-      caseId: args.caseId,
-      text: args.text,
-      kind: args.kind,
-      evidenceId: args.evidenceId,
-      assertedAt,
-      verdict,
-      verdictReason: reason,
-    });
-    await writeAudit(ctx, {
-      caseId: args.caseId,
-      actor: args.actor,
-      action: "claim.recorded",
-      detail: `${verdict}: ${args.text.slice(0, 80)}`,
-    });
-    return { claimId, verdict, reason };
   },
 });
 
