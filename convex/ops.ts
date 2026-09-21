@@ -60,6 +60,38 @@ export const integrationHealth = query({
   handler: async () => configured(process.env),
 });
 
+/** The whole case as one document, for the board, the demo cards and a judge's own inspection. */
+export const caseExport = query({
+  args: { caseRef: v.string() },
+  handler: async (ctx, args) => {
+    const caseDoc = await ctx.db
+      .query("cases")
+      .withIndex("by_ref", (q) => q.eq("ref", args.caseRef))
+      .unique();
+    if (!caseDoc) return null;
+    const [requirements, evidence, claims, calls, grades, billing, auditRows] = await Promise.all([
+      ctx.db.query("requirements").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+      ctx.db.query("evidence").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+      ctx.db.query("claims").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+      ctx.db.query("calls").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+      ctx.db.query("grades").withIndex("by_subject", (q) => q.eq("subjectKind", "case").eq("subjectRef", args.caseRef)).collect(),
+      ctx.db.query("billingEvents").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+      ctx.db.query("audit").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+    ]);
+    return {
+      case: caseDoc,
+      requirements,
+      evidence: evidence.sort((a, b) => b.fetchedAt - a.fetchedAt),
+      claims,
+      calls,
+      grades,
+      billing,
+      audit: auditRows.sort((a, b) => a.at - b.at),
+      exportedAt: Date.now(),
+    };
+  },
+});
+
 /** The audit rows for one case, newest last: the case's own diary. */
 export const auditForCase = query({
   args: { caseRef: v.string() },

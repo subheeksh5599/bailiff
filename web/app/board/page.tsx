@@ -1,75 +1,307 @@
 "use client";
 
 import "../board.css";
+import Link from "next/link";
+import { useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { useBackend } from "../providers";
+
+/**
+ * The case board.
+ *
+ * Everything on this screen is read from the live deployment or not shown at all:
+ * the case list, the requirement set, every piece of evidence with the time it
+ * was read, the claims with their verdicts, the grades and the billing rows. When
+ * the backend is not connected the board says so instead of rendering samples -
+ * there is no fixture path in this file.
+ */
+const DEFAULT_REQUIREMENTS = [
+  { key: "order_ref", label: "The order or reference number", kind: "email_reply" },
+  { key: "refund_issued", label: "Their record shows the refund or credit", kind: "payment_record" },
+];
+
+type CloseResult =
+  | { closed: true; alreadyVerified?: boolean; unsatisfied: [] }
+  | { closed: false; unsatisfied: Array<{ key: string; label: string; reason: string }> };
+
 export default function Board() {
+  const { configured } = useBackend();
+  const [ref, setRef] = useState("");
+  const [counterparty, setCounterparty] = useState("");
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [closeResult, setCloseResult] = useState<CloseResult | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const health = useQuery(api.ops.integrationHealth, configured ? {} : "skip");
+  const board = useQuery(api.cases.board, configured ? { limit: 50 } : "skip");
+  const detail = useQuery(api.cases.get, selected ? { ref: selected } : "skip");
+  const audit = useQuery(api.ops.auditForCase, selected ? { caseRef: selected } : "skip");
+
+  const openCase = useMutation(api.cases.openCase);
+  const freeze = useMutation(api.cases.freezeRequirements);
+  const attach = useMutation(api.cases.attachOwnEvidence);
+  const close = useMutation(api.cases.attemptClose);
+
+  async function handleOpen(event: React.FormEvent) {
+    event.preventDefault();
+    if (!configured) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const created = await openCase({
+        ref: ref.trim(),
+        customerRef: "signed-in-owner",
+        counterpartyName: counterparty.trim(),
+        amountClaimedUnits: amount ? Math.round(Number(amount) * 100) : undefined,
+        currency: amount ? "USD" : undefined,
+        channel: "phone",
+      });
+      if (!created.duplicate) {
+        await freeze({
+          caseId: created.caseId,
+          requirements: DEFAULT_REQUIREMENTS,
+          actor: "board",
+        });
+      }
+      setSelected(ref.trim());
+      setMessage(created.duplicate ? "That reference already exists; opened the existing case." : "Case opened and its requirements frozen.");
+      setRef("");
+      setCounterparty("");
+      setAmount("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "the case was not opened");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAttach(event: React.FormEvent) {
+    event.preventDefault();
+    if (!detail || !note.trim()) return;
+    setBusy(true);
+    try {
+      const result = await attach({
+        caseId: detail.case._id,
+        kind: "email_reply",
+        source: "owner pasted the thread",
+        excerpt: note.trim(),
+        ingestedBy: "board",
+      });
+      setMessage(
+        result.newlySatisfied.length
+          ? `Stored and it satisfies: ${result.newlySatisfied.join(", ")}.`
+          : "Stored. It does not satisfy anything yet."
+      );
+      setNote("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "the evidence was not stored");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleClose() {
+    if (!detail) return;
+    setBusy(true);
+    setCloseResult(null);
+    try {
+      const result = await close({ caseId: detail.case._id, actor: "board" });
+      setCloseResult(result as CloseResult);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "the close was refused");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
-<header className="top">
-  <svg className="mark" viewBox="0 0 170 48" aria-label="Bailiff">
-    <path d="M4 22H18L24 15L30 28L37 4L43 35L48 20L54 26H72" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
-    <text x="3" y="45" fill="#fff" fontSize="29" fontWeight="800" letterSpacing="-1.1">bailiff</text>
-  </svg>
-  <span id="conn" className="conn">connecting…</span>
-  <a className="btn ghost" href="./index.html">← site</a>
-  <div className="status" id="status"></div>
-</header>
+      <header className="top">
+        <div className="wrap">
+          <Link className="mark" href="/" aria-label="Bailiff home">
+            <svg viewBox="0 0 170 48" aria-hidden="true">
+              <text x="3" y="45" fill="#fff" fontSize="29" fontWeight="800" letterSpacing="-1.1" fontFamily="Manrope">bailiff</text>
+            </svg>
+          </Link>
+          <div className="status" id="status">
+            {!configured && <span className="tag warning">backend not connected</span>}
+            {health &&
+              Object.entries(health)
+                .filter(([name]) => name !== "convex")
+                .map(([name, on]) => (
+                  <span key={name} className={on ? "tag on" : "tag off"}>
+                    {name}: {on ? "on" : "off"}
+                  </span>
+                ))}
+          </div>
+        </div>
+      </header>
 
-<div id="banner" className="banner" style={{ display: "none" }}>
-  <h3>Backend not reachable</h3>
-  <p id="bannerDetail"></p>
-  <div className="inline">
-    <input id="urlInput" type="text" placeholder="http://127.0.0.1:3212" spellCheck="false"/>
-    <button className="btn" id="urlSave">Connect</button>
-  </div>
-</div>
+      {!configured && (
+        <div className="banner" id="banner">
+          <div className="wrap">
+            <b>No live backend.</b> NEXT_PUBLIC_CONVEX_URL is not set, so this board has nothing to read and shows
+            nothing. It does not fall back to sample cases.
+          </div>
+        </div>
+      )}
 
-<div className="wrap">
+      <main className="wrap row">
+        <section className="sec card" id="create">
+          <h2>New case</h2>
+          <p className="placeholder">A case keeps its requirement set frozen at intake, and only closes when the other side&apos;s own record satisfies it.</p>
+          <form onSubmit={handleOpen} className="inline">
+            <label htmlFor="refInput">Reference</label>
+            <input id="refInput" value={ref} onChange={(e) => setRef(e.target.value)} required minLength={3} placeholder="case-2026-0914-01" />
+            <label htmlFor="cpInput">Company</label>
+            <input id="cpInput" value={counterparty} onChange={(e) => setCounterparty(e.target.value)} required placeholder="Example Corp" />
+            <label htmlFor="amtInput">Owed</label>
+            <input id="amtInput" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="412.00" />
+            <button className="btn" type="submit" disabled={busy || !configured}>
+              Open the case
+            </button>
+          </form>
+          {message && <p className="msg" id="createMsg">{message}</p>}
+        </section>
 
-  <div>
-    <section className="card">
-      <h2>New case</h2>
-      <p className="hint">Paste the case text. Bailiff creates a real case, extracts the fields and keeps it open until the outcome is verified.</p>
-      <label htmlFor="text">Case text</label>
-      <textarea id="text" spellCheck="false" placeholder="Paste the email thread, order confirmation or portal export here."></textarea>
-      <div className="row">
-        <div><label htmlFor="label">Data label</label>
-          <select id="label">
-            <option value="TEST_INPUT">TEST_INPUT</option>
-            <option value="SYNTHETIC_CONSENTED">SYNTHETIC_CONSENTED</option>
-            <option value="UNLABELED">UNLABELED</option>
-          </select></div>
-        <div><label htmlFor="kind">Source</label>
-          <select id="kind"><option value="text">text</option><option value="email">email</option></select></div>
-      </div>
-      <label htmlFor="urls">Requirement pages to read (one per line, optional)</label>
-      <textarea id="urls" style={{ minHeight: "66px" }} spellCheck="false" placeholder="https://payer.example/prior-authorization"></textarea>
-      <div className="row">
-        <div><label htmlFor="rInsurer">Insurer email (optional)</label><input id="rInsurer" type="text" spellCheck="false"/></div>
-        <div><label htmlFor="rSpecialist">Specialist email (optional)</label><input id="rSpecialist" type="text" spellCheck="false"/></div>
-      </div>
-      <p className="hint" style={{ margin: "12px 0 0" }}>Recipients must be real addresses. A case with none is blocked with <code>RECIPIENT_MISSING</code> rather than routed to an invented address.</p>
-      <div style={{ marginTop: "14px" }}><button className="btn" id="create">Create case</button></div>
-      <div className="msg" id="createMsg"></div>
-    </section>
+        <section className="sec card">
+          <h2>Cases</h2>
+          {board === undefined && configured && <p className="placeholder">Loading from the live deployment…</p>}
+          {board?.length === 0 && <p className="placeholder">No cases yet. Open one above.</p>}
+          <div className="clist">
+            {board?.map((row) => (
+              <button
+                key={row.ref}
+                className={`crow${selected === row.ref ? " active" : ""}`}
+                onClick={() => {
+                  setSelected(row.ref);
+                  setCloseResult(null);
+                }}
+              >
+                <span className="mono">{row.ref}</span>
+                <span className="state">{row.state}</span>
+                <span className="kv">{row.counterparty}</span>
+                {typeof row.amountClaimedUnits === "number" && <span className="kv">{row.currency} {(row.amountClaimedUnits / 100).toFixed(2)}</span>}
+              </button>
+            ))}
+          </div>
+        </section>
 
-    <section className="card" style={{ marginTop: "16px" }}>
-      <h2>Cases <span id="counts" style={{ fontWeight: "500", color: "#a7a4cf", fontSize: "13px" }}></span></h2>
-      <p className="hint">Live from Convex — this list updates itself when a step or a reply lands.</p>
-      <div className="filters" id="filters">
-        <button data-f="all" className="on">all</button><button data-f="needs_action">needs action</button>
-        <button data-f="waiting">waiting</button><button data-f="blocked">blocked</button>
-        <button data-f="complete">complete</button>
-      </div>
-      <div className="clist" id="clist"><div className="empty">No cases in this session yet. Create one above.</div></div>
-    </section>
-  </div>
+        {detail && (
+          <section className="sec card" id="detail">
+            <h2>
+              {detail.case.ref} <span className="tag">{detail.case.state}</span>
+            </h2>
+            <p className="placeholder">
+              {detail.case.counterpartyName} · opened {new Date(detail.case.openedAt).toISOString()} · set hash{" "}
+              <span className="mono">{(detail.case.requirementSetHash ?? "not frozen").slice(0, 12)}</span>
+            </p>
 
-  <section className="card" id="detail">
-    <p className="placeholder">Select a case, or create one, to see its evidence and what is still missing.</p>
-  </section>
-</div>
+            <h3>Requirements</h3>
+            <ul className="items">
+              {detail.requirements.map((r) => (
+                <li key={r.key} className={r.satisfied ? "item on" : "item"}>
+                  <span className="dot" /> {r.label} <span className="mono">({r.kind})</span> — {r.satisfied ? "satisfied" : "still open"}
+                </li>
+              ))}
+            </ul>
 
+            <h3>Evidence</h3>
+            {detail.evidence.length === 0 && <p className="placeholder">Nothing read yet.</p>}
+            <ul className="items">
+              {detail.evidence.map((e) => (
+                <li key={e._id} className="item">
+                  <span className={`tag ${e.sourceKind === "counterparty" ? "on" : ""}`}>{e.sourceKind}</span>{" "}
+                  <span className="mono">{e.kind}</span> from {e.source} at {new Date(e.fetchedAt).toISOString()}{" "}
+                  <span className="mono">#{e.contentHash.slice(0, 10)}</span>
+                </li>
+              ))}
+            </ul>
 
+            <h3>Claims</h3>
+            {detail.claims.length === 0 && <p className="placeholder">No claims recorded yet.</p>}
+            <ul className="items">
+              {detail.claims.map((c) => (
+                <li key={c._id} className="item">
+                  <span className={`tag ${c.verdict === "verified" ? "on" : "off"}`}>{c.verdict}</span> {c.text}{" "}
+                  <span className="placeholder">— {c.verdictReason}</span>
+                </li>
+              ))}
+            </ul>
+
+            <h3>Grades and billing</h3>
+            {detail.grades.length === 0 && <p className="placeholder">No grade yet.</p>}
+            {detail.grades.map((g) => (
+              <div key={g._id} className="card">
+                <b>{g.verdict}</b> <span className="mono">{g.subjectRef}</span> · rubric {g.rubricRef} · {g.gradedBy} ·{" "}
+                {new Date(g.gradedAt).toISOString()}
+                <ul className="items">
+                  {g.checks.map((check, index) => (
+                    <li key={`${g._id}-${index}`} className={check.passed ? "item on" : "item"}>
+                      <span className="dot" /> {check.name}: {check.passed ? "pass" : "fail"} — {check.detail}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <ul className="items">
+              {detail.billing.map((b) => (
+                <li key={b._id} className="item">
+                  <span className="tag">{b.state}</span> {b.units} unit(s) for {b.reason} · key{" "}
+                  <span className="mono">{b.idempotencyKey}</span> · attempts {b.attempts}
+                </li>
+              ))}
+            </ul>
+
+            <h3>Add the owner&apos;s own document</h3>
+            <form onSubmit={handleAttach} className="inline">
+              <textarea id="text" value={note} onChange={(e) => setNote(e.target.value)} spellCheck={false} placeholder="Paste the email thread, order confirmation or portal export here." />
+              <button className="btn" type="submit" disabled={busy || note.trim().length < 20}>
+                Store it as our own record
+              </button>
+            </form>
+
+            <div className="bar">
+              <button className="btn" onClick={handleClose} disabled={busy}>
+                Ask to close the case
+              </button>
+            </div>
+            {closeResult && (
+              <div className={closeResult.closed ? "msg ok" : "msg err"}>
+                {closeResult.closed ? (
+                  <>Closed, because every frozen requirement is satisfied by a record read after the case opened.</>
+                ) : (
+                  <>
+                    <b>Refused.</b> Still open:
+                    <ul className="items">
+                      {closeResult.unsatisfied.map((u) => (
+                        <li key={u.key} className="item">
+                          {u.label} — {u.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            )}
+
+            <h3>The case&apos;s own diary</h3>
+            <ul className="items">
+              {audit?.map((row) => (
+                <li key={row._id} className="item">
+                  <span className="placeholder">{new Date(row.at).toISOString()}</span>{" "}
+                  <span className="mono">{row.action}</span> {row.from && row.to ? `${row.from} → ${row.to} ` : ""}
+                  {row.detail}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </main>
     </>
   );
 }
