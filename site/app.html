@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Sentry — case board</title>
+<title>Bailiff — case board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
@@ -18,7 +18,7 @@ button,input,select,textarea{font:inherit}
  border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .mark{width:104px;height:30px}
 .mark text{font-family:Manrope}
-.health{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.status{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
 .hb{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:9999px;
  padding:6px 12px;font-size:11.5px;background:rgba(255,255,255,.04);cursor:help}
 .dot{width:8px;height:8px;border-radius:50%;background:#7b78a8;flex:0 0 8px}
@@ -98,13 +98,13 @@ textarea{min-height:150px;resize:vertical;font-family:ui-monospace,monospace;fon
 <body>
 
 <header class="top">
-  <svg class="mark" viewBox="0 0 170 48" aria-label="Sentry">
+  <svg class="mark" viewBox="0 0 170 48" aria-label="Bailiff">
     <path d="M4 22H18L24 15L30 28L37 4L43 35L48 20L54 26H72" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="3" y="45" fill="#fff" font-size="29" font-weight="800" letter-spacing="-1.1">sentry</text>
+    <text x="3" y="45" fill="#fff" font-size="29" font-weight="800" letter-spacing="-1.1">bailiff</text>
   </svg>
   <span id="conn" class="conn">connecting…</span>
   <a class="btn ghost" href="./index.html">← site</a>
-  <div class="health" id="health"></div>
+  <div class="status" id="status"></div>
 </header>
 
 <div id="banner" class="banner" style="display:none">
@@ -120,10 +120,10 @@ textarea{min-height:150px;resize:vertical;font-family:ui-monospace,monospace;fon
 
   <div>
     <section class="card">
-      <h2>New referral</h2>
-      <p class="hint">Paste the referral text. Sentry creates a real case, extracts the fields and keeps it open until the handoff is confirmed.</p>
-      <label for="text">Referral text</label>
-      <textarea id="text" spellcheck="false" placeholder="Paste the referral letter, portal export or email thread here."></textarea>
+      <h2>New case</h2>
+      <p class="hint">Paste the case text. Bailiff creates a real case, extracts the fields and keeps it open until the handoff is confirmed.</p>
+      <label for="text">Case text</label>
+      <textarea id="text" spellcheck="false" placeholder="Paste the case letter, portal export or email thread here."></textarea>
       <div class="row">
         <div><label for="label">Data label</label>
           <select id="label">
@@ -171,11 +171,11 @@ const anyApi = {
   cases:        { create: "cases:create", correctField: "cases:correctField",
                   setRecipients: "cases:setRecipients", retryStep: "cases:retryStep",
                   get: "cases:get", list: "cases:list", counts: "cases:counts" },
-  integrations: { integrationHealth: "integrations:integrationHealth" },
+  integrations: { integrationStatus: "integrations:integrationStatus" },
   directory:    { list: "directory:list" }
 };
 
-const LS_URL = "sentry.convexUrl", LS_TOK = "sentry.session";
+const LS_URL = "bailiff.convexUrl", LS_TOK = "bailiff.session";
 
 /* Backend resolution order:
    1. ?convex=<url>             explicit override, always wins
@@ -231,18 +231,18 @@ function markUp(){
 
 let selected = null, filter = "all", lastList = [];
 
-/* ---- connection + integration health ---- */
+/* ---- connection + integration status ---- */
 (async () => {
   try {
     await client.mutation(anyApi.sessions.ensure, { token, label: "case board" });
     markUp();
   } catch (e) { down("The deployment did not accept a session: " + e.message + "."); return; }
 
-  client.onUpdate(anyApi.integrations.integrationHealth, {}, rows => {
-    $("health").innerHTML = (rows || []).map(r =>
+  client.onUpdate(anyApi.integrations.integrationStatus, {}, rows => {
+    $("status").innerHTML = (rows || []).map(r =>
       `<span class="hb" title="${esc(r.detail)}"><i class="dot ${esc(r.status)}"></i>${esc(r.name)} · ${esc(r.status.toLowerCase())}</span>`
     ).join("");
-  }, err => console.warn("health", err));
+  }, err => console.warn("status", err));
 
   client.onUpdate(anyApi.cases.counts, { token }, c => {
     $("counts").textContent = c ? `· ${c.total} total · ${c.needsAction} need action · ${c.waiting} waiting · ${c.complete} complete` : "";
@@ -263,7 +263,7 @@ function subscribeList(){
     }
     $("clist").innerHTML = lastList.map(r => `
       <button class="crow ${r.caseId === selected ? "sel" : ""}" data-id="${esc(r.caseId)}">
-        <b>${esc(r.patientDisplayName || r.caseRef)}</b>
+        <b>${esc(r.counterpartyDisplayName || r.caseRef)}</b>
         <small>${esc(r.caseRef)} · ${esc(r.state)}${r.requestedSpecialty ? " · " + esc(r.requestedSpecialty) : ""}</small>
         <small>${esc(r.nextAction || r.blockDetail || "")}</small>
       </button>`).join("");
@@ -283,7 +283,7 @@ $("filters").onclick = e => {
 $("create").onclick = async () => {
   const text = $("text").value.trim();
   const m = $("createMsg");
-  if (text.length < 20) { m.className = "msg err"; m.textContent = "Paste the referral text first (at least 20 characters)."; return; }
+  if (text.length < 20) { m.className = "msg err"; m.textContent = "Paste the case text first (at least 20 characters)."; return; }
   const discoveryUrls = $("urls").value.split(/\n+/).map(s => s.trim()).filter(Boolean);
   const recipients = {};
   if ($("rInsurer").value.trim())    recipients.insurer    = $("rInsurer").value.trim();
@@ -296,7 +296,7 @@ $("create").onclick = async () => {
       ...(Object.keys(recipients).length ? { recipients } : {})
     }});
     m.className = "msg ok";
-    m.textContent = (res.duplicate ? "Identical referral already existed — opened the existing case " : "Created ")
+    m.textContent = (res.duplicate ? "Identical case already existed — opened the existing case " : "Created ")
       + res.caseRef + " · state " + res.state
       + (res.extractionQueued ? " · extraction queued" : "")
       + (res.redactionKinds?.length ? " · redacted: " + res.redactionKinds.join(", ") : "")
@@ -369,7 +369,7 @@ function renderCase(d){
     ${sec("Correct a field", "The only route out of NEEDS_HUMAN or BLOCKED after an uncertain extraction.",
       `<div class="row">
          <div><label for="cf">Field</label><select id="cf">
-           ${["patient_name","referring_clinic","requested_specialty","urgency","insurance_provider","received_date"]
+           ${["customer_name","case_sender","requested_outcome","urgency","counterparty","received_date"]
              .map(f => `<option value="${f}">${f}</option>`).join("")}</select></div>
          <div><label for="cv">Value</label><input id="cv" type="text"/></div>
        </div>
