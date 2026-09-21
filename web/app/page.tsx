@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 import "./globals.css";
 import Script from "next/script";
 
@@ -120,18 +122,18 @@ export default function Landing() {
       <a className="more" href="#integrations">&#8594; See how a case is verified</a>
     </div>
     <div className="panel"><div className="art"><svg viewBox="0 0 460 330">
-      <rect className="ln ln-c draw" style={{ "--len": "1200" }} x="70" y="34" width="330" height="188" rx="16"/>
-      <g className="ln ln-c draw" style={{ "--len": "900" }}>
+      <rect className="ln ln-c draw" style={{ "--len": "1200" } as CSSProperties} x="70" y="34" width="330" height="188" rx="16"/>
+      <g className="ln ln-c draw" style={{ "--len": "900" } as CSSProperties}>
         <path d="M70 76h330M70 114h330M70 152h330M70 190h330M168 34v188"/>
       </g>
       <rect className="chip" x="212" y="18" width="206" height="38" rx="19"/>
       <text className="chiptx" x="230" y="42">Rayna Donin | prior auth missing</text>
       <rect className="chip" x="146" y="196" width="196" height="38" rx="19"/>
       <text className="chiptx" x="164" y="220">Case intake | example</text>
-      <g className="ln ln-c draw" style={{ "--len": "700" }} transform="translate(52 236)">
+      <g className="ln ln-c draw" style={{ "--len": "700" } as CSSProperties} transform="translate(52 236)">
         <circle cx="34" cy="22" r="17"/><path d="M4 66a30 30 0 0 1 60 0"/>
       </g>
-      <path className="ln ln-c draw" style={{ "--len": "400" }} d="M300 262h96M300 284h64"/>
+      <path className="ln ln-c draw" style={{ "--len": "400" } as CSSProperties} d="M300 262h96M300 284h64"/>
     </svg></div></div>
   </article>
 
@@ -143,17 +145,17 @@ export default function Landing() {
       <a className="more" href="#integrations">&#8594; See how a case is verified</a>
     </div>
     <div className="panel"><div className="art"><svg viewBox="0 0 460 330">
-      <rect className="ln ln-c draw" style={{ "--len": "1100" }} x="150" y="16" width="168" height="196" rx="26"/>
-      <rect className="ln ln-c draw" style={{ "--len": "600" }} x="180" y="44" width="108" height="46" rx="11"/>
+      <rect className="ln ln-c draw" style={{ "--len": "1100" } as CSSProperties} x="150" y="16" width="168" height="196" rx="26"/>
+      <rect className="ln ln-c draw" style={{ "--len": "600" } as CSSProperties} x="180" y="44" width="108" height="46" rx="11"/>
       <text className="bigval" x="234" y="80" textAnchor="middle">v4</text>
       <text className="lbl" x="284" y="88">REQ SET</text>
-      <path className="ln ln-c draw" style={{ "--len": "500" }} d="M330 22l-54 56M330 22l16 16-54 56-16-16z"/>
+      <path className="ln ln-c draw" style={{ "--len": "500" } as CSSProperties} d="M330 22l-54 56M330 22l16 16-54 56-16-16z"/>
       <g transform="translate(148 214)">
-        <rect className="ln ln-c draw" style={{ "--len": "800" }} x="0" y="0" width="150" height="62" rx="12"/>
+        <rect className="ln ln-c draw" style={{ "--len": "800" } as CSSProperties} x="0" y="0" width="150" height="62" rx="12"/>
         <text className="mini" x="20" y="38">3 sources read</text>
-        <path className="ln ln-c draw" style={{ "--len": "600" }} d="M150 34c56 0 70 46 24 64s-98-10-112-46"/>
+        <path className="ln ln-c draw" style={{ "--len": "600" } as CSSProperties} d="M150 34c56 0 70 46 24 64s-98-10-112-46"/>
       </g>
-      <path className="ln ln-c draw" style={{ "--len": "500" }} d="M60 118c0 54 22 86 62 96M60 118a12 12 0 1 1 24 0"/>
+      <path className="ln ln-c draw" style={{ "--len": "500" } as CSSProperties} d="M60 118c0 54 22 86 62 96M60 118a12 12 0 1 1 24 0"/>
     </svg></div></div>
   </article>
 
@@ -165,19 +167,19 @@ export default function Landing() {
       <a className="more" href="#integrations">&#8594; See how a case is verified</a>
     </div>
     <div className="panel"><div className="art"><svg viewBox="0 0 460 330">
-      <rect className="ln ln-c draw" style={{ "--len": "1000" }} x="96" y="14" width="330" height="116" rx="16"/>
+      <rect className="ln ln-c draw" style={{ "--len": "1000" } as CSSProperties} x="96" y="14" width="330" height="116" rx="16"/>
       <text className="lbl" x="120" y="44">REPLIES RECORDED</text>
       <text className="rowtx" x="120" y="60">across 12 days on this case</text>
       <text className="bigval" x="120" y="108">12</text>
-      <rect className="ln ln-c draw" style={{ "--len": "1000" }} x="96" y="148" width="330" height="148" rx="16"/>
+      <rect className="ln ln-c draw" style={{ "--len": "1000" } as CSSProperties} x="96" y="148" width="330" height="148" rx="16"/>
       <text className="lbl" x="120" y="176">RESPONSE LATENCY</text>
       <path d="M116 268Q166 232 206 250T286 226T406 200V286H116Z" fill="rgba(0,177,255,.22)"/>
-      <path className="ln ln-c draw" style={{ "--len": "700" }} d="M116 268Q166 232 206 250T286 226T406 200"/>
-      <g className="ln ln-c draw" style={{ "--len": "600" }} transform="translate(28 46)">
+      <path className="ln ln-c draw" style={{ "--len": "700" } as CSSProperties} d="M116 268Q166 232 206 250T286 226T406 200"/>
+      <g className="ln ln-c draw" style={{ "--len": "600" } as CSSProperties} transform="translate(28 46)">
         <rect x="0" y="0" width="46" height="34" rx="12"/><path d="M8 34v14a15 15 0 0 0 30 0V34"/>
       </g>
-      <path className="ln ln-c draw" style={{ "--len": "400" }} d="M42 168v104M34 272h16"/>
-      <ellipse className="ln ln-c draw" style={{ "--len": "300" }} cx="44" cy="302" rx="22" ry="11" transform="rotate(-22 44 302)"/>
+      <path className="ln ln-c draw" style={{ "--len": "400" } as CSSProperties} d="M42 168v104M34 272h16"/>
+      <ellipse className="ln ln-c draw" style={{ "--len": "300" } as CSSProperties} cx="44" cy="302" rx="22" ry="11" transform="rotate(-22 44 302)"/>
     </svg></div></div>
   </article>
 
@@ -189,9 +191,9 @@ export default function Landing() {
       <a className="more" href="#integrations">&#8594; See how a case is verified</a>
     </div>
     <div className="panel"><div className="art"><svg viewBox="0 0 460 330">
-      <rect className="ln ln-c draw" style={{ "--len": "1300" }} x="24" y="12" width="412" height="230" rx="16"/>
+      <rect className="ln ln-c draw" style={{ "--len": "1300" } as CSSProperties} x="24" y="12" width="412" height="230" rx="16"/>
       <text className="lbl" x="44" y="40">CUSTOMER</text><text className="lbl" x="200" y="40">CASE STATUS</text><text className="lbl" x="344" y="40">DAYS OPEN</text>
-      <path className="ln ln-c draw" style={{ "--len": "1400" }} d="M24 52h412M24 84h412M24 116h412M24 148h412M24 180h412M24 212h412"/>
+      <path className="ln ln-c draw" style={{ "--len": "1400" } as CSSProperties} d="M24 52h412M24 84h412M24 116h412M24 148h412M24 180h412M24 212h412"/>
       <g className="rowtx">
         <text x="44" y="73">Doris Phillips</text><text x="200" y="73">Confirmed</text><text x="346" y="73">4</text>
         <text x="44" y="105">Rayna Dorwart</text><text x="200" y="105">Confirmed</text><text x="346" y="105">6</text>
@@ -205,7 +207,7 @@ export default function Landing() {
         <rect x="384" y="124" width="44" height="18" rx="9"/><rect x="384" y="156" width="44" height="18" rx="9"/>
         <rect x="384" y="188" width="44" height="18" rx="9"/><rect x="384" y="220" width="44" height="18" rx="9"/>
       </g>
-      <g className="ln ln-c draw" style={{ "--len": "700" }} transform="translate(120 250)">
+      <g className="ln ln-c draw" style={{ "--len": "700" } as CSSProperties} transform="translate(120 250)">
         <path d="M0 40L110 0l110 40-110 40z"/><path d="M0 40v26l110 40 110-40V40"/>
       </g>
     </svg></div></div>
@@ -313,127 +315,7 @@ export default function Landing() {
 
 </main>
 
-<script>
-(function(){
-  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function $(id){ return document.getElementById(id); }
-  var scene=$('scene'), heroCopy=$('heroCopy'), heroArt=$('heroArt'), dash=$('dashWrap'),
-      focus=$('focus'), nav=$('nav'), kw=$('kw'), sys=$('sys'), dia=$('dia'), trend=$('trend'),
-      pill=$('demoPill'), slot=$('pillSlot'), ctaBand=$('ctaBand'), process=$('process');
 
-  function clamp(v,a,b){ a=a===undefined?0:a; b=b===undefined?1:b; return Math.max(a,Math.min(b,v)); }
-  function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
-  function lerp(a,b,t){ return a+(b-a)*t; }
-
-  /* ---- measure the real "Request Demo" text so the pill always fits it ---- */
-  function measure(fs,px,py){
-    var g=document.createElement('span');
-    g.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font-family:Manrope,sans-serif;font-weight:700;font-size:'+fs+'px';
-    g.textContent='Request Demo'; document.body.appendChild(g);
-    var w=g.offsetWidth+px*2, h=g.offsetHeight+py*2; g.parentNode.removeChild(g);
-    return {w:w,h:h};
-  }
-  var INLINE, DOCK, INLINE_FS;
-  function sizeSlot(){
-    var small = innerWidth<980;
-    INLINE_FS = small?15:22;
-    INLINE = measure(INLINE_FS, small?22:34, small?14:22);
-    DOCK   = measure(14, 24, 13);
-    slot.style.width=INLINE.w+'px';
-    slot.style.height=INLINE.h+'px';
-  }
-
-  /* ---- hero word cycle: timer-free cross-fade, box width follows the active word ---- */
-  var words=[].slice.call(kw.querySelectorAll('.kwW')), wordIdx=-1;
-  function sizeWords(){
-    words.forEach(function(w){ w.__w=w.getBoundingClientRect().width; });
-    if(wordIdx>=0 && words[wordIdx]) kw.style.width=words[wordIdx].__w+'px';
-  }
-  function setWord(i){
-    if(i===wordIdx) return; wordIdx=i;
-    words.forEach(function(w,n){ w.classList.toggle('on', n===i); });
-    if(words[i] && words[i].__w) kw.style.width=words[i].__w+'px';
-  }
-
-  function render(){
-    var max=scene.offsetHeight-innerHeight;
-    var p=clamp(scrollY/max);
-    var small=innerWidth<980;
-
-    setWord(p<.09?0:(p<.18?1:2));
-
-    var out=ease(clamp((p-.20)/.14));
-    heroCopy.style.opacity=String(1-out);
-    heroCopy.style.transform='translateY('+(-out*90)+'px) scale('+(1-out*.05)+')';
-    heroArt.style.opacity=String(.9*(1-out));
-    heroArt.style.transform='translateX('+(-out*70)+'px) scale('+(1-out*.1)+')';
-
-    /* dashboard: sliver bottom-right -> centre -> full-bleed -> exits up */
-    var rise=ease(clamp((p-.14)/.26));
-    var zoom=ease(clamp((p-.40)/.22));
-    var exit=ease(clamp((p-.66)/.14));
-    dash.style.left = lerp(40, small?4:2, rise)+'%';
-    dash.style.right= lerp(4,  small?4:2, rise)+'%';
-    dash.style.top  = lerp(88, 13, rise)+'%';
-    dash.style.opacity=String(1-exit);
-    dash.style.transform='translateY('+(-exit*innerHeight*.9)+'px) scale('+(lerp(.82,1,rise)+zoom*.16)+')';
-
-    var t=ease(clamp((p-.38)/.22));
-    sys.textContent=String(Math.round(lerp(1,3,t)));
-    dia.textContent='4';
-    trend.style.strokeDashoffset=String(760*(1-ease(clamp((p-.42)/.18))));
-
-    var fIn=ease(clamp((p-.80)/.10)), fOut=ease(clamp((p-.96)/.04));
-    focus.style.opacity=String(fIn*(1-fOut));
-    focus.style.transform='translateY('+((1-fIn)*44)+'px)';
-
-    nav.classList.toggle('gone', p>.20);
-
-    /* ---- travelling Request Demo pill: inline -> dips down -> parks top-right ---- */
-    var r=slot.getBoundingClientRect();
-    var slotDocTop=r.top+scrollY, slotDocLeft=r.left;
-    var start=ctaBand.offsetTop+ctaBand.offsetHeight*0.30;
-    var end  =process.offsetTop+innerHeight*0.25;
-    var k=ease(clamp((scrollY-start)/(end-start)));
-    /* freeze the source once the handoff begins, otherwise the pill would chase the
-       sentence off the top of the screen instead of visibly travelling to the corner */
-    var srcTop=slotDocTop-Math.min(scrollY,start);
-    var dx=innerWidth-DOCK.w-(small?18:34), dy=small?16:26;
-    var dip=Math.sin(Math.PI*k)*innerHeight*0.07;
-    pill.style.width =lerp(r.width||INLINE.w, DOCK.w, k)+'px';
-    pill.style.height=lerp(r.height||INLINE.h, DOCK.h, k)+'px';
-    pill.style.left  =lerp(slotDocLeft, dx, k)+'px';
-    pill.style.top   =(lerp(srcTop, dy, k)+dip)+'px';
-    pill.style.fontSize=lerp(INLINE_FS, 14, k)+'px';
-    pill.classList.toggle('docked', k>.5);
-    pill.classList.toggle('live', scrollY > ctaBand.offsetTop-innerHeight);
-  }
-
-  /* render synchronously on scroll: requestAnimationFrame is throttled or absent in
-     background/headless tabs, and a queued renderer would stall there permanently. */
-  var lastY=-1;
-  function tick(){ if(scrollY!==lastY){ lastY=scrollY; render(); } }
-  addEventListener('scroll',tick,{passive:true});
-  addEventListener('resize',function(){ sizeSlot(); sizeWords(); render(); });
-
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ e.target.classList.toggle('on', e.isIntersecting); });
-  },{threshold:.22, rootMargin:'-8% 0px -14% 0px'});
-  Array.prototype.forEach.call(document.querySelectorAll('[data-step]'),function(el){ io.observe(el); });
-
-  var io2=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('on'); io2.unobserve(e.target); } });
-  },{threshold:.16});
-  Array.prototype.forEach.call(document.querySelectorAll('.rv'),function(el,i){
-    el.style.transitionDelay=((i%3)*110)+'ms'; io2.observe(el);
-  });
-
-  sizeSlot(); sizeWords();
-  if(reduced){ pill.classList.add('live'); }
-  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ sizeSlot(); sizeWords(); render(); }); }
-  render();
-})();
-</script>
       <ScriptTag />
     </>
   );

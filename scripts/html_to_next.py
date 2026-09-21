@@ -48,11 +48,19 @@ def camel_css(prop: str) -> str:
 
 def style_to_object(value: str) -> str:
     out = []
+    custom = False
     for prop, val in CSS_PROP.findall(value):
         key = camel_css(prop)
-        quoted = f'"{key}"' if key.startswith("--") else key
+        if key.startswith("--"):
+            custom = True
+            quoted = f'"{key}"'
+        else:
+            quoted = key
         out.append(f"{quoted}: {json.dumps(val.strip())}")
-    return "{ " + ", ".join(out) + " }"
+    # CSS custom properties are legal at runtime but not in the CSSProperties type,
+    # so a style object carrying one is asserted instead of silently dropped.
+    suffix = " as CSSProperties" if custom else ""
+    return "{ " + ", ".join(out) + " }" + suffix
 
 
 def convert_markup(html: str) -> str:
@@ -102,12 +110,17 @@ def split_page(source: str) -> tuple[str, str, str, str, str]:
 def write_page(*, source: Path, css_out: Path, page_out: Path, component: str, keep_script: bool,
                client_logic: str | None, css_import: str | None) -> None:
     styles, scripts, head_inner, body_attrs, body = split_page(source.read_text(encoding="utf-8"))
+    # The script is either re-attached as a client component (keep_script) or replaced by
+    # hand-written React logic; either way it must not also sit in the markup as a raw tag.
+    body = re.sub(r"<script[^>]*>.*?</script>", "", body, flags=re.S)
     css_out.parent.mkdir(parents=True, exist_ok=True)
     page_out.parent.mkdir(parents=True, exist_ok=True)
     css_out.write_text(styles + "\n", encoding="utf-8")
     jsx = convert_markup(body)
 
     bits = ['"use client";', ""]
+    if "as CSSProperties" in jsx:
+        bits += ['import type { CSSProperties } from "react";', ""]
     if css_import:
         bits.append(css_import)
     if keep_script and scripts:
