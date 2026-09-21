@@ -1,0 +1,14 @@
+ ✓ Compiled successfully in 38.0s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/5) ...
+Error occurred prerendering page "/board". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: Could not find Convex client! `useQuery` must be used in the React component tree under `ConvexProvider`. Did you forget it? See https://docs.convex.dev/quick-start#set-up-convex-in-your-react-app
+    at c.query.query (.next/server/chunks/234.js:12:57277)
+    at aU (.next/server/chunks/234.js:12:58276)
+    at aH (.next/server/app/board/page.js:2:5514) {
+  digest: '1712002258'
+}
+Export encountered an error on /board/page: /board, exiting the build.
+ ⨯ Next.js build worker exited with code: 1 and signal: null

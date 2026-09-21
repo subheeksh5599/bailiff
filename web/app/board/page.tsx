@@ -27,6 +27,39 @@ type CloseResult =
 
 export default function Board() {
   const { configured } = useBackend();
+  // Hooks cannot be called conditionally, so the split is at the component level:
+  // with no client there is nothing to query, and nothing is rendered from a query.
+  if (!configured) return <NotConnected />;
+  return <ConnectedBoard />;
+}
+
+function NotConnected() {
+  return (
+    <>
+      <header className="top">
+        <div className="wrap">
+          <Link className="mark" href="/" aria-label="Bailiff home">
+            <svg viewBox="0 0 170 48" aria-hidden="true">
+              <text x="3" y="45" fill="#fff" fontSize="29" fontWeight="800" letterSpacing="-1.1" fontFamily="Manrope">bailiff</text>
+            </svg>
+          </Link>
+          <div className="status">
+            <span className="tag off">backend: off</span>
+          </div>
+        </div>
+      </header>
+      <div className="banner" id="banner">
+        <div className="wrap">
+          <b>No live backend.</b> NEXT_PUBLIC_CONVEX_URL is not set, so this board has nothing to read and shows
+          nothing. It does not fall back to sample cases: run <span className="mono">npx convex dev</span> and set the
+          URL to see real ones.
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ConnectedBoard() {
   const [ref, setRef] = useState("");
   const [counterparty, setCounterparty] = useState("");
   const [amount, setAmount] = useState("");
@@ -36,8 +69,8 @@ export default function Board() {
   const [closeResult, setCloseResult] = useState<CloseResult | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const health = useQuery(api.ops.integrationHealth, configured ? {} : "skip");
-  const board = useQuery(api.cases.board, configured ? { limit: 50 } : "skip");
+  const health = useQuery(api.ops.integrationHealth, {});
+  const board = useQuery(api.cases.board, { limit: 50 });
   const detail = useQuery(api.cases.get, selected ? { ref: selected } : "skip");
   const audit = useQuery(api.ops.auditForCase, selected ? { caseRef: selected } : "skip");
 
@@ -48,7 +81,6 @@ export default function Board() {
 
   async function handleOpen(event: React.FormEvent) {
     event.preventDefault();
-    if (!configured) return;
     setBusy(true);
     setMessage(null);
     try {
@@ -128,8 +160,7 @@ export default function Board() {
             </svg>
           </Link>
           <div className="status" id="status">
-            {!configured && <span className="tag warning">backend not connected</span>}
-            {health &&
+              {health &&
               Object.entries(health)
                 .filter(([name]) => name !== "convex")
                 .map(([name, on]) => (
@@ -140,15 +171,6 @@ export default function Board() {
           </div>
         </div>
       </header>
-
-      {!configured && (
-        <div className="banner" id="banner">
-          <div className="wrap">
-            <b>No live backend.</b> NEXT_PUBLIC_CONVEX_URL is not set, so this board has nothing to read and shows
-            nothing. It does not fall back to sample cases.
-          </div>
-        </div>
-      )}
 
       <main className="wrap row">
         <section className="sec card" id="create">
@@ -161,7 +183,7 @@ export default function Board() {
             <input id="cpInput" value={counterparty} onChange={(e) => setCounterparty(e.target.value)} required placeholder="Example Corp" />
             <label htmlFor="amtInput">Owed</label>
             <input id="amtInput" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="412.00" />
-            <button className="btn" type="submit" disabled={busy || !configured}>
+            <button className="btn" type="submit" disabled={busy}>
               Open the case
             </button>
           </form>
@@ -170,7 +192,7 @@ export default function Board() {
 
         <section className="sec card">
           <h2>Cases</h2>
-          {board === undefined && configured && <p className="placeholder">Loading from the live deployment…</p>}
+          {board === undefined && <p className="placeholder">Loading from the live deployment…</p>}
           {board?.length === 0 && <p className="placeholder">No cases yet. Open one above.</p>}
           <div className="clist">
             {board?.map((row) => (
