@@ -10,7 +10,7 @@
     "isolatedModules": true,
     "allowJs": true,
     "jsx": "react-jsx",
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
   "include": ["convex/**/*.ts", "tests/**/*.ts"]
 }

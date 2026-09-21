@@ -10,6 +10,7 @@
 
 import type * as billing from "../billing.js";
 import type * as cases from "../cases.js";
+import type * as grades from "../grades.js";
 import type * as lib_hash from "../lib/hash.js";
 import type * as lib_rules from "../lib/rules.js";
 import type * as lib_states from "../lib/states.js";
@@ -24,6 +25,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   cases: typeof cases;
+  grades: typeof grades;
   "lib/hash": typeof lib_hash;
   "lib/rules": typeof lib_rules;
   "lib/states": typeof lib_states;
