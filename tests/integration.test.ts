@@ -167,7 +167,7 @@ describe("billing: money moves only behind a passing grade, once", () => {
   it("refuses to bill a call whose grade failed", async () => {
     const t = harness();
     const caseId = await openCase(t);
-    const grade = await t.mutation(api.grades.recordGrade, {
+    const grade = await t.mutation(internal.grades.recordGrade, {
       subjectKind: "call",
       subjectRef: "call-2",
       rubricRef: "resolution-v1",
@@ -191,7 +191,7 @@ describe("billing: money moves only behind a passing grade, once", () => {
   it("refuses to bill an unverified grade, because unverified is not a pass", async () => {
     const t = harness();
     const caseId = await openCase(t);
-    const grade = await t.mutation(api.grades.recordGrade, {
+    const grade = await t.mutation(internal.grades.recordGrade, {
       subjectKind: "call",
       subjectRef: "call-3",
       rubricRef: "resolution-v1",
@@ -212,7 +212,7 @@ describe("billing: money moves only behind a passing grade, once", () => {
   it("bills once behind a passing grade, and a replayed webhook does not bill again", async () => {
     const t = harness();
     const caseId = await openCase(t);
-    const grade = await t.mutation(api.grades.recordGrade, {
+    const grade = await t.mutation(internal.grades.recordGrade, {
       subjectKind: "call",
       subjectRef: "call-4",
       rubricRef: "resolution-v1",
@@ -235,7 +235,7 @@ describe("billing: money moves only behind a passing grade, once", () => {
   it("a failed meter call stays pending and is retried, never duplicated", async () => {
     const t = harness();
     const caseId = await openCase(t);
-    const grade = await t.mutation(api.grades.recordGrade, {
+    const grade = await t.mutation(internal.grades.recordGrade, {
       subjectKind: "call",
       subjectRef: "call-5",
       rubricRef: "resolution-v1",

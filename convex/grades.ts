@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, query } from "./_generated/server";
 import { gradeVerdict } from "./lib/rules";
 
 /**
@@ -9,7 +9,7 @@ import { gradeVerdict } from "./lib/rules";
  * argue with. The verdict is derived here, in one place, so no caller can post a
  * "pass" that its own checks do not support.
  */
-export const recordGrade = mutation({
+export const recordGrade = internalMutation({
   args: {
     subjectKind: v.string(),
     subjectRef: v.string(),
