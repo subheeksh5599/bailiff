@@ -1,2 +1,26 @@
+# dependencies
+node_modules/
+web/node_modules/
 
+# build output
+web/.next/
+web/out/
+*.tsbuildinfo
+
+# convex local state and generated client
+.convex/local/
+convex/_generated/
+
+# environment files never ship
+.env
 .env.local
+.env.*.local
+
+# test and tool output
+coverage/
+.venv/
+__pycache__/
+*.pyc
+
+# demo build scratch
+demo/build/
