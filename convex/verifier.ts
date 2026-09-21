@@ -1,5 +1,5 @@
-import type { Doc, Id } from "../_generated/dataModel";
-import type { QueryCtx, MutationCtx } from "../_generated/server";
+import type { Doc, Id } from "./_generated/dataModel";
+import type { QueryCtx, MutationCtx } from "./_generated/server";
 import { evaluateCase, type CaseEvaluation, type Evidence, type Requirement } from "./lib/rules";
 
 /**
