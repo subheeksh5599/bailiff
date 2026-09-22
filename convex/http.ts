@@ -2,6 +2,7 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { parseInbound } from "./integrations/agentmail";
+import { configured } from "./lib/config";
 
 /**
  * The only doors into the ledger.
@@ -24,20 +25,7 @@ http.route({
   path: "/health",
   method: "GET",
   handler: httpAction(async () => {
-    return json({
-      ok: true,
-      integrations: {
-        convex: true,
-        callTranscripts: Boolean(process.env.VAPI_WEBHOOK_SECRET),
-        telephony: Boolean(process.env.VAPI_API_KEY),
-        webReads: Boolean(process.env.FIRECRAWL_API_KEY),
-        extraction: Boolean(process.env.OPENAI_API_KEY),
-        grading: Boolean(process.env.SCORECARD_API_KEY),
-        metering: Boolean(process.env.AUTUMN_SECRET_KEY),
-        email: Boolean(process.env.RESEND_API_KEY),
-        knowledge: Boolean(process.env.INKEEP_API_KEY),
-      },
-    });
+    return json({ ok: true, integrations: configured(process.env) });
   }),
 });
 

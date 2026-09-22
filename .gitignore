@@ -31,3 +31,4 @@ demo/build/
 # demo scratch (real case exports and rendered media)
 demo/export.json
 demo/audio/
+.env.cloud

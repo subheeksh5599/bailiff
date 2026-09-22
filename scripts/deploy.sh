@@ -25,6 +25,10 @@ npx convex deploy --yes
 echo "== pushing deployment variables (names only are printed) =="
 npx convex env set --from-file .env.deployment
 
-SITE=$(grep -E '^CONVEX_SITE_URL=' .env.local | cut -d= -f2-)
+# `convex dev` rewrites the CONVEX_* lines in .env.local with the local URLs, so the
+# cloud address is read from .env.cloud first rather than from whatever the CLI last wrote.
+SITE=$(grep -E '^CONVEX_SITE_URL=.*convex\.site' .env.cloud 2>/dev/null | cut -d= -f2- || true)
+[ -n "$SITE" ] || SITE=$(grep -E '^CONVEX_SITE_URL=.*convex\.site' .env.local 2>/dev/null | cut -d= -f2- || true)
+[ -n "$SITE" ] || { echo "no cloud site url: put CONVEX_SITE_URL=https://<deployment>.convex.site in .env.cloud"; exit 1; }
 echo "== health of $SITE =="
 curl -s --max-time 30 "$SITE/health" | python3 -m json.tool

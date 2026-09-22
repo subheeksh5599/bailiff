@@ -28,6 +28,12 @@ TEXT = "#ededec"
 DIM = "#5a5a6e"
 
 
+def when(ms: int) -> str:
+    """Epoch millis are unreadable on camera; every timestamp on a card is ISO."""
+    from datetime import datetime, timezone
+    return datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ")
+
+
 def im() -> list[str]:
     """ImageMagick 7 ships `magick`; older systems only have `convert`."""
     for candidate in (["magick"], ["convert"]):
@@ -81,17 +87,18 @@ def main() -> int:
     ref = case["ref"]
 
     # 1 — the case and its frozen set
-    lines: list[tuple[str, str]] = [(MUTED, f"{case['counterpartyName']} · opened {case['openedAt']} · state {case['state']}")]
+    lines: list[tuple[str, str]] = [(MUTED, f"{case['counterpartyName']} · opened {when(case['openedAt'])} · state {case['state']}")]
     lines += wrap("set hash ", (case.get("requirementSetHash") or "not frozen")[:32])
     for req in export["requirements"]:
         lines.append((ACCENT if req["satisfied"] else TEXT, f"[{'x' if req['satisfied'] else ' '}] {req['label']} ({req['kind']})"))
-    render(out / "01-case.png", f"Case {ref}", lines, f"read from the deployment at {export['exportedAt']}")
+    title = ref if ref.lower().startswith("case") else f"Case {ref}"
+    render(out / "01-case.png", title, lines, f"read from the deployment at {when(export['exportedAt'])}")
 
     # 2 — the evidence, with where it came from and when
     lines = [(MUTED, f"{len(export['evidence'])} read(s)")]
     for ev in export["evidence"][:12]:
         lines.append((ACCENT if ev["sourceKind"] == "counterparty" else TEXT,
-                      f"{ev['sourceKind']} · {ev['kind']} · {ev['source'][:52]} · #{ev['contentHash'][:10]}"))
+                      f"{ev['sourceKind']} · {ev['kind']} · {ev['source'][:40]} · {when(ev['fetchedAt'])}"))
     render(out / "02-evidence.png", "Every read is stamped and hashed", lines, "nothing here was typed in")
 
     # 3 — claims and verdicts
@@ -105,7 +112,7 @@ def main() -> int:
     # 4 — grades and the gate
     lines = []
     for grade in export["grades"][:2]:
-        lines.append((ACCENT if grade["verdict"] == "pass" else TEXT, f"grade {grade['verdict']} · {grade['rubricRef']} · {grade['gradedBy']}"))
+        lines.append((ACCENT if grade["verdict"] == "pass" else TEXT, f"grade {grade['verdict']} · {grade['rubricRef']} · {grade['gradedBy']} · {when(grade['gradedAt'])}"))
         for check in grade["checks"]:
             lines.append((MUTED, f"  {'pass' if check['passed'] else 'fail'} {check['name']} — {check['detail'][:70]}"))
     render(out / "04-gate.png", "Only a passing grade releases a charge", lines or [(TEXT, "no grade recorded yet")],
@@ -121,7 +128,7 @@ def main() -> int:
     # 6 — the diary
     lines = [(MUTED, f"{len(export['audit'])} entry(ies)")]
     for row in export["audit"][-12:]:
-        lines.append((TEXT, f"{row['action']}: {(row.get('detail') or '')[:80]}"))
+        lines.append((TEXT, f"{when(row['at'])}  {row['action']}: {(row.get('detail') or '')[:70]}"))
     render(out / "06-diary.png", "The case keeps its own diary", lines, "including every refusal")
 
     print(f"cards written to {out}")
