@@ -24,3 +24,6 @@ __pycache__/
 
 # demo build scratch
 demo/build/
+
+# deployment variable bundle (secrets)
+.env.deployment

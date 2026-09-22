@@ -22,7 +22,10 @@ export async function postJson<T>(
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "user-agent": opts.userAgent ?? "bailiff/0.1 (+https://github.com/subheeksh5599/bailiff)",
+        // Some vendor APIs sit behind a bot filter that refuses a scripted client, so the
+        // agent string is configuration rather than a constant. It is not used to pretend
+        // to be a person browsing: every request is still an authenticated API call.
+        "user-agent": opts.userAgent ?? process.env.USER_AGENT ?? "bailiff/0.1 (+https://github.com/subheeksh5599/bailiff)",
         ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),
         ...(opts.headers ?? {}),
       },
