@@ -28,13 +28,21 @@ TEXT = "#ededec"
 DIM = "#5a5a6e"
 
 
+def im() -> list[str]:
+    """ImageMagick 7 ships `magick`; older systems only have `convert`."""
+    for candidate in (["magick"], ["convert"]):
+        if subprocess.run(["which", candidate[0]], capture_output=True).returncode == 0:
+            return candidate
+    raise SystemExit("ImageMagick is required to draw the cards")
+
+
 def run(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True)
 
 
 def render(path: Path, heading: str, lines: list[tuple[str, str]], footer: str) -> None:
     cmd = [
-        "convert",
+        *im(),
         "-size", f"{W}x{H}",
         f"xc:{BG}",
         "-fill", ACCENT, "-pointsize", "64", "-annotate", "+90+150", heading,

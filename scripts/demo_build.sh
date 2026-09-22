@@ -39,11 +39,11 @@ for card in "$CARDS"/*.png; do
       -c:v libx264 -tune stillimage -pix_fmt yuv420p -c:a aac -shortest \
       -vf "scale=1920:1080" "$segment"
   fi
-  echo "file '$segment'" >> "$list"
+  echo "file '$(realpath "$segment")'" >> "$list"
 done
 
 mkdir -p "$(dirname "$OUT")"
-ffmpeg -y -loglevel error -f concat -safe 0 -i "$list" -c copy "$OUT"
+ffmpeg -y -loglevel error -f concat -safe 0 -i "$list" -c:v libx264 -pix_fmt yuv420p -c:a aac "$OUT"
 rm -f "$list"
 
 echo "wrote $OUT"

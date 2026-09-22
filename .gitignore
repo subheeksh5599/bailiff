@@ -27,3 +27,7 @@ demo/build/
 
 # deployment variable bundle (secrets)
 .env.deployment
+
+# demo scratch (real case exports and rendered media)
+demo/export.json
+demo/audio/
