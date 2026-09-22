@@ -123,6 +123,46 @@ export function SignInGate({ children }: { children: ReactNode }): ReactNode {
 }
 
 /**
+ * The way in, wearing the landing page's own material.
+ *
+ * Both screens that ask for a passphrase sit outside the board's shell, so without this
+ * they would inherit the pale marketing surface and read as a different product - a white
+ * page bolted onto a dark app. The plate is the artwork the landing opens with, blurred
+ * behind its own deep-sea gradient so the screen still looks right before the image
+ * arrives, and a scrim keeps the panel legible.
+ */
+function AuthScreen({ children }: { children: ReactNode }): ReactNode {
+  return (
+    <div
+      className="relative min-h-screen overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #17333e 0%, #0f4a52 58%, #0b2129 100%)" }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- decoration behind a
+          form; it must not be deferred, resized or swapped by the image pipeline. */}
+      <img
+        src="/fold-mosaic.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-75 blur-2xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          // Light enough that the plate's own colours survive, dark enough that the
+          // panel and its small type stay legible on top of them.
+          background:
+            "radial-gradient(115% 85% at 50% 12%, rgba(8,9,11,0.10) 0%, rgba(8,9,11,0.55) 58%, rgba(8,9,11,0.92) 100%)",
+        }}
+      />
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
+        <div className="w-full max-w-lg">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * The first thing a new deployment shows.
  *
  * A self-hosted board should not need a terminal to become usable, so a deployment with
@@ -159,7 +199,7 @@ export function ClaimForm(): ReactNode {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-16">
+    <AuthScreen>
       <Panel className="p-8">
         <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">bailiff</p>
         <h1 className="mt-3 font-display text-3xl leading-tight text-white">
@@ -198,7 +238,7 @@ export function ClaimForm(): ReactNode {
           {problem && <p className="text-[12px] leading-relaxed text-[#f0a8a8]">{problem}</p>}
         </div>
       </Panel>
-    </div>
+    </AuthScreen>
   );
 }
 
@@ -277,7 +317,7 @@ function SignIn(): ReactNode {
   const [busy, setBusy] = useState(false);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-16">
+    <AuthScreen>
       <Panel className="p-8">
         <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">bailiff</p>
         <h1 className="mt-3 font-display text-3xl leading-tight text-white">
@@ -319,6 +359,6 @@ function SignIn(): ReactNode {
           above stay open with no session at all.
         </p>
       </Panel>
-    </div>
+    </AuthScreen>
   );
 }
