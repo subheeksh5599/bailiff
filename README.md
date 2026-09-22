@@ -50,7 +50,7 @@ The browser can never write the evidence that closes its own case: it may attach
 
 ## Money
 
-A phone line opens cases. Nothing is stated on that call that was not fetched first and filed against the case: the assistant's only route to a value is a tool that reads and records.
+A phone line opens cases, and the board can dial one: the case reference travels in the call's metadata, which is how the finished call finds its way back to the right case. Nothing is stated on that call that was not fetched first and filed against the case: the assistant's only route to a value is a tool that reads and records.
 
 When the call ends, its claims are put against three checks that are printed on the case:
 
@@ -70,7 +70,7 @@ Every case the pipeline has touched, newest first. The counts above the list are
 
 <img src="docs/screenshots/case.jpg" alt="One case: frozen requirements, the evidence that closed it, the grade and the charge" width="100%" />
 
-One case, with the requirement set it was frozen on, the evidence read back, the claims and their verdicts, the grade check by check, and what that grade released. An operator can read a page as evidence, file the owner's own document, run the pipeline on a call, attempt a close and read the refusal in the backend's own words, or reopen a settled case as disputed. A settled case refuses new evidence and says why rather than disabling a control silently.
+One case, with the requirement set it was frozen on, the evidence read back, the claims and their verdicts, the grade check by check, and what that grade released. An operator can start the call the case is built around, read a page as evidence, file the owner's own document, run the pipeline on a call, attempt a close and read the refusal in the backend's own words, or reopen a settled case as disputed. A settled case refuses new evidence and says why rather than disabling a control silently.
 
 <img src="docs/screenshots/integrations.jpg" alt="Integrations: what carries a key, what does not, and the commands that show both" width="100%" />
 
@@ -179,6 +179,7 @@ hackathon.md       the build log, including what a live deployment found
 | OpenAI-backed extraction | Keyed, but the provider answers `402 insufficient_quota`. The pipeline prefers the call platform's own reading of a call, so a graded run does not need this key at all |
 | Inkeep knowledge | Off. The account has no organization, so the health endpoint reports it false |
 | Assistant refusing to state an unread number | Mechanism in place — the tool is the only route to a value. Not yet exercised on a live call |
+| Dialling out from the board | Implemented, and refused by the plan rather than by the code: numbers bought from the call platform carry a daily outbound limit, and the board shows that refusal in the provider's own words. Inbound calls to the number answer on this assistant, which is the path the demo uses |
 | Live deployment | `https://aware-jellyfish-285.convex.site` — the landing, the board, health, `/cases` and `/case` all answer |
 | Demo video | Not recorded |
 

@@ -40,11 +40,16 @@ export async function postJson<T>(
       /* keep the raw text: a vendor that answers with HTML is telling us something */
     }
     if (!response.ok) {
-      const message =
-        typeof data === "object" && data && "error" in data
-          ? JSON.stringify((data as { error: unknown }).error)
-          : text.slice(0, 300);
-      return { ok: false, status: response.status, error: message };
+      // Providers usually say something useful in `message` and something terse in
+      // `error`. Either is more use than a status code, so both are read before
+      // falling back to the body itself.
+      const record =
+        typeof data === "object" && data !== null ? (data as Record<string, unknown>) : null;
+      const detail =
+        (typeof record?.message === "string" && record.message) ||
+        (record && "error" in record ? JSON.stringify(record.error) : "") ||
+        text.slice(0, 300);
+      return { ok: false, status: response.status, error: detail };
     }
     return { ok: true, status: response.status, data: data as T };
   } catch (error) {

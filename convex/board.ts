@@ -1,6 +1,9 @@
 import { v } from "convex/values";
 import { action, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { postJson } from "./integrations/http";
+import { ENDPOINTS } from "./integrations/endpoints";
+import { NotConfigured } from "./lib/config";
 
 /**
  * The two things the board is allowed to start.
@@ -61,5 +64,64 @@ export const readSource = action({
       satisfies: written.newlySatisfied,
       excerpt: page.markdown.slice(0, 600),
     };
+  },
+});
+
+/**
+ * Start the call a case is built around.
+ *
+ * The board asks the phone line to dial, and the case reference rides along in
+ * the call's metadata — that is what lets the finished call find its way back to
+ * the right case when the end-of-call report arrives. Without this the product
+ * could only be used by whoever dials the number by hand, which is not the same
+ * product: a case would have to exist before anyone could know to call about it.
+ *
+ * A settled case is refused here too. Reopening it first is the way to say that
+ * something new needs to be asked, and the audit trail records which of the two
+ * happened.
+ */
+export const startCall = action({
+  args: { caseRef: v.string(), to: v.string() },
+  handler: async (ctx: ActionCtx, args): Promise<{ callId: string | null; to: string }> => {
+    const snapshot = await ctx.runQuery(api.cases.get, { ref: args.caseRef });
+    if (!snapshot) throw new Error(`no case ${args.caseRef}`);
+    if (snapshot.case.state === "VERIFIED") {
+      throw new Error("refused: this case is settled; reopen it as disputed before dialling again");
+    }
+
+    const to = args.to.trim();
+    if (!/^\+[1-9][0-9]{6,15}$/.test(to)) {
+      throw new Error("refused: a number to dial has to be in international form, starting with +");
+    }
+
+    const key = process.env.VAPI_API_KEY;
+    const assistantId = process.env.VAPI_ASSISTANT_ID;
+    const phoneNumberId = process.env.VAPI_PHONE_NUMBER_ID;
+    if (!key || !assistantId || !phoneNumberId) {
+      throw new NotConfigured("telephony", "VAPI_API_KEY / VAPI_ASSISTANT_ID / VAPI_PHONE_NUMBER_ID");
+    }
+
+    const response = await postJson<{ id?: string }>(
+      `${ENDPOINTS.vapi.base}/call`,
+      {
+        assistantId,
+        phoneNumberId,
+        customer: { number: to },
+        metadata: { caseRef: args.caseRef },
+      },
+      { token: key, timeoutMs: 30_000 }
+    );
+    if (!response.ok) {
+      throw new Error(`the phone line refused the call: ${response.status} ${response.error}`);
+    }
+
+    const callId = response.data?.id ?? null;
+    await ctx.runMutation(internal.ops.audit, {
+      caseId: snapshot.case._id,
+      actor: "board",
+      action: "call.started",
+      detail: `dialling ${to}; the case reference travels in the call's metadata`,
+    });
+    return { callId, to };
   },
 });

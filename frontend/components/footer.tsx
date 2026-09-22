@@ -193,7 +193,7 @@ export function Footer(): ReactNode {
 
       {/* The signature, holding the floor. Tight leading pulls the cap bottoms
           onto the page edge; `overflow-hidden` trims only the empty leading
-          below them. KAIROS has no descenders, so no glyph is shaved. */}
+          below them. BAILIFF has no descenders, so no glyph is shaved. */}
       <div aria-hidden="true" className="select-none px-6 sm:px-10">
         <span
           className="display block text-[#1a2b33]"
@@ -203,7 +203,7 @@ export function Footer(): ReactNode {
             letterSpacing: "0.055em",
           }}
         >
-          KAIROS
+          BAILIFF
         </span>
       </div>
     </footer>

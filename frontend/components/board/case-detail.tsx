@@ -30,6 +30,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
   const audit = useQuery(api.audit, { caseRef }) as AuditRow[] | undefined;
 
   const readSource = useAction(api.readSource);
+  const startCall = useAction(api.startCall);
   const run = useAction(api.run);
   const attach = useMutation(api.attach);
   const close = useMutation(api.close);
@@ -37,6 +38,8 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
 
   const [url, setUrl] = useState("");
   const [readKind, setReadKind] = useState("page_read");
+  const [dialTo, setDialTo] = useState("");
+  const [dialed, setDialed] = useState<{ callId: string | null; to: string } | null>(null);
   const [callRef, setCallRef] = useState("");
   const [docKind, setDocKind] = useState("own_document");
   const [docText, setDocText] = useState("");
@@ -101,11 +104,21 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
             {doc.verifiedAt && <p className="mt-1 text-accent">verified {when(doc.verifiedAt)}</p>}
           </div>
         </div>
-        {doc.requirementSetHash && (
-          <p className="data mt-4 text-[11px] break-all text-neutral-600">
-            requirementSetHash {doc.requirementSetHash}
-          </p>
-        )}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          {doc.requirementSetHash ? (
+            <p className="data text-[11px] break-all text-neutral-600">
+              requirementSetHash {doc.requirementSetHash}
+            </p>
+          ) : (
+            <span />
+          )}
+          <a
+            className="data text-[11px] text-neutral-400 no-underline hover:text-accent"
+            href={`/case?ref=${encodeURIComponent(doc.ref)}`}
+          >
+            this record as JSON →
+          </a>
+        </div>
       </Panel>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -214,6 +227,37 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                       {readResult.satisfies.length > 0
                         ? `Satisfied: ${readResult.satisfies.join(", ")}.`
                         : "No frozen requirement was satisfied by it."}
+                    </p>
+                  )}
+                </div>
+
+                <div className="border-t border-white/[0.06] pt-5">
+                  <p className="text-[13px] font-medium text-neutral-200">Start the call</p>
+                  <p className="mt-1 text-[12px] text-neutral-500">
+                    The line dials, and the case reference travels in the call&rsquo;s metadata — that
+                    is how the finished call finds its way back here.
+                  </p>
+                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2.5">
+                    <Input
+                      value={dialTo}
+                      placeholder="+447700900123"
+                      onChange={(e) => setDialTo(e.target.value)}
+                    />
+                    <Button
+                      disabled={busy !== null || !dialTo.trim()}
+                      onClick={() =>
+                        act("call", () => startCall({ caseRef: doc.ref, to: dialTo.trim() }), setDialed)
+                      }
+                    >
+                      {busy === "call" ? "Dialling…" : "Dial"}
+                    </Button>
+                  </div>
+                  {dialed && (
+                    <p className="mt-3 text-[12px] text-neutral-400">
+                      Dialling {dialed.to}
+                      {dialed.callId ? <> · call {dialed.callId.slice(0, 12)}…</> : null}. The
+                      transcript and the line&rsquo;s own reading of it land on this case when the
+                      call ends.
                     </p>
                   )}
                 </div>

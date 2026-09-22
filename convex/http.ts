@@ -265,15 +265,32 @@ export function extractCaseRef(text: string): string | null {
 /**
  * The board's own address, in the form a person would type.
  *
- * The app is exported as one file, and the static layer serves exact paths only,
- * so the clean path would otherwise fall through to the landing page. This sends
- * it to the app instead, and keeps the nicer URL working for anyone who shortens
- * it by hand.
+ * The app is exported as one file and the static layer serves exact paths only,
+ * so `/dashboard` would otherwise fall through to the landing page. Serving the
+ * file's bytes here — rather than redirecting — keeps the address clean instead
+ * of leaving a file extension in the bar for anyone who shortens it by hand.
  */
 http.route({
   path: "/dashboard",
   method: "GET",
-  handler: httpAction(async () => new Response(null, { status: 302, headers: { location: "/dashboard.html" } })),
+  handler: httpAction(async (ctx) => {
+    // The same lookup the static layer uses, asked for the app's own file.
+    const asset = await ctx.runQuery(components.staticHosting.lib.resolveAssetForHttp, {
+      path: "/dashboard.html",
+    });
+    if (!asset) return new Response("Not Found", { status: 404 });
+
+    const headers = { "content-type": "text/html; charset=utf-8" };
+    if (asset.appStorageId) {
+      const blob = await ctx.storage.get(asset.appStorageId);
+      if (blob) return new Response(blob, { headers });
+    }
+    if (asset.storageUrl) {
+      const upstream = await fetch(asset.storageUrl);
+      if (upstream.ok) return new Response(upstream.body, { headers });
+    }
+    return new Response("Not Found", { status: 404 });
+  }),
 });
 
 /**

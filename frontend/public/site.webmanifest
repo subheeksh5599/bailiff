@@ -1,7 +1,7 @@
 {
-  "name": "Kairos",
-  "short_name": "Kairos",
-  "description": "Give an AI agent a budget it cannot exceed, without publishing the budget. Caps and settlement amounts stay encrypted inside iExec Nox on Ethereum Sepolia.",
+  "name": "Bailiff",
+  "short_name": "Bailiff",
+  "description": "A case against a company closes when the other side's own record satisfies what was frozen at intake, and a charge is released only by a grade that passes.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#edf0ee",

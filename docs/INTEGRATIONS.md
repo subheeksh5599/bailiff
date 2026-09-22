@@ -69,3 +69,13 @@ requirement is marked satisfied with the id of the evidence that satisfied it, i
 transaction. A case that read verified while its requirement still read unsatisfied would be
 two answers to one question.
 
+## Dialling out
+
+The board can start the call a case is built around: the line dials, and the case
+reference travels in the call's metadata so the finished call lands on the right
+case. On the account this was built against, the platform refuses the request
+because numbers bought from it carry a daily outbound limit — the refusal is
+surfaced in the provider's own words rather than reduced to a status code, and the
+board shows it. Inbound calls to the same number answer on the product's assistant,
+which is the path the demo uses.
+

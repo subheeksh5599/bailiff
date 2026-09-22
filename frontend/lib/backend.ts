@@ -178,6 +178,10 @@ export const api = {
   readSource: actionRef<"action", { caseRef: string; url: string; kind?: string }, ReadResult>(
     "board:readSource"
   ),
+
+  startCall: actionRef<"action", { caseRef: string; to: string }, { callId: string | null; to: string }>(
+    "board:startCall"
+  ),
 };
 
 /** Where the deployment answers: the site and the backend share one address. */
