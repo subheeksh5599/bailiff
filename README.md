@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stack](https://img.shields.io/badge/Convex%20%2B%20Next.js%20%2B%20TypeScript-1f1f23)
 
-[![▶ Watch the demo](https://img.shields.io/badge/%E2%96%B6%20Watch%20the%20demo-1%3A40-FF0000?labelColor=1f1f23)](https://youtu.be/nlCXhzFYia4) [![Recorded click-through](https://img.shields.io/badge/Recorded%20click--through-96s-14151a?labelColor=0f1420)](demo/bailiff-recorded.mp4) [![Click-through](https://img.shields.io/badge/Click--through-61s-14151a?labelColor=0f1420)](demo/bailiff-clickthrough.mp4) [![Honesty table](https://img.shields.io/badge/Honesty%20table-what%20is%20real%20vs%20pending-14151a?labelColor=0f1420)](#whats-real-vs-pending--the-honesty-table) [![Run it](https://img.shields.io/badge/Run%20it-one%20command-14151a?labelColor=0f1420)](#-see-it-in-one-command)
+[![▶ Watch the demo](https://img.shields.io/badge/%E2%96%B6%20Watch%20the%20demo-1%3A36-FF0000?labelColor=1f1f23)](https://youtu.be/AYrAlrk17Yk) [![Local copy](https://img.shields.io/badge/Local%20copy-demo%2Fbailiff--recorded.mp4-14151a?labelColor=0f1420)](demo/bailiff-recorded.mp4) [![Honesty table](https://img.shields.io/badge/Honesty%20table-what%20is%20real%20vs%20pending-14151a?labelColor=0f1420)](#whats-real-vs-pending--the-honesty-table) [![Run it](https://img.shields.io/badge/Run%20it-one%20command-14151a?labelColor=0f1420)](#-see-it-in-one-command)
 
 </div>
 
@@ -42,11 +42,11 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 
 ## ▶ Demo
 
-[![The board, live](docs/screenshots/board.jpg)](https://youtu.be/nlCXhzFYia4)
+[![▶ Watch the demo: 1:36, real screen capture of the live deployment](docs/media/bailiff-demo-poster.png)](https://youtu.be/AYrAlrk17Yk)
 
-**[▶ Watch the explainer (1:40)](https://youtu.be/nlCXhzFYia4)** &nbsp;·&nbsp; **[ The live deployment, driven ↗ ](demo/bailiff-recorded.mp4)** &nbsp;·&nbsp; **[ Click-through ↗ ](demo/bailiff-clickthrough.mp4)** &nbsp;·&nbsp; **[ What's real vs pending ↗ ](#whats-real-vs-pending--the-honesty-table)** &nbsp;·&nbsp; **[ Run it yourself ↗ ](#-see-it-in-one-command)**
+**[▶ Watch the demo (1:36)](https://youtu.be/AYrAlrk17Yk)** &nbsp;·&nbsp; **[ Local copy ↗ ](demo/bailiff-recorded.mp4)** &nbsp;·&nbsp; **[ What's real vs pending ↗ ](#whats-real-vs-pending--the-honesty-table)** &nbsp;·&nbsp; **[ Run it yourself ↗ ](#-see-it-in-one-command)**
 
-_Two cuts, both under three minutes. The explainer opens on the rule the product enforces and closes on what it cannot verify; everything between is the live deployment. The click-through is the same product with twelve real interactions, a caption on each, and nothing else. Every frame came from the deployment — no mock state, no invented numbers, and the two refusals shown are refusals the backend actually returned._
+_One session on the live deployment, one take, and no cut that hides a step. The frames are Chrome's own screencast and every click is a dispatched mouse event at the element's real coordinates, so the pointer marks where the press actually landed; each frame is held for the interval it was genuinely on screen, which is why motion looks like a screen share rather than invented smoothness. Nothing is mocked and the refusals shown are refusals the backend returned._
 
 ## The 20-second pitch
 
@@ -347,7 +347,7 @@ The landing page states what is verified and what is not, side by side, because 
 ```
 convex/            the case, the pipeline, the gates, the adapters, the routes
 frontend/          the site: the landing page and the board
-demo/              the videos: the recording, the click-through, the motion piece, the click sheet
+demo/              the demo video and the click sheet
 tests/             184 tests across 25 files
 docs/              integrations, deployments, the demo, what a live run printed
 scripts/           deploy, the live end-to-end run, the video assembly
@@ -393,7 +393,7 @@ which the passphrase is visible — on camera, a passphrase is published.
 
 ## Results and supporting records
 
-- **[The explainer](https://youtu.be/nlCXhzFYia4)** — 1:40. **[The recording](demo/bailiff-recorded.mp4)** — 96s of the live deployment being clicked, one session, no cuts that hide a step, and the pointer where the press landed.
+- **[The demo](https://youtu.be/AYrAlrk17Yk)** — 1:36 of the live deployment being driven, one session, with the pointer where the press landed. A local copy is committed at [demo/bailiff-recorded.mp4](demo/bailiff-recorded.mp4).
 - **[`hackathon.md`](hackathon.md)** — the build log, including what a live deployment found that tests did not.
 - **[`docs/evidence/`](docs/evidence)** — the last test run, typecheck, and site build, as they printed.
 - **[`docs/DEMO.md`](docs/DEMO.md)** — how each cut was assembled, and how to rebuild it.

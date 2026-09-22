@@ -12,9 +12,7 @@
 - **Live app:** https://aware-jellyfish-285.convex.site — landing, the board, `/health`,
   and the JSON routes `/cases` and `/case?ref=`. Every claim in this repository was
   checked against that deployment, not against a local run.
-- **Demo video, click-through:** [demo/bailiff-clickthrough.mp4](demo/bailiff-clickthrough.mp4) — 61 seconds, twelve real interactions with a caption on each: the board, a case that closed, a case refused, a document hashed as it arrived, the self-test, the same rows over HTTP. Captured while the deployment was driven by hand.
-- **Demo video, explainer:** https://youtu.be/nlCXhzFYia4 — 100 seconds, the same product with the reasoning. Committed at [demo/bailiff-demo.mp4](demo/bailiff-demo.mp4). The open and the close are rendered motion pieces; everything between them is the live deployment, captured while it was driven by hand. Shot by shot in `demo/SCRIPT.md`.
-- **The motion piece on its own:** [demo/hyperframes-narrated.mp4](demo/hyperframes-narrated.mp4) — 35 seconds, the opening and closing pieces with narration, for posting. The silent cut is [demo/hyperframes.mp4](demo/hyperframes.mp4).
+- **Demo video:** https://youtu.be/AYrAlrk17Yk — 96 seconds of the live deployment being driven, one session and one take: the landing page, the board, a case that closed on the other side's own reply, a case that cannot close and says why, a document hashed as it arrived, and the deployment's own self-test over HTTP. A local copy is committed at [demo/bailiff-recorded.mp4](demo/bailiff-recorded.mp4).
 - **The demo, for anyone recording it:** [demo/CLICKS.md](demo/CLICKS.md) — every click and every line, in order.
 - **Repo:** [github.com/subheeksh5599/bailiff](https://github.com/subheeksh5599/bailiff), public.
 - **Social proof:** the build is posted at [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004).
@@ -112,7 +110,7 @@ cd web && npm install && npm run dev   # landing + case board
 
 - `README.md` — the claim, the invariants, and the honesty table.
 - `docs/INTEGRATIONS.md` — what each integration does and what happens when its key is missing.
-- `docs/DEMO.md` — the demo as delivered, and how to rebuild it. `docs/RUNOFSHOW.md` — the live session plan. `demo/` — the video, the stills it was cut from, the narration.
+- `docs/DEMO.md` — the demo as delivered, and how to rebuild it. `docs/RUNOFSHOW.md` — the live session plan. `demo/` — the recording, its poster, and the click sheet.
 - `convex/lib/rules.ts` — the freshness, authority and grade rules, as pure functions.
 - `convex/verifier.ts` — the only path to a closed case.
 - `convex/billing.ts` — the gate, in one mutation, with the idempotency key.

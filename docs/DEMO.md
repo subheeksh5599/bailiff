@@ -1,159 +1,75 @@
-# Demo video — beat sheet
+# The demo
 
-Four minutes, recorded on the live deployment, one take per section. Every number
-on screen comes from the board reading the deployment; nothing is typed in, and no
-frame is a fixture. Say each number as it appears — the whole point of this product
-is that the screen and the claim agree.
+**Delivered:** [https://youtu.be/AYrAlrk17Yk](https://youtu.be/AYrAlrk17Yk) — 96 seconds.
+A local copy of the same cut is committed at [`demo/bailiff-recorded.mp4`](../demo/bailiff-recorded.mp4)
+(1920×1080, H.264, 4.4 MB). The thumbnail in the README is a frame from this recording,
+`docs/media/bailiff-demo-poster.png` — not a separate screenshot.
 
-Total: ~4:00. Narrate to camera, not to the terminal.
+## What it shows
 
----
+One session on the live deployment, in order: the landing page and what it claims, the board and
+its counts, a case that closed on the other side's own reply with every requirement pointing at the
+evidence that satisfied it, a case that cannot close and names the requirement with nothing behind
+it, a page read on the server and filed against the case, a document hashed as it arrived, and the
+deployment's own self-test over HTTP.
 
-## 0:00 – 0:25 · The problem
+Reads are public; the actions are not. The recording runs signed in, which is the state a real
+operator works in, and every number on screen is read back from the deployment rather than typed
+in.
 
-**On screen:** the landing page at `/`.
+## How it was made
 
-> "Getting money back from a company is email work, and it has no end condition.
-> A ticket gets marked resolved without the refund existing. Someone says 'it was
-> issued on the 20th' and the person waiting has no way to tell a promise from a
-> record. So the chase continues until somebody gives up.
->
-> The problem isn't that the message is hard to write. It's that 'done' is a claim
-> with nothing behind it."
+Two scripts, both committed.
 
----
+`scripts/record_demo.py` performs the session in a real browser. The frames are Chrome's own
+screencast and every click is a dispatched mouse event at the element's real coordinates — the
+pointer drawn on screen marks where the press actually landed, so it is a marker at the real event
+position rather than a composited cursor. Frames arrive when the page repaints, not on a clock, and
+each one is written to disk with the wall-clock time it arrived.
 
-## 0:25 – 1:15 · A case, and a requirement set that cannot move
+The session needs a signed-in board, and a recording should not require the operator to type her
+passphrase into a script. Authority on this deployment is already the deploy key, so a session is
+minted from the command line (`auth:mintSession`, an internal mutation) and handed to the browser.
+The recorder never sees the passphrase.
 
-**On screen:** `/board`. Open a case: reference `case-demo-01`, company, amount.
-Press **Open the case**.
+`scripts/assemble_recording.py` cuts it. Because frames arrive on repaint, each is held for the
+interval it was genuinely on screen: a burst means something moved, a gap means nothing did. That
+reproduces the session rather than inventing a frame rate for it, which is why motion reads like a
+screen share instead of invented smoothness.
 
-> "A case opens with the things that must be true for it to be over, and they are
-> frozen at intake and hashed. Not a ticket status — a set of facts that have to
-> exist, each one needing evidence of its own kind, read after this case opened."
+Narration is generated per step and placed at the moment that step began, taken from the recorder's
+own timeline. Lines **queue**: a line is placed at its beat but never before the previous one has
+stopped speaking, and the assembler refuses to build a cut where two lines overlap rather than
+trusting the arithmetic. A step that produced no repaint at all — the page did not change, so no
+frame arrived — is anchored to the last step that did produce one, or its line would land inside
+the line before it.
 
-Point at the requirement list: both rows open, set hash visible.
+## Rebuilding it
 
-> "That hash is the reason the goalposts can't move later."
+```bash
+# 1. perform the session (needs the browser harness, and a signed-in deployment)
+python3 scripts/record_demo.py             # writes demo/recording/frames + timeline.json
 
----
+# 2. cut it and lay the narration on the beats
+python3 scripts/assemble_recording.py      # writes demo/bailiff-recorded.mp4
+```
 
-## 1:15 – 2:00 · Try to close it. Watch it refuse.
-
-**On screen:** paste the customer's own thread, press **Store it as our own
-record**, then press **Ask to close the case**.
-
-> "Here's the customer's own email thread. It's real evidence, and it satisfies
-> something — but not the requirement about their record. So watch what happens
-> when I ask it to close."
-
-The refusal appears, naming the requirement and the reason.
-
-> "It refuses, and it says which requirement is still open and why. That refusal
-> is written into the case's diary — it isn't a toast that disappears."
-
----
-
-## 2:00 – 2:45 · Where a number is allowed to come from
-
-**On screen:** the integration pills at the top, then a call.
-
-> "On a call, the assistant has exactly two tools, and one of them is the only way
-> any price, date or status can be spoken: `read_source`. That tool reads the
-> company's own page right then and stores it on the case with the time it was
-> read. When the read fails, the assistant is instructed to say it cannot confirm —
-> and because the read never landed, there is nothing on the case for that promise
-> to hide behind."
-
----
-
-## 2:45 – 3:30 · Money only behind a passing grade
-
-**On screen:** the grades and billing section for the case.
-
-> "The call is transcribed, the transcript is hashed, and the claims are read out
-> of it: what the caller wanted, what was promised, what was presented as fact.
->
-> The facts are the interesting part. A promise can be checked against our own
-> recording — the transcript proves it was said. A statement about the world can't
-> be. So a fact with no record behind it is marked unverifiable, and unverifiable
-> bills nothing."
-
-Point at the checks, then at the billing row.
-
-> "Only a pass releases a charge, the charge is written in the same transaction as
-> the grade, and the key is the call's own reference — so a replayed webhook reads
-> the same row instead of billing twice."
-
----
-
-## 3:30 – 4:00 · The closure can come back
-
-**On screen:** the diary, then the re-check.
-
-> "Last thing, and it's the part I'd want to know if I were buying this. Every day
-> a re-check walks the closed cases. If the evidence that closed one has aged out,
-> the closure is withdrawn, the case goes back to dispute, and the reason is
-> written down. A 'done' that can't come undone isn't a fact, it's a claim."
-
-> "Bailiff keeps a case open until the other side's own record shows the outcome.
-> Everything you saw on screen was read from the deployment."
-
----
-
-## Recording notes
-
-- One take per section; stitch them.
-- Show the deployment URL in the browser chrome, or the board's own header.
-- If a vendor is switched off, say so and show the pill. That is the honest state,
-  and it is more convincing than a demo that hides it.
-- Never type a value into the UI that is not a real input: the reference, the
-  company name and the pasted thread are inputs; everything else is read back.
-
----
-
-## What was delivered
-
-Published at https://youtu.be/nlCXhzFYia4 (100 seconds, 1920x1080), and committed as `demo/bailiff-demo.mp4`. Rebuild it with `python3 scripts/demo_video.py`;
-the narration lines are in `demo/voice/`, the stills in `demo/shots/`, and the motion
-pieces come from one HyperFrames render trimmed by timestamp.
-
-Two kinds of footage, and the difference is stated in the README as well: the opening
-and the closing are motion pieces built for the video, and everything between them is
-the live deployment, captured while it was being driven by hand. Nothing is mocked and
-no state is invented for the camera — the case that refuses to close is a case that
-refuses to close, and its refusal is the backend's own sentence.
-
-Each segment lasts as long as its narration plus a beat, so no line is cut off and no
-line runs over the following picture. The assembly refuses to build a segment whose
-line is longer than the motion available for it: a moving picture that ends early
-leaves the last seconds frozen, which is the failure this check exists to prevent.
-
-## The click-through cut
-
-`demo/bailiff-clickthrough.mp4` — 61 seconds, cut by `python3 scripts/demo_clickthrough.py`.
-Twelve steps of real interaction captured from the live deployment, with eight short
-lines across the whole thing and a caption on every step, because the criterion the
-judges published is "talk less, click through the real product".
-
-The frames live in `demo/click/`, the lines in `demo/voice2/`. A state change that
-happens between two screenshots reads as a cut rather than as something happening, so
-the moments that matter — a refused close, an upload being hashed — carry three frames
-each, and every step drifts slowly so nothing sits frozen.
-
-`demo/hyperframes.mp4` is the motion piece alone: the opening and the closing, 35
-seconds, silent, for posting on its own.
-
-## Narration on the motion piece
-
-`demo/hyperframes-narrated.mp4` — 35 seconds. Six lines, each measured against the
-window between the cards it sits under, because a line that runs past its window talks
-over the next card. The script refuses to build rather than shipping an overlap:
-`python3 scripts/demo_hyperframes_narrated.py`.
+The recorder sizes the browser window from the difference between the window and the viewport
+before it starts: the screencast follows the window, not the device-metrics override, so the window
+has to be the size of the frame we want. Frames land at exactly 1920×1080 because of that
+measurement, not by luck. Earlier, frames came out at 1280×577 — an odd height that H.264 refuses
+outright — which is the defect that measurement exists to prevent.
 
 ## The click sheet
 
-`demo/CLICKS.md` is the demo written as clicks and lines only, for recording by hand.
-It names the two buttons not to press on camera — one grades a call that has already
-been ingested, the other is refused by the phone platform's own outbound limit — so
-neither turns into a dead click in a take.
+[`demo/CLICKS.md`](../demo/CLICKS.md) is the same session written as clicks and lines only, for
+recording by hand. It names the two controls not to press on camera — one grades a call that has
+already been ingested, the other is refused by the phone platform's own outbound limit — so neither
+turns into a dead click in a take.
+
+## What is not here
+
+Earlier cuts — an explainer over stills, a captioned click-through, and a rendered motion piece —
+were removed once this recording replaced them, along with their images, narration tracks and build
+scripts. Their footage was mostly stills of a static page, which is the one thing a demo of this
+product should not be.

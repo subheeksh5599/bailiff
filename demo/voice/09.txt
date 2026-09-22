@@ -1,1 +1,0 @@
-And the same rows the board renders come back over HTTP, so a claim about this site is one request away from being checked.

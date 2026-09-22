@@ -1,1 +1,0 @@
-A case opens with a frozen list of what has to be true, hashed before the call is placed. Evidence only counts if it was read after the case opened. And a promise is checked against our own recording, while a claim about what they did needs their record.

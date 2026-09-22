@@ -1,1 +1,0 @@
-The grade prints its checks, and the charge it released.
