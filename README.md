@@ -340,7 +340,7 @@ The landing page states what is verified and what is not, side by side, because 
 
 ## Tech stack
 
-**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 132 across 13 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
+**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 184 across 25 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
 
 ## Project layout
 
