@@ -43,6 +43,20 @@ export function emailPath(env: Env = process.env): "agentmail" | "resend" | null
   return null;
 }
 
+/**
+ * Where the report goes.
+ *
+ * The case mailbox is the owner's fallback rather than an error: if no separate
+ * owner address is configured, the mailbox that already holds the case's mail is
+ * the right place for its reports, and nothing is silently dropped.
+ */
+export function ownerMailbox(env: Env = process.env): string | null {
+  const explicit = (env.OWNER_EMAIL ?? "").trim();
+  if (explicit.length > 0) return explicit;
+  const inbox = (env.AGENTMAIL_INBOX_ID ?? "").trim();
+  return inbox.length > 0 ? inbox : null;
+}
+
 export function configured(env: Env = process.env): Record<string, boolean> {
   return {
     convex: true,

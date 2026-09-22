@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildSendRequest, parseInbound } from "../convex/integrations/agentmail";
-import { emailPath, configured } from "../convex/lib/config";
+import { emailPath, configured, ownerMailbox } from "../convex/lib/config";
 import { extractCaseRef } from "../convex/http";
 
 /**
@@ -98,5 +98,20 @@ describe("filing a reply against the right case", () => {
 
   it("does not accept a reference with punctuation that cannot be a case", () => {
     expect(extractCaseRef("[case:]")).toBeNull();
+  });
+});
+
+describe("where the report goes", () => {
+  it("uses the owner address when one is set", () => {
+    expect(ownerMailbox({ OWNER_EMAIL: "owner@example.com", AGENTMAIL_INBOX_ID: "cases@inbox" })).toBe("owner@example.com");
+  });
+
+  it("falls back to the case mailbox, because that is where the case's mail already lives", () => {
+    expect(ownerMailbox({ AGENTMAIL_INBOX_ID: "cases@inbox" })).toBe("cases@inbox");
+  });
+
+  it("returns nothing rather than an empty recipient when neither is configured", () => {
+    expect(ownerMailbox({})).toBeNull();
+    expect(ownerMailbox({ OWNER_EMAIL: "   ", AGENTMAIL_INBOX_ID: "" })).toBeNull();
   });
 });

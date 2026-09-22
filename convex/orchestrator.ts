@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { action, internalAction, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { gradeVerdict, type GradeCheck } from "./lib/rules";
-import { emailPath, has } from "./lib/config";
+import { emailPath, has, ownerMailbox } from "./lib/config";
 import type { Extracted } from "./integrations/openai";
 
 /**
@@ -216,7 +216,7 @@ export const deriveOutcome = internalAction({
     // somewhere to arrive: a one-way sender can issue a case but can never hear back.
     const mailPath = emailPath();
     if (mailPath) {
-      const owner = process.env.OWNER_EMAIL;
+      const owner = ownerMailbox();
       if (!owner) {
         await ctx.runMutation(internal.ops.audit, {
           caseId: snapshot.case._id,
