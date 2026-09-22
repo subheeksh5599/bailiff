@@ -330,7 +330,7 @@ The landing page states what is verified and what is not, side by side, because 
 ## Security
 
 - **Hooks fail closed.** Every `/hooks/*` route requires a shared secret and refuses without it, so a forged "call ended" cannot close a case or move money.
-- **Secrets never touch a command line.** Deployment variables are pushed with `env set --from-file`; the values live in `.env.local` (git-ignored, mode 600). Nothing secret is printed, logged, or returned by `/health`, which reports presence rather than values.
+- **Secrets never touch a command line.** Deployment variables are pushed with `env set --from-file`; the values live in `.env.local` (git-ignored, mode 600). Nothing secret is printed, logged, or returned by `/health`, which reports presence rather than values. The operator passphrase exists on the deployment only as a hash, and is changed with `./scripts/set-operator-passphrase.sh`, which reads it without echoing it.
 - **The browser is not trusted.** Reads happen on the server. The client can attach the owner's own document and nothing else; it cannot assert what a page said.
 - **Uploads are bounded.** A type or size the rule does not accept is refused with the reason, and a refused upload is deleted rather than left in storage.
 - **The money path is keyed.** The charge is written once, keyed on the call reference, so a retry or a replay cannot bill twice.
@@ -372,6 +372,16 @@ npx convex run selftest:run   # the same self-test, from the CLI
 ## How I'd deploy it
 
 Point `CONVEX_DEPLOY_KEY` at a production deployment, run `./scripts/deploy.sh`, build the site with `NEXT_PUBLIC_CONVEX_URL` set to that deployment's cloud URL, and upload the export. Then set the hook secrets, point the call platform and the mailbox at the deployment's HTTP actions, and put an auth layer in front of the board before letting anyone else touch it. The variables it wants are all named in `/health`'s output when they are missing.
+
+The exception is the operator passphrase, which exists on the deployment only as a hash.
+Its plaintext stays in `.env.local` (git-ignored, mode 600). To change it:
+
+```bash
+./scripts/set-operator-passphrase.sh      # asks twice, hashes locally, pushes the hash only
+```
+
+`--dry-run` shows what it would write without writing it. Change it after any recording in
+which the passphrase is visible — on camera, a passphrase is published.
 
 ## Results and supporting records
 
