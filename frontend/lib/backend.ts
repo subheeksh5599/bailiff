@@ -238,6 +238,21 @@ export const api = {
     { token: string; expiresAt: number }
   >("auth:signIn"),
   signOut: mutation<"mutation", { token: string }, { signedOut: boolean }>("auth:signOut"),
+  authState: query<
+    "query",
+    Record<string, never>,
+    { configured: boolean; claimable: boolean; source: "browser" | "environment" | null }
+  >("auth:state"),
+  claim: mutation<
+    "mutation",
+    { passphrase: string; label?: string },
+    { token: string; expiresAt: number }
+  >("auth:claim"),
+  changePassphrase: mutation<
+    "mutation",
+    { token?: string | undefined; current: string; next: string },
+    { changed: true; otherSessionsEnded: number }
+  >("auth:changePassphrase"),
   session: query<
     "query",
     { token?: string | undefined },

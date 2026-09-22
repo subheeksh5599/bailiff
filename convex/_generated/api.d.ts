@@ -41,6 +41,7 @@ import type * as lib_hash from "../lib/hash.js";
 import type * as lib_limits from "../lib/limits.js";
 import type * as lib_messages from "../lib/messages.js";
 import type * as lib_metrics from "../lib/metrics.js";
+import type * as lib_operator from "../lib/operator.js";
 import type * as lib_rules from "../lib/rules.js";
 import type * as lib_session from "../lib/session.js";
 import type * as lib_states from "../lib/states.js";
@@ -91,6 +92,7 @@ declare const fullApi: ApiFromModules<{
   "lib/limits": typeof lib_limits;
   "lib/messages": typeof lib_messages;
   "lib/metrics": typeof lib_metrics;
+  "lib/operator": typeof lib_operator;
   "lib/rules": typeof lib_rules;
   "lib/session": typeof lib_session;
   "lib/states": typeof lib_states;

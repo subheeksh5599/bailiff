@@ -3,7 +3,7 @@
 Site: `https://aware-jellyfish-285.convex.site` — browser full screen, no terminal tab, no GitHub tab.
 
 Before you start:
-- set the passphrase you will type on camera first, so it is short and you know it: `./scripts/set-operator-passphrase.sh` (it is also readable in `/home/arch/bailiff/.env.local`)
+- decide the passphrase before you record: the board asks for one on first open (claim), and **Integrations → The operator's passphrase** changes it
 - have one file ready to upload (any PDF or text file — a bill, a statement)
 - open **two tabs** on the site, both on the board, signed in on both. The second tab exists to show a case arriving in the first (step 6).
 
@@ -16,10 +16,10 @@ Before you start:
 **SAY:** It says what it can't verify, on the front page, next to what it can.
 
 **3.** CLICK **Open the board** (top right).
-**SAY:** The reads are public — health, the self-test, every case as JSON. The actions are not. This is the operator's screen, so it asks for a passphrase.
+**SAY:** The reads are public — health, the self-test, every case as JSON. The actions are not: closing a case, releasing a charge, spending a call and taking a file all wait behind one passphrase.
 
-**4.** Type the passphrase in the field, CLICK **Sign in**.
-**SAY:** One passphrase, and the deployment keeps only hashes of the sessions it hands out.
+**4.** A deployment with no operator asks you to choose one: type a passphrase in both fields and CLICK **Set the passphrase and sign in**. If it is already claimed, type it once and CLICK **Sign in**.
+**SAY:** It is stored as a hash, and once it exists this form is gone for good — the board cannot be claimed twice.
 
 **5.** SCROLL to the line that begins **"Showing all … cases, newest first"**, and the line just below it beginning **"This list is a live subscription…"**.
 **SAY:** Every case the pipeline has touched, with the counts taken from the same rows the list renders.

@@ -6,6 +6,7 @@ import { verifyConfig } from "@/lib/config";
 import { Chip, Panel } from "@/components/fabric/ui";
 import { Reading } from "@/components/board/board";
 import type { ReactNode } from "react";
+import { ChangePassphrase } from "./session";
 
 /**
  * What is switched on, what is not, and how to check both.
@@ -163,7 +164,8 @@ export function IntegrationsView(): ReactNode {
                 </p>
               </div>
             </div>
-          </Panel>
+                  <ChangePassphrase />
+      </Panel>
         </div>
       </div>
     </div>

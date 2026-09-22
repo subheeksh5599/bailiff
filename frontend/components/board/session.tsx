@@ -33,6 +33,7 @@ type SessionValue = {
   ready: boolean;
   signIn: (passphrase: string) => Promise<void>;
   signOut: () => void;
+  adopt: (token: string) => void;
   error: string | null;
 };
 
@@ -82,6 +83,11 @@ export function SessionProvider({ children }: { children: ReactNode }): ReactNod
     if (current) void signOutMutation({ token: current }).catch(() => {});
   }, [token, signOutMutation]);
 
+  const adopt = useCallback((next: string) => {
+    window.localStorage.setItem(STORAGE_KEY, next);
+    setToken(next);
+  }, []);
+
   const value = useMemo<SessionValue>(
     () => ({
       token,
@@ -89,9 +95,10 @@ export function SessionProvider({ children }: { children: ReactNode }): ReactNod
       ready,
       signIn,
       signOut,
+      adopt,
       error,
     }),
-    [token, state, ready, signIn, signOut, error]
+    [token, state, ready, signIn, signOut, adopt, error]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
@@ -105,9 +112,158 @@ export function useSession(): SessionValue {
 
 export function SignInGate({ children }: { children: ReactNode }): ReactNode {
   const { signedIn, ready } = useSession();
+  const deployment = useQuery(api.authState, {});
   if (!ready) return null;
-  if (!signedIn) return <SignIn />;
+  if (!signedIn) {
+    if (deployment === undefined) return null;
+    // No operator yet: the first visitor sets the passphrase, from the browser.
+    return deployment.claimable ? <ClaimForm /> : <SignIn />;
+  }
   return <>{children}</>;
+}
+
+/**
+ * The first thing a new deployment shows.
+ *
+ * A self-hosted board should not need a terminal to become usable, so a deployment with
+ * no passphrase at all lets the first person to open it set one. That is the only moment
+ * the board is open, and it closes for good the moment this succeeds.
+ */
+export function ClaimForm(): ReactNode {
+  const { adopt } = useSession();
+  const claim = useMutation(api.claim);
+  const [passphrase, setPassphrase] = useState("");
+  const [again, setAgain] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  const submit = async () => {
+    setProblem(null);
+    if (passphrase.trim().length < 8) {
+      setProblem("At least eight characters.");
+      return;
+    }
+    if (passphrase !== again) {
+      setProblem("Those do not match.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await claim({ passphrase, label: "claimed from the board" });
+      adopt(result.token);
+    } catch (err) {
+      setProblem(err instanceof Error ? err.message : "that did not work");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-16">
+      <Panel className="p-8">
+        <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">bailiff</p>
+        <h1 className="mt-3 font-display text-3xl leading-tight text-white">
+          This deployment has no operator yet.
+        </h1>
+        <p className="mt-4 text-[13px] leading-relaxed text-neutral-400">
+          The reads are already public: <span className="data">/health</span>,{" "}
+          <span className="data">/selftest</span>, <span className="data">/cases</span> and any case
+          as JSON. Everything that changes a case — closing it, releasing a charge, spending a call,
+          taking a file — waits behind one passphrase. Set it here and this board is yours; only the
+          hash is stored, and once it exists this form cannot be used again.
+        </p>
+        <div className="mt-6 space-y-3">
+          <Input
+            type="password"
+            autoFocus
+            value={passphrase}
+            placeholder="choose a passphrase"
+            onChange={(e) => setPassphrase(e.target.value)}
+          />
+          <Input
+            type="password"
+            value={again}
+            placeholder="same again"
+            onChange={(e) => setAgain(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void submit();
+            }}
+          />
+          <Button
+            disabled={busy || !passphrase.trim() || !again.trim()}
+            onClick={() => void submit()}
+          >
+            {busy ? "Setting…" : "Set the passphrase and sign in"}
+          </Button>
+          {problem && <p className="text-[12px] leading-relaxed text-[#f0a8a8]">{problem}</p>}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+/**
+ * Where the passphrase is changed, for as long as the operator is signed in. A new one
+ * ends every other session, because changing a passphrase is also a revocation.
+ */
+export function ChangePassphrase(): ReactNode {
+  const { token } = useSession();
+  const change = useMutation(api.changePassphrase);
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  return (
+    <div className="mt-6 border-t border-white/[0.06] pt-5">
+      <p className="text-[13px] font-medium text-neutral-200">The operator&rsquo;s passphrase</p>
+      <p className="mt-1 text-[12px] leading-relaxed text-neutral-500">
+        Only its hash is stored. Changing it ends every other signed-in session, which is what makes
+        it a revocation as well as a change.
+      </p>
+      <div className="mt-3 grid gap-2.5">
+        <Input
+          type="password"
+          value={current}
+          placeholder="current passphrase"
+          onChange={(e) => setCurrent(e.target.value)}
+        />
+        <Input
+          type="password"
+          value={next}
+          placeholder="new passphrase"
+          onChange={(e) => setNext(e.target.value)}
+        />
+        <Button
+          disabled={busy || !current.trim() || !next.trim()}
+          onClick={() => {
+            setBusy(true);
+            setNote(null);
+            setProblem(null);
+            void change({ token: token ?? undefined, current, next })
+              .then((result) => {
+                setNote(
+                  result.otherSessionsEnded > 0
+                    ? `Changed. ${result.otherSessionsEnded} other session(s) ended.`
+                    : "Changed."
+                );
+                setCurrent("");
+                setNext("");
+              })
+              .catch((err) =>
+                setProblem(err instanceof Error ? err.message : "that did not work")
+              )
+              .finally(() => setBusy(false));
+          }}
+        >
+          {busy ? "Changing…" : "Change it"}
+        </Button>
+        {note && <p className="text-[12px] text-neutral-400">{note}</p>}
+        {problem && <p className="text-[12px] leading-relaxed text-[#f0a8a8]">{problem}</p>}
+      </div>
+    </div>
+  );
 }
 
 /**

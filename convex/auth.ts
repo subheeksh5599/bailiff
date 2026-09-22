@@ -11,13 +11,12 @@ import { internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import {
   SESSION_TTL_MS,
-  configuredPassphraseHash,
   expired,
   randomToken,
   requireOperator,
   tokenHash,
 } from "./lib/session";
-import { sha256Hex } from "./lib/hash";
+import { hashOf, operatorState, passphraseMatches } from "./lib/operator";
 
 /**
  * The same gate, reachable from an action. An action has no database handle of its
@@ -34,13 +33,12 @@ export const requireSession = internalQuery({
 export const signIn = mutation({
   args: { passphrase: v.string(), label: v.optional(v.string()) },
   handler: async (ctx, args): Promise<{ token: string; expiresAt: number }> => {
-    const expected = configuredPassphraseHash();
-    if (!expected) {
-      throw new Error("refused: this deployment has no operator passphrase configured");
+    const state = await operatorState(ctx);
+    if (!state.configured) {
+      throw new Error("refused: this deployment has no operator passphrase yet — claim it from the board");
     }
-    const offered = await sha256Hex(args.passphrase);
-    // Constant-time-ish: compare the hashes, never the passphrases.
-    if (offered.length !== expected.length || offered !== expected) {
+    // Compare hashes, never passphrases.
+    if (!(await passphraseMatches(ctx, args.passphrase))) {
       throw new Error("refused: that passphrase is not the one this deployment expects");
     }
 
@@ -68,6 +66,103 @@ export const signOut = mutation({
     if (!session) return { signedOut: false };
     await ctx.db.delete(session._id);
     return { signedOut: true };
+  },
+});
+
+/**
+ * What this deployment expects before anyone signs in.
+ *
+ * `claimable` is true only when no passphrase exists at all - neither the one an
+ * operator set here nor one the deployment was given in its environment. That is the
+ * one moment the board is open, and it is how a deployment is set up from its own
+ * website rather than from a terminal.
+ */
+export const state = query({
+  args: {},
+  handler: async (ctx) => {
+    const current = await operatorState(ctx);
+    return {
+      configured: current.configured,
+      claimable: current.claimable,
+      source: current.source,
+    };
+  },
+});
+
+/**
+ * Claim the deployment: set the operator passphrase from the browser.
+ *
+ * Allowed only while nothing is configured, so it cannot be used to take a board that
+ * already has an operator. The passphrase is hashed before it is written, and the
+ * caller is signed in as the operator they just became.
+ */
+export const claim = mutation({
+  args: { passphrase: v.string(), label: v.optional(v.string()) },
+  handler: async (ctx, args): Promise<{ token: string; expiresAt: number }> => {
+    const current = await operatorState(ctx);
+    if (!current.claimable) {
+      throw new Error(
+        "refused: this deployment already has an operator passphrase, so it cannot be claimed again"
+      );
+    }
+    if (args.passphrase.trim().length < 8) {
+      throw new Error("refused: a passphrase under eight characters is not worth having");
+    }
+
+    const now = Date.now();
+    await ctx.db.insert("operatorSettings", {
+      passphraseHash: await hashOf(args.passphrase),
+      updatedAt: now,
+      setFrom: "browser",
+    });
+
+    const token = randomToken();
+    const expiresAt = now + SESSION_TTL_MS;
+    await ctx.db.insert("operatorSessions", {
+      tokenHash: await tokenHash(token),
+      label: args.label?.slice(0, 60) ?? "claimed from the board",
+      createdAt: now,
+      expiresAt,
+    });
+    return { token, expiresAt };
+  },
+});
+
+/** Change the passphrase from the board. Requires a session and the current passphrase. */
+export const changePassphrase = mutation({
+  args: { token: v.optional(v.string()), current: v.string(), next: v.string() },
+  handler: async (ctx, args): Promise<{ changed: true; otherSessionsEnded: number }> => {
+    const session = await requireOperator(ctx, args.token);
+    if (!(await passphraseMatches(ctx, args.current))) {
+      throw new Error("refused: that is not the current passphrase");
+    }
+    if (args.next.trim().length < 8) {
+      throw new Error("refused: a passphrase under eight characters is not worth having");
+    }
+
+    const settings = await ctx.db.query("operatorSettings").first();
+    const now = Date.now();
+    if (settings) {
+      await ctx.db.patch(settings._id, { passphraseHash: await hashOf(args.next), updatedAt: now });
+    } else {
+      // The deployment was configured from its environment; the browser now takes over.
+      await ctx.db.insert("operatorSettings", {
+        passphraseHash: await hashOf(args.next),
+        updatedAt: now,
+        setFrom: "browser",
+      });
+    }
+
+    // Every other session ends: a passphrase change is also a revocation.
+    const all = await ctx.db.query("operatorSessions").collect();
+    let ended = 0;
+    for (const row of all) {
+      if (row._id !== session._id) {
+        await ctx.db.delete(row._id);
+        ended += 1;
+      }
+    }
+    return { changed: true, otherSessionsEnded: ended };
   },
 });
 

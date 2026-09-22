@@ -46,6 +46,15 @@ export default defineSchema({
     .index("by_case", ["caseId"])
     .index("by_case_key", ["caseId", "key"]),
 
+  // Who the operator is. One row, written the first time somebody claims this
+  // deployment from the browser, so setting a passphrase never requires a shell.
+  // Only the hash is stored, exactly as with the environment variable the CLI path uses.
+  operatorSettings: defineTable({
+    passphraseHash: v.string(),
+    updatedAt: v.number(),
+    setFrom: v.string(),
+  }),
+
   // Operator sessions. Only the hash of a token is stored, so a copy of this
   // table is not a set of usable sessions.
   operatorSessions: defineTable({
