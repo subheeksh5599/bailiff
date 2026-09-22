@@ -24,8 +24,9 @@ const read = (fetchedAt: number, id = "ev-1") => ({
   sourceKind: "counterparty" as const,
   source: "billing@example.com",
   fetchedAt,
+  // the schema holds the amount as units, with the rendered figure alongside it
   value: "128.40",
-  valueUnits: "GBP",
+  valueUnits: 12840,
   excerpt: "refund issued",
 });
 
