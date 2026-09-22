@@ -1,0 +1,1 @@
+The deployment reports which integrations carry a key, and checks itself in one request, storage written and read back included.

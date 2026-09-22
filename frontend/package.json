@@ -10,7 +10,8 @@
     "deploy": "npx @convex-dev/static-hosting upload -d out",
     "start": "next start -p 5173",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "prebuild": "node scripts/check-env.mjs"
   },
   "dependencies": {
     "convex": "^1.46.0",

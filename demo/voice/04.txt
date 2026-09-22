@@ -1,0 +1,1 @@
+Every case the pipeline has touched, newest first, with the numbers computed from the same rows the list renders.

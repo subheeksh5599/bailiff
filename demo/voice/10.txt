@@ -1,0 +1,1 @@
+Nine of ten integrations are on. The one that is not says so in its own output. And there is no sample data anywhere in the repository.

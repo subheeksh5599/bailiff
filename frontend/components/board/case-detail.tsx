@@ -179,7 +179,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                     <div className="min-w-0">
                       <p className="text-[13px] text-neutral-200">{req.label}</p>
                       <p className="data mt-1 text-[11px] text-neutral-500">
-                        {req.key} · satisfied by {req.kind}
+                        {req.key} · needs evidence of kind {req.kind}
                       </p>
                     </div>
                     <Chip accent={req.satisfied}>

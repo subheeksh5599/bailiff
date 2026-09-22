@@ -71,7 +71,17 @@ Not a mockup — every one of these is wired to the live deployment, and I've ru
 
 ## demo
 
-A recorded walkthrough goes here. **Not recorded yet, and this line stays until it is.** In the meantime the live site *is* the demo: [open the board](https://aware-jellyfish-285.convex.site/dashboard), click a case, read what closed it.
+<div align="center">
+
+<a href="demo/bailiff-demo.mp4"><img src="demo/preview.gif" alt="The case that refused to close, then closed on the other side's own reply" width="100%" /></a>
+
+<sub>**100 seconds.** <a href="demo/bailiff-demo.mp4">Watch the whole thing</a> — the open and the close are rendered pieces, and everything between is the live deployment being driven by hand.</sub>
+
+</div>
+
+What it shows, in order: the rule it enforces, the three requirements a case is frozen on, the board with every case the pipeline has touched, a case opened and its requirement set hashed, one case end to end — requirement, evidence with read times and hashes, the grade with its checks printed, the charge that grade released — a close attempt refused in the backend's own words, a document uploaded and hashed as it arrived, the deployment checking itself in one request, and the honest line at the end.
+
+The live site is also the demo: [open the board](https://aware-jellyfish-285.convex.site/dashboard), click a case, read what closed it.
 
 ## what it's built on
 
@@ -124,7 +134,7 @@ npx convex dev                   # the backend
 cd frontend && npm install && npm run dev
 ```
 
-`frontend/.env.local` wants one line — `NEXT_PUBLIC_CONVEX_URL` — or the board tells you there's no backend and shows nothing. That's on purpose. There is no sample data anywhere in this repo.
+`frontend/.env.local` wants one line — `NEXT_PUBLIC_CONVEX_URL` — or the build refuses to run and tells you why. A panel built without it would export fine and then open with nothing behind it, which is worse than a build that stops. There is no sample data anywhere in this repo.
 
 ## the honest bit
 
@@ -141,7 +151,7 @@ cd frontend && npm install && npm run dev
 | Inkeep | off. No org on that account |
 | dialling out from the board | built, and refused by the plan (platform numbers have a daily outbound limit). Inbound works, that's what the demo uses |
 | the assistant never stating an unread number | mechanism is in place, not yet exercised on a real call |
-| demo video | not recorded |
+| demo video | recorded and in the repo: `demo/bailiff-demo.mp4`, with the shot-by-shot script in `demo/SCRIPT.md` |
 | live site | everything above answers: landing, board, health, `/cases`, `/case` |
 
 ## layout
@@ -150,6 +160,7 @@ cd frontend && npm install && npm run dev
 convex/            the case, the pipeline, the adapters, the routes
 frontend/          the site — landing page and the board
 tests/             132 tests
+demo/              the video, the stills it was cut from, and the script that assembles it
 docs/              integrations, deployments, the demo beat sheet, run output
 hackathon.md       the build log, including what a live deployment found
 ```

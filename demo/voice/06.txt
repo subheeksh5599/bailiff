@@ -1,0 +1,1 @@
+One case: the requirement it was frozen on, the evidence that satisfied it with the hash of what was read, the grade with every check printed, and the charge that grade released.

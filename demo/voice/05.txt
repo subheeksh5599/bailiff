@@ -1,0 +1,1 @@
+Open a case and freeze its requirement set. It is hashed, and it cannot be rewritten afterwards, by us or by anyone else.

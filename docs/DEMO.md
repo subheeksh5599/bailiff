@@ -109,3 +109,22 @@ Point at the checks, then at the billing row.
   and it is more convincing than a demo that hides it.
 - Never type a value into the UI that is not a real input: the reference, the
   company name and the pasted thread are inputs; everything else is read back.
+
+---
+
+## What was delivered
+
+`demo/bailiff-demo.mp4` — 100 seconds, 1920x1080. Rebuild it with `python3 scripts/demo_video.py`;
+the narration lines are in `demo/voice/`, the stills in `demo/shots/`, and the motion
+pieces come from one HyperFrames render trimmed by timestamp.
+
+Two kinds of footage, and the difference is stated in the README as well: the opening
+and the closing are motion pieces built for the video, and everything between them is
+the live deployment, captured while it was being driven by hand. Nothing is mocked and
+no state is invented for the camera — the case that refuses to close is a case that
+refuses to close, and its refusal is the backend's own sentence.
+
+Each segment lasts as long as its narration plus a beat, so no line is cut off and no
+line runs over the following picture. The assembly refuses to build a segment whose
+line is longer than the motion available for it: a moving picture that ends early
+leaves the last seconds frozen, which is the failure this check exists to prevent.
