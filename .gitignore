@@ -44,3 +44,7 @@ demo/build-click/
 # superseded frontends, kept only in history
 /web/
 /site/
+
+demo/recording/
+.operator-passphrase
+demo/bailiff-recorded-silent.mp4

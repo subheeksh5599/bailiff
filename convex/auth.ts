@@ -7,7 +7,7 @@
  * expire and tokens that are stored only as hashes.
  */
 
-import { internalQuery, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import {
   SESSION_TTL_MS,
@@ -180,6 +180,51 @@ export const current = query({
       return { signedIn: false, expiresAt: session?.expiresAt ?? null, label: null };
     }
     return { signedIn: true, expiresAt: session.expiresAt, label: session.label ?? null };
+  },
+});
+
+/**
+ * Mint a session from outside the browser.
+ *
+ * This is the operator's own authority used a second way: the only thing that can call an
+ * internal mutation here is the deployment's own key, which is the same authority that
+ * deploys the functions. It exists so a recording or an agent can drive a signed-in board
+ * without anyone typing the passphrase into it, and so a locked-out operator has a way
+ * back in that does not involve reading a secret aloud.
+ */
+export const mintSession = internalMutation({
+  args: { label: v.optional(v.string()) },
+  handler: async (ctx, args): Promise<{ token: string; expiresAt: number }> => {
+    const state = await operatorState(ctx);
+    if (!state.configured) {
+      throw new Error("refused: this deployment has no operator passphrase yet — claim it from the board");
+    }
+    const token = randomToken();
+    const now = Date.now();
+    const expiresAt = now + SESSION_TTL_MS;
+    await ctx.db.insert("operatorSessions", {
+      tokenHash: await tokenHash(token),
+      label: args.label?.slice(0, 60) ?? "minted from the deployment key",
+      createdAt: now,
+      expiresAt,
+    });
+    return { token, expiresAt };
+  },
+});
+
+/** Forget the passphrase set from the browser, so the board can be claimed again. */
+export const clearBrowserPassphrase = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<{ cleared: boolean; sessionsEnded: number }> => {
+    const settings = await ctx.db.query("operatorSettings").first();
+    let cleared = false;
+    if (settings) {
+      await ctx.db.delete(settings._id);
+      cleared = true;
+    }
+    const sessions = await ctx.db.query("operatorSessions").collect();
+    for (const row of sessions) await ctx.db.delete(row._id);
+    return { cleared, sessionsEnded: sessions.length };
   },
 });
 

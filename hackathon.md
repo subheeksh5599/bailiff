@@ -19,6 +19,15 @@
 - **Repo:** [github.com/subheeksh5599/bailiff](https://github.com/subheeksh5599/bailiff), public.
 - **Social proof:** the build is posted at [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004).
 
+### The click-through, recorded from real input events
+
+`demo/bailiff-recorded.mp4` (96s) is a capture of the live deployment being driven: the frames
+are Chrome's own screencast, and every click is a dispatched mouse event at the element's real
+coordinates, so the pointer marks where the press actually landed. Frames arrive when the page
+repaints, so each one is held for the interval it was genuinely on screen — a burst is motion, a
+gap is stillness. `scripts/record_demo.py` performs the session; `scripts/assemble_recording.py`
+cuts it and places each narration line at the moment its step began.
+
 ## What is real right now, and what is not
 
 | Piece | State |
