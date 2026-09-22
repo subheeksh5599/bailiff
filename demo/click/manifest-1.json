@@ -1,0 +1,101 @@
+[
+ {
+  "step": "01",
+  "frames": [
+   "01a.png",
+   "01b.png"
+  ],
+  "note": "landing top",
+  "t": 1790077068.9058454
+ },
+ {
+  "step": "02",
+  "frames": [
+   "02a.png",
+   "02b.png"
+  ],
+  "note": "what is and is not verified",
+  "t": 1790077071.5054872
+ },
+ {
+  "step": "03",
+  "frames": [
+   "03a.png",
+   "03b.png"
+  ],
+  "note": "the board, real cases",
+  "t": 1790077079.3308115
+ },
+ {
+  "step": "04",
+  "frames": [
+   "04a.png",
+   "04b.png"
+  ],
+  "note": "counts and what they say",
+  "t": 1790077081.30881
+ },
+ {
+  "step": "05",
+  "frames": [
+   "05a.png",
+   "05b.png"
+  ],
+  "note": "a case that closed"
+ },
+ {
+  "step": "06",
+  "frames": [
+   "06a.png",
+   "06b.png"
+  ],
+  "note": "the grade and what it released"
+ },
+ {
+  "step": "07",
+  "frames": [
+   "07a.png"
+  ],
+  "note": "an open case"
+ },
+ {
+  "step": "08",
+  "frames": [
+   "08a.png",
+   "08b.png",
+   "08c.png"
+  ],
+  "note": "the refusal, as it lands"
+ },
+ {
+  "step": "09",
+  "frames": [
+   "09a.png"
+  ],
+  "note": "the owner's document, before upload"
+ },
+ {
+  "step": "10",
+  "frames": [
+   "10a.png",
+   "10b.png"
+  ],
+  "note": "hashed from the bytes that arrived"
+ },
+ {
+  "step": "11",
+  "frames": [
+   "11a.png",
+   "11b.png"
+  ],
+  "note": "the self-test, one request"
+ },
+ {
+  "step": "12",
+  "frames": [
+   "12a.png",
+   "12b.png"
+  ],
+  "note": "the same rows over HTTP"
+ }
+]

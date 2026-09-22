@@ -12,7 +12,9 @@
 - **Live app:** https://aware-jellyfish-285.convex.site — landing, the board, `/health`,
   and the JSON routes `/cases` and `/case?ref=`. Every claim in this repository was
   checked against that deployment, not against a local run.
-- **Demo video:** https://youtu.be/nlCXhzFYia4 — 100 seconds, under the three minutes the judges ask for. Also committed at [demo/bailiff-demo.mp4](demo/bailiff-demo.mp4). The open and the close are rendered motion pieces; everything between them is the live deployment, captured while it was driven by hand. Shot by shot in `demo/SCRIPT.md`.
+- **Demo video, click-through:** [demo/bailiff-clickthrough.mp4](demo/bailiff-clickthrough.mp4) — 61 seconds, twelve real interactions with a caption on each: the board, a case that closed, a case refused, a document hashed as it arrived, the self-test, the same rows over HTTP. Captured while the deployment was driven by hand.
+- **Demo video, explainer:** https://youtu.be/nlCXhzFYia4 — 100 seconds, the same product with the reasoning. Committed at [demo/bailiff-demo.mp4](demo/bailiff-demo.mp4).
+- **The motion piece on its own:** [demo/hyperframes.mp4](demo/hyperframes.mp4) — 35 seconds, silent, the opening and closing pieces as one clip. The open and the close are rendered motion pieces; everything between them is the live deployment, captured while it was driven by hand. Shot by shot in `demo/SCRIPT.md`.
 - **Repo:** [github.com/subheeksh5599/bailiff](https://github.com/subheeksh5599/bailiff), public.
 
 ## What is real right now, and what is not

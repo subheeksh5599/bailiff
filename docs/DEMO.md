@@ -128,3 +128,18 @@ Each segment lasts as long as its narration plus a beat, so no line is cut off a
 line runs over the following picture. The assembly refuses to build a segment whose
 line is longer than the motion available for it: a moving picture that ends early
 leaves the last seconds frozen, which is the failure this check exists to prevent.
+
+## The click-through cut
+
+`demo/bailiff-clickthrough.mp4` — 61 seconds, cut by `python3 scripts/demo_clickthrough.py`.
+Twelve steps of real interaction captured from the live deployment, with eight short
+lines across the whole thing and a caption on every step, because the criterion the
+judges published is "talk less, click through the real product".
+
+The frames live in `demo/click/`, the lines in `demo/voice2/`. A state change that
+happens between two screenshots reads as a cut rather than as something happening, so
+the moments that matter — a refused close, an upload being hashed — carry three frames
+each, and every step drifts slowly so nothing sits frozen.
+
+`demo/hyperframes.mp4` is the motion piece alone: the opening and the closing, 35
+seconds, silent, for posting on its own.

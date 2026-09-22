@@ -1,0 +1,7 @@
+file '/home/arch/bailiff/demo/click/08a.png'
+duration 1.7
+file '/home/arch/bailiff/demo/click/08b.png'
+duration 1.7
+file '/home/arch/bailiff/demo/click/08c.png'
+duration 1.7
+file '/home/arch/bailiff/demo/click/08c.png'
