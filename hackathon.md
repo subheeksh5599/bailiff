@@ -11,7 +11,7 @@
   mailbox: sends the report, receives the reply that becomes evidence).
 - **Live app:** not deployed yet — deployment created, functions to be pushed on the
   first run of `./scripts/deploy.sh`.
-- **Demo video:** not recorded yet; the beat sheet is in `docs/DEMO.md`.
+- **Demo video:** `demo/bailiff-demo.mp4` — 100 seconds. The open and the close are rendered motion pieces; everything between them is the live deployment, captured while it was driven by hand. Shot by shot in `demo/SCRIPT.md`.
 - **Repo:** this repository, public.
 
 ## What is real right now, and what is not
@@ -94,7 +94,7 @@ cd web && npm install && npm run dev   # landing + case board
 
 - `README.md` — the claim, the invariants, and the honesty table.
 - `docs/INTEGRATIONS.md` — what each integration does and what happens when its key is missing.
-- `docs/DEMO.md` — the demo beat sheet. `docs/RUNOFSHOW.md` — the live session plan.
+- `docs/DEMO.md` — the demo as delivered, and how to rebuild it. `docs/RUNOFSHOW.md` — the live session plan. `demo/` — the video, the stills it was cut from, the narration.
 - `convex/lib/rules.ts` — the freshness, authority and grade rules, as pure functions.
 - `convex/verifier.ts` — the only path to a closed case.
 - `convex/billing.ts` — the gate, in one mutation, with the idempotency key.
@@ -204,3 +204,13 @@ board, hashed from its bytes, filed as the owner's own record and offered back f
 download; and the numbers read the states, the refusals and the chases off the real
 case rows.
 
+- 2026-09-22  The demo, and the three things watching it found: two scenes of the motion
+  piece rendered black because only the children were animated inside a transparent
+  container (a linter cannot see an invisible scene, so this is exactly what looking at
+  the output is for); a requirement read "satisfied by email_reply" beside an
+  outstanding badge, which is the evidence kind it *needs*, now phrased that way; and
+  the closing card claimed no sample data while the footage showed `example.com`, so the
+  claim is now the precise one. Rebuilding the site to fix the copy also caught a fresh
+  build deploying with no deployment address at all — export fine, upload fine, site
+  empty — which is now a build-time refusal, and a 1280x577 capture being cropped into
+  a 1920x1080 frame, which produced a segment with no video stream.
