@@ -114,7 +114,7 @@ Point at the checks, then at the billing row.
 
 ## What was delivered
 
-`demo/bailiff-demo.mp4` — 100 seconds, 1920x1080. Rebuild it with `python3 scripts/demo_video.py`;
+Published at https://youtu.be/nlCXhzFYia4 (100 seconds, 1920x1080), and committed as `demo/bailiff-demo.mp4`. Rebuild it with `python3 scripts/demo_video.py`;
 the narration lines are in `demo/voice/`, the stills in `demo/shots/`, and the motion
 pieces come from one HyperFrames render trimmed by timestamp.
 
