@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import { claimVerdict } from "./lib/rules";
+import { parseCallAnalysis } from "./lib/analysis";
 
 /**
  * Ingesting what actually happened, without dressing it up.
@@ -19,6 +20,7 @@ export const ingestCall = internalMutation({
     endedAt: v.number(),
     endedReason: v.string(),
     transcript: v.string(),
+    analysis: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const caseDoc = await ctx.db
@@ -52,6 +54,33 @@ export const ingestCall = internalMutation({
       excerpt: args.transcript.slice(0, 4000),
       ingestedBy: "telephony-hook",
     });
+
+    // The platform's own reading of the call, when it sent one. It is stored as its own
+    // piece of evidence with its source named, so the grade can say what it read from
+    // where. One we cannot read is kept as unreadable rather than dropped: the run then
+    // falls back to the model, and the raw payload is still on the case for a human.
+    if (args.analysis) {
+      const readable = parseCallAnalysis(args.analysis);
+      await ctx.db.insert("evidence", {
+        caseId: caseDoc._id,
+        kind: readable ? "call_analysis" : "call_analysis_unreadable",
+        sourceKind: "own_record",
+        source: `call:${args.callRef}:analysis`,
+        fetchedAt: Date.now(),
+        contentHash: await hashText(args.analysis),
+        excerpt: args.analysis.slice(0, 4000),
+        ingestedBy: "telephony-hook",
+      });
+      await ctx.db.insert("audit", {
+        caseId: caseDoc._id,
+        actor: "telephony-hook",
+        action: readable ? "analysis.ingested" : "analysis.rejected",
+        detail: readable
+          ? `${readable.promises.length} promise(s), ${readable.facts.length} fact(s) from the call platform`
+          : `the platform sent an analysis we could not read (${args.analysis.length} bytes)`,
+        at: Date.now(),
+      });
+    }
 
     await ctx.db.insert("messages", {
       caseId: caseDoc._id,

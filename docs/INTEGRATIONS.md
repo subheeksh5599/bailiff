@@ -51,3 +51,21 @@ Each of these was run against the deployed backend, not a local one:
 Two resources live outside the repository, because both platforms own them: the
 resolution feature the meter counts against, and the customer it is counted for.
 Both were created against the live accounts, and the code reads them by id.
+
+## Three runs of the whole pipeline, on the deployment
+
+`scripts/live_e2e.py` opens real cases on the live backend, sends real webhook traffic with
+the shared secret, and runs the pipeline. The three outcomes are the product's rules made
+observable:
+
+| Run | What the call contained | Grade | Charge | Close |
+|---|---|---|---|---|
+| pass | one promise, nothing else | pass, all three checks green | released, metered | refused: the requirement still needs a read-back |
+| refuse | a statement about what the counterparty had already done | fail: one fact with no record behind it | not released | refused, naming the requirement |
+| close | the counterparty's own reply, arriving after the case opened | - | - | closed, with the requirement pointing at the evidence that closed it |
+
+The closing run is the one that keeps the record honest: the case moves to verified and the
+requirement is marked satisfied with the id of the evidence that satisfied it, in the same
+transaction. A case that read verified while its requirement still read unsatisfied would be
+two answers to one question.
+

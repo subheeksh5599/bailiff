@@ -4,6 +4,7 @@ import { api, internal } from "./_generated/api";
 import { gradeVerdict, type GradeCheck } from "./lib/rules";
 import { emailPath, has, ownerMailbox } from "./lib/config";
 import type { Extracted } from "./integrations/openai";
+import { parseCallAnalysis } from "./lib/analysis";
 
 /**
  * The whole pipeline for one call, with every stop named.
@@ -46,18 +47,40 @@ export const deriveOutcome = internalAction({
     );
     if (!transcript) return { stopped: "the call exists but carries no transcript to read" };
 
-    if (!has(process.env, "openai")) {
+    // Two possible sources for the claims, in order of preference. The call platform's
+    // own reading of the call came from the call itself, so when it is present the
+    // model is not consulted at all - one fewer dependency in the path that decides
+    // whether money moves. Either way the source is written down.
+    const analysis = snapshot.evidence.find(
+      (e) => e.kind === "call_analysis" && e.source === `call:${args.callRef}:analysis`
+    );
+    const fromPlatform = parseCallAnalysis(analysis?.excerpt);
+
+    if (!fromPlatform && !has(process.env, "openai")) {
+      const unusable = analysis
+        ? "the call carried an analysis we could not read, and no model is configured: set OPENAI_API_KEY"
+        : "extraction is not configured: set OPENAI_API_KEY";
       await ctx.runMutation(internal.ops.audit, {
         caseId: snapshot.case._id,
         action: "pipeline.stopped",
         actor: "orchestrator",
-        detail: "extraction is not configured: set OPENAI_API_KEY",
+        detail: unusable,
       });
-      return { stopped: "extraction is not configured (OPENAI_API_KEY)" };
+      return { stopped: unusable };
     }
 
     let extracted: Extracted;
-    try {
+    if (fromPlatform) {
+      extracted = fromPlatform;
+      await ctx.runMutation(internal.ops.audit, {
+        caseId: snapshot.case._id,
+        action: "extraction.read",
+        actor: "orchestrator",
+        detail:
+          `read from the call platform's own analysis: ` +
+          `${fromPlatform.promises.length} promise(s), ${fromPlatform.facts.length} fact(s)`,
+      });
+    } else try {
       extracted = await ctx.runAction(internal.integrations.openai.extractClaims, {
         transcript: transcript.excerpt,
       });

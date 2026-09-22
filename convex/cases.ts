@@ -221,6 +221,30 @@ export const attemptClose = mutation({
       await ctx.db.patch(args.caseId, { state: "READBACK_PENDING" });
     }
     const current = (await ctx.db.get(args.caseId))!;
+
+    // A case's state and its requirement record have to tell one story. A reader who
+    // sees the case marked verified and then finds the requirement it closed on still
+    // marked unsatisfied has been handed two answers, and the board reads that flag.
+    // The pointer is written here, in the same transaction as the move, and only when
+    // it resolves to a real piece of evidence on this case.
+    const evidenceRows = await ctx.db
+      .query("evidence")
+      .withIndex("by_case", (q) => q.eq("caseId", args.caseId))
+      .collect();
+    const requirementRows = await ctx.db
+      .query("requirements")
+      .withIndex("by_case", (q) => q.eq("caseId", args.caseId))
+      .collect();
+    for (const row of requirementRows) {
+      const pointer = evaluation.satisfiedBy[row.key];
+      if (!pointer || row.satisfied) continue;
+      const match = evidenceRows.find(
+        (e) => e._id === pointer || `${e.source}@${e.fetchedAt}` === pointer
+      );
+      if (!match) continue;
+      await ctx.db.patch(row._id, { satisfied: true, satisfiedByEvidenceId: match._id });
+    }
+
     await move(ctx, args.caseId, current.state, "VERIFIED", args.actor, true,
       `every requirement satisfied; ${Object.keys(evaluation.satisfiedBy).length} evidence pointers`);
     await ctx.db.patch(args.caseId, { verifiedAt: Date.now() });

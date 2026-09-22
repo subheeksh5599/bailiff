@@ -125,3 +125,25 @@ on the live URL, including the failures still standing - extraction stops with t
 provider's quota error recorded on the case, and knowledge reports itself off rather
 than pretending.
 
+## The pipeline run three ways on the deployment
+
+Local tests prove the rules; only a real run proves the wiring. `scripts/live_e2e.py` opens
+cases on the live backend, posts real webhook traffic signed with the shared secret, and runs
+the pipeline end to end. Three calls, chosen to sit on either side of the line that matters:
+
+- a call whose only claim was a promise: graded pass, and the charge released - which is the
+  only thing that releases it;
+- a call asserting what the counterparty had already done: graded fail on a statement with no
+  record behind it, and the charge untouched, however confidently it was said;
+- a case whose requirement was met by a reply that arrived after the case opened: closed, with
+  the requirement pointing at the evidence that closed it.
+
+That last one found a defect worth fixing: the case moved to verified while the requirement it
+closed on still read unsatisfied. One question, two answers, and the board reads that flag - so
+the pointer is now written in the same transaction as the move, and a test holds it there.
+
+A second source of claims was added on the same run: the call platform's own reading of the
+call, carried in its end-of-call report. It comes from the call itself, in the same system, so
+it is preferred over a second model's pass over the same text - and it means the pipeline has no
+dependency on a model key to decide whether money moves. The model remains the fallback.
+

@@ -24,6 +24,7 @@ import type * as integrations_openai from "../integrations/openai.js";
 import type * as integrations_resend from "../integrations/resend.js";
 import type * as integrations_scorecard from "../integrations/scorecard.js";
 import type * as integrations_vapi from "../integrations/vapi.js";
+import type * as lib_analysis from "../lib/analysis.js";
 import type * as lib_config from "../lib/config.js";
 import type * as lib_hash from "../lib/hash.js";
 import type * as lib_rules from "../lib/rules.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/resend": typeof integrations_resend;
   "integrations/scorecard": typeof integrations_scorecard;
   "integrations/vapi": typeof integrations_vapi;
+  "lib/analysis": typeof lib_analysis;
   "lib/config": typeof lib_config;
   "lib/hash": typeof lib_hash;
   "lib/rules": typeof lib_rules;

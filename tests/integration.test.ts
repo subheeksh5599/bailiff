@@ -76,6 +76,17 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
     const second = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
     expect(second.closed).toBe(true);
     if (second.closed) expect(second.alreadyVerified).toBe(true);
+
+    // The record has to agree with itself. A case reading verified while the requirement
+    // it closed on still reads unsatisfied is two answers to the same question, and the
+    // board reads that flag - so the pointer is written with the move, not later.
+    const record = await t.query(api.cases.get, { ref: "case-1" });
+    const requirements = record?.requirements ?? [];
+    expect(requirements).toHaveLength(2);
+    for (const requirement of requirements) {
+      expect(requirement.satisfied).toBe(true);
+      expect(requirement.satisfiedByEvidenceId).toBeTruthy();
+    }
   });
 
   it("refuses to close on evidence that was read before the case existed", async () => {

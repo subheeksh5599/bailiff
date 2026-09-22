@@ -49,6 +49,7 @@ http.route({
         type?: string;
         call?: { id?: string; startedAt?: string; endedAt?: string; metadata?: { caseRef?: string } };
         artifact?: { transcript?: string; recordingUrl?: string };
+        analysis?: { structuredData?: unknown; summary?: string };
         endedReason?: string;
       };
     };
@@ -73,6 +74,9 @@ http.route({
       endedAt,
       endedReason: message?.endedReason ?? "unknown",
       transcript,
+      analysis: message?.analysis?.structuredData
+        ? JSON.stringify(message.analysis.structuredData)
+        : undefined,
     });
     return json({ ok: true, ...result });
   }),
