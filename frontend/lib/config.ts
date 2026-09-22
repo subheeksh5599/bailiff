@@ -173,6 +173,16 @@ export const verifyConfig = {
     "state": "REQUIREMENTS_FROZEN", \u2026 } ]`,
     },
     {
+      label: "The deployment checks itself, in one request",
+      command: "curl -s $SITE/selftest",
+      output: `{ "ok": true, "checks": [
+  { "name": "integrations", "ok": true,
+    "detail": "9 on (convex, firecrawl, \u2026); off: knowledge" },
+  { "name": "storage", "ok": true,
+    "detail": "wrote 4 bytes, read them back, and removed them again" },
+  \u2026 ] }`,
+    },
+    {
       label: "A closed case names the evidence that closed it",
       command: 'curl -s "$SITE/case?ref=live-close-134804"',
       output: `{ "case": { "state": "VERIFIED", "verifiedAt": \u2026 },

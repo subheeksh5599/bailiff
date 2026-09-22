@@ -71,6 +71,23 @@ http.route({
   }),
 });
 
+/**
+ * The deployment, asked to check itself.
+ *
+ * The same report the self-test action returns, at an address anyone can reach
+ * with curl, so verifying it does not require the Convex CLI, an account or a
+ * deploy key. It is a read in spirit: the one thing it writes is a four-byte file
+ * it immediately deletes, because "storage works" cannot be answered by reading
+ * configuration.
+ */
+http.route({
+  path: "/selftest",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    return json(await ctx.runAction(api.selftest.run, {}));
+  }),
+});
+
 /** One case, with everything attached to it: same snapshot the board renders. */
 http.route({
   path: "/case",
@@ -81,7 +98,41 @@ http.route({
     const snapshot = await ctx.runQuery(api.cases.get, { ref });
     if (!snapshot) return json({ ok: false, error: `no case ${ref}` }, 404);
     const audit = await ctx.runQuery(api.ops.auditForCase, { caseRef: ref });
-    return json({ case: snapshot.case, requirements: snapshot.requirements, evidence: snapshot.evidence, claims: snapshot.claims, grades: snapshot.grades, billing: snapshot.billing, audit });
+
+    // The same rows again, reduced to the claim itself: this requirement was frozen
+    // with this hash, it was satisfied by this piece of evidence with this hash, the
+    // grade came back with these checks, and the charge is in this state. That is the
+    // whole assertion, small enough to diff against what anyone else was told.
+    const proof = {
+      requirementSetHash: snapshot.case.requirementSetHash ?? null,
+      openedAt: snapshot.case.openedAt,
+      state: snapshot.case.state,
+      requirements: snapshot.requirements.map((requirement) => {
+        const found = snapshot.evidence.find(
+          (item) => item._id === requirement.satisfiedByEvidenceId
+        );
+        return {
+          key: requirement.key,
+          kind: requirement.kind,
+          satisfied: requirement.satisfied,
+          satisfiedBy: found
+            ? { source: found.source, sourceKind: found.sourceKind, readAt: found.fetchedAt, hash: found.contentHash }
+            : null,
+        };
+      }),
+      grades: snapshot.grades.map((grade) => ({
+        subject: grade.subjectRef,
+        verdict: grade.verdict,
+        checks: grade.checks.map((check) => ({ name: check.name, passed: check.passed })),
+      })),
+      billing: snapshot.billing.map((row) => ({
+        state: row.state,
+        key: row.idempotencyKey,
+        units: row.units,
+      })),
+    };
+
+    return json({ proof, case: snapshot.case, requirements: snapshot.requirements, evidence: snapshot.evidence, claims: snapshot.claims, grades: snapshot.grades, billing: snapshot.billing, audit });
   }),
 });
 }

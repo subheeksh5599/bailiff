@@ -90,21 +90,30 @@ Every vendor call happens inside a Convex function — never in the browser, nev
 
 ## go on then, check it
 
-Three reads, no auth, nothing that can change anything:
+Four reads, no auth, nothing that can change anything:
 
 ```bash
-curl -s https://aware-jellyfish-285.convex.site/health
-curl -s https://aware-jellyfish-285.convex.site/cases
+curl -s https://aware-jellyfish-285.convex.site/selftest   # the deployment, checking itself
+curl -s https://aware-jellyfish-285.convex.site/health     # which integrations carry a key
+curl -s https://aware-jellyfish-285.convex.site/cases      # the same rows the board renders
 curl -s "https://aware-jellyfish-285.convex.site/case?ref=case-2026-0914-0188"
 ```
 
-That last one returns the case with the requirement it closed on, and `satisfiedByEvidenceId` pointing at the exact reply that closed it. The first one reporting `knowledge: false` is the whole point — what's broken gets said out loud.
+The last one comes back with a `proof` block — the whole claim in four lines: the requirement set's hash, the requirement it was satisfied by with the source and the hash of that evidence, the grade and its checks, and the state of the charge:
 
-Or ask the deployment to check itself in one go:
-
-```bash
-npx convex run selftest:run    # writes 4 bytes to storage, reads them back, deletes them, and reports every check
+```json
+"proof": {
+  "state": "VERIFIED",
+  "requirementSetHash": "39d5db9408b76c39…",
+  "requirements": [{ "key": "refund_moved", "satisfied": true,
+    "satisfiedBy": { "source": "mail:billing@meridian.example",
+                     "sourceKind": "counterparty", "hash": "54336d5b8d2c4d9e…" } }],
+  "grades": [{ "verdict": "pass", "checks": […3 checks…] }],
+  "billing": [{ "state": "metered", "key": "call:call-0914-0188-1" }]
+}
 ```
+
+And the first one is the honest one: it asks the deployment what it can actually do, writes four bytes to storage to prove storage works, reads them back, deletes them, and reports the checks it could not run as **skipped rather than passing**. `knowledge: false` in the health check is the point — what's broken gets said out loud.
 
 ## running it yourself
 
