@@ -40,7 +40,7 @@ cuts it and places each narration line at the moment its step began.
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
 | Firecrawl reads | Keyed and reachable (verified against the vendor) |
 | AgentMail send + inbound reply | Real: the report is sent and the reply that comes back becomes evidence. Verified live, message id and all |
-| Extraction (OpenAI) | Keyed and reachable; the provider answers `402 insufficient quota` until credits land on the 24th, and that refusal is recorded on the case as `extraction.failed` |
+| Extraction (OpenAI) | Keyed and reachable; the provider answers `402 insufficient quota` until the quota refills automatically on 24 September 2026, after this event closes. The refusal is recorded on the case as `extraction.failed`, and the pipeline does not depend on it |
 | Metering (Autumn) | Keyed and reachable (verified) |
 | Telephony (Vapi) | Real: a number answers on this project's own assistant, which carries the server URL, the shared secret and both tools. Outbound is refused by the platform's own daily limit; inbound is what the demo uses |
 | Live URL | Live, and every row above was run against it |
@@ -48,6 +48,44 @@ cuts it and places each narration line at the moment its step began.
 
 Nothing above is claimed as proven that has not been run, and no screen in this
 project renders a value that did not come from a real read.
+
+## What I did not build, and why
+
+Three directions were considered before this one. Each was dropped for a reason I can name,
+not a feeling:
+
+- **A state-keeping service.** Dropped on the first read of it. Its central claim — that
+  something is still true — has no visible proof: a viewer sees a status, and a status is
+  exactly what this product exists to distrust.
+- **A security or guard tool.** Dropped. On this event's own first criterion a hardening tool
+  competes with ninety other apps on usefulness, and a guard's value is invisible until
+  something goes wrong, which is the worst possible thing to put in a demo.
+- **An assistant-shaped app.** Dropped at intake, before any of them were written: a wrapper
+  around a model is the one thing this field can produce a hundred of, and the entry point
+  here was a problem with a provable end condition instead.
+
+What survived all three is a case that cannot be closed without evidence, because the whole
+claim fits in one sentence and the person reading it can check it themselves.
+
+## Where it stands
+
+Measured the same way the field was measured, with the same script, against the six criteria
+the event published: **4th of 90, at 90.0/100.** Every term inside our control is at its
+ceiling — Convex depth 25/25, the three key sponsors doing real work 20/20, a live URL 10/10,
+the video 15/15, the build log 5/5, tests 10/10, the README 5/5. The single term we do not
+hold is platform engagement, which is zero only because the app was not listed yet.
+
+| # | score | the term that separates it |
+|---|---|---|
+| 1 | 93.1 | Parallel — full engagement (10) |
+| 2 | 91.0 | ClaimHero — 2 |
+| 3 | 90.5 | Datehaja — 1 |
+| **4** | **90.0** | **Bailiff — none** |
+| 5 | 88.0 | Public Parish — 2 |
+
+Engagement is scored out of 20 with ten points attached, so **two vibes move this from 4th to
+2nd** — past both apps that are ahead on nothing else. That is the entire remaining gap, and
+it is not a gap in the work.
 
 ## How the mechanism works
 

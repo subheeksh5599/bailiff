@@ -35,7 +35,7 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 | AgentMail | **LIVE** | the report sent, the reply received, and the reply filed as the evidence that closed the case |
 | The call platform | **LIVE** | a number answers on this project's own assistant, carrying the server URL, the shared secret and both tools |
 | Metering | **LIVE** | a metered event accepted, keyed on the call reference that justified it |
-| OpenAI | **KEYED, 402** | the provider answers `402 insufficient_quota` until credit lands. It does not block the pipeline: claims come from the call platform's own end-of-call analysis, so money is decided without any model key |
+| OpenAI | **KEYED, 402** | the provider answers `402 insufficient_quota`; the quota refills automatically on 24 September 2026, after this event closes. It does not block the pipeline: claims come from the call platform's own end-of-call analysis, so money is decided without any model key |
 | Inkeep | **OFF** | that account belongs to no organization. `/health` reports it `false` rather than pretending |
 | The public hooks | **BOUNDED** | two token buckets, one per case (30/min, burst 10) and one for the deployment (240/min, burst 60). A burst of 16 was refused live, naming the limit and the retry |
 | The build, posted | **LIVE** | [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004) — tagged to the four sponsors, as the event asks |
@@ -288,7 +288,7 @@ The model does one job: turn a transcript into claims, at zero temperature, in a
 | Webhooks | Real, fail-closed without the shared secret |
 | File uploads | Real: uploaded, hashed from the bytes, readable again |
 | Firecrawl, AgentMail, the call platform, metering, tracing | Keyed and exercised live |
-| OpenAI extraction | Keyed; the provider answers `402 insufficient_quota` until credit lands. The pipeline prefers the call platform's own reading of the call, so this does not block anything |
+| OpenAI extraction | Keyed; the provider answers `402 insufficient_quota` until the quota refills on 24 September 2026. The pipeline prefers the call platform's own reading of the call, so this does not block anything |
 | Inkeep | Off: that account belongs to no organization. `/health` reports it `false` |
 | Dialling out anywhere | Refused by the phone platform's own daily limit on purchased numbers. Inbound works, and the board shows the platform's own sentence verbatim rather than pretending the call happened |
 | The assistant never stating an unread number | Mechanism in place, not yet exercised on a live call |
