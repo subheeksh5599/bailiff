@@ -40,3 +40,7 @@ frontend/.vercel/
 frontend/next-env.d.ts
 frontend/tsconfig.tsbuildinfo
 demo/build-click/
+
+# superseded frontends, kept only in history
+/web/
+/site/
