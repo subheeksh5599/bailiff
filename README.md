@@ -153,6 +153,7 @@ cd frontend && npm install && npm run dev
 | Inkeep | off. No org on that account |
 | dialling out from the board | built, and refused by the plan (platform numbers have a daily outbound limit). Inbound works, that's what the demo uses |
 | the assistant never stating an unread number | mechanism is in place, not yet exercised on a real call |
+| the motion piece for posting | `demo/hyperframes-narrated.mp4` — 35s, the opening and closing pieces with narration |
 | demo video | recorded: [https://youtu.be/nlCXhzFYia4](https://youtu.be/nlCXhzFYia4) (100s), committed as `demo/bailiff-demo.mp4`, shot-by-shot script in `demo/SCRIPT.md` |
 | live site | everything above answers: landing, board, health, `/cases`, `/case` |
 

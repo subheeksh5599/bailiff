@@ -14,7 +14,8 @@
   checked against that deployment, not against a local run.
 - **Demo video, click-through:** [demo/bailiff-clickthrough.mp4](demo/bailiff-clickthrough.mp4) — 61 seconds, twelve real interactions with a caption on each: the board, a case that closed, a case refused, a document hashed as it arrived, the self-test, the same rows over HTTP. Captured while the deployment was driven by hand.
 - **Demo video, explainer:** https://youtu.be/nlCXhzFYia4 — 100 seconds, the same product with the reasoning. Committed at [demo/bailiff-demo.mp4](demo/bailiff-demo.mp4). The open and the close are rendered motion pieces; everything between them is the live deployment, captured while it was driven by hand. Shot by shot in `demo/SCRIPT.md`.
-- **The motion piece on its own:** [demo/hyperframes.mp4](demo/hyperframes.mp4) — 35 seconds, silent, the opening and closing pieces as one clip.
+- **The motion piece on its own:** [demo/hyperframes-narrated.mp4](demo/hyperframes-narrated.mp4) — 35 seconds, the opening and closing pieces with narration, for posting. The silent cut is [demo/hyperframes.mp4](demo/hyperframes.mp4).
+- **The demo, for anyone recording it:** [demo/CLICKS.md](demo/CLICKS.md) — every click and every line, in order.
 - **Repo:** [github.com/subheeksh5599/bailiff](https://github.com/subheeksh5599/bailiff), public.
 
 ## What is real right now, and what is not

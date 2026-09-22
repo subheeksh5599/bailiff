@@ -143,3 +143,17 @@ each, and every step drifts slowly so nothing sits frozen.
 
 `demo/hyperframes.mp4` is the motion piece alone: the opening and the closing, 35
 seconds, silent, for posting on its own.
+
+## Narration on the motion piece
+
+`demo/hyperframes-narrated.mp4` — 35 seconds. Six lines, each measured against the
+window between the cards it sits under, because a line that runs past its window talks
+over the next card. The script refuses to build rather than shipping an overlap:
+`python3 scripts/demo_hyperframes_narrated.py`.
+
+## The click sheet
+
+`demo/CLICKS.md` is the demo written as clicks and lines only, for recording by hand.
+It names the two buttons not to press on camera — one grades a call that has already
+been ingested, the other is refused by the phone platform's own outbound limit — so
+neither turns into a dead click in a take.

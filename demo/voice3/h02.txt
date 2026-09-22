@@ -1,0 +1,1 @@
+Frozen before the call, then hashed.

@@ -1,0 +1,1 @@
+A promise is checked against our own recording.
