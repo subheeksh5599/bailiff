@@ -186,30 +186,34 @@ export const api = {
       value?: string;
       valueUnits?: number;
     },
-    { evidenceId: string; newlySatisfied: string[] }
+    { evidenceId: string; newlySatisfied: string[]; token?: string | undefined }
   >("cases:attachOwnEvidence"),
 
   close: mutation<
     "mutation",
-    { caseId: string; actor: string },
+    { caseId: string; actor: string; token?: string | undefined },
     { closed: boolean; unsatisfied?: Unsatisfied[]; alreadyVerified?: boolean }
   >("cases:attemptClose"),
 
-  reopen: mutation<"mutation", { caseId: string; reason: string; actor: string }, { state: string }>(
+  reopen: mutation<
+    "mutation",
+    { caseId: string; reason: string; actor: string; token?: string | undefined },
+    { state: string }
+  >(
     "cases:reopenAsDisputed"
   ),
 
   run: actionRef<"action", { caseRef: string; callRef: string }, RunResult>("orchestrator:resolveCall"),
 
-  readSource: actionRef<"action", { caseRef: string; url: string; kind?: string }, ReadResult>(
+  readSource: actionRef<"action", { caseRef: string; url: string; kind?: string; token?: string | undefined }, ReadResult>(
     "board:readSource"
   ),
 
-  startCall: actionRef<"action", { caseRef: string; to: string }, { callId: string | null; to: string }>(
+  startCall: actionRef<"action", { caseRef: string; to: string; token?: string | undefined }, { callId: string | null; to: string }>(
     "board:startCall"
   ),
 
-  uploadUrl: mutation<"mutation", Record<string, never>, string>("attachments:generateUploadUrl"),
+  uploadUrl: mutation<"mutation", { token?: string | undefined }, string>("attachments:generateUploadUrl"),
 
   attachFile: actionRef<
     "action",
@@ -220,11 +224,25 @@ export const api = {
       reportedType?: string;
       kind?: string;
       note?: string;
+      token?: string | undefined;
     },
     { evidenceId: string; contentHash: string; satisfies: string[]; description: string }
   >("attachments:attach"),
 
   fileUrl: query<"query", { evidenceId: string }, string | null>("attachments:fileUrl"),
+
+  // The board's session: the one place a passphrase is exchanged for a token.
+  signIn: mutation<
+    "mutation",
+    { passphrase: string; label?: string },
+    { token: string; expiresAt: number }
+  >("auth:signIn"),
+  signOut: mutation<"mutation", { token: string }, { signedOut: boolean }>("auth:signOut"),
+  session: query<
+    "query",
+    { token?: string | undefined },
+    { signedIn: boolean; expiresAt: number | null; label: string | null }
+  >("auth:current"),
 };
 
 /** Where the deployment answers: the site and the backend share one address. */

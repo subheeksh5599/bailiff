@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -27,7 +28,7 @@ describe("the re-check takes a closure back when the evidence stops being curren
       excerpt: "refund issued",
       ingestedBy: "fetcher",
     });
-    const closed = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    const closed = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     expect(closed.closed).toBe(true);
 
     const result = await t.mutation(internal.recheck.verified, { maxAgeDays: 0 });

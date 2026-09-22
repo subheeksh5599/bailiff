@@ -8,6 +8,7 @@ import { claimVerdict, isFresh, requirementMatchedBy } from "./lib/rules";
 import { requirementSetHash, sha256Hex } from "./lib/hash";
 import { evaluateById } from "./verifier";
 import { internal } from "./_generated/api";
+import { requireOperator } from "./lib/session";
 
 /**
  * Case operations.
@@ -152,8 +153,10 @@ export const attachOwnEvidence = mutation({
     valueUnits: v.optional(v.number()),
     excerpt: v.string(),
     ingestedBy: v.string(),
+    token: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireOperator(ctx, args.token);
     const caseDoc = await ctx.db.get(args.caseId);
     if (!caseDoc) throw new Error("no such case");
 
@@ -205,8 +208,9 @@ export const attachOwnEvidence = mutation({
 });
 
 export const attemptClose = mutation({
-  args: { caseId: v.id("cases"), actor: v.string() },
+  args: { ...{ caseId: v.id("cases"), actor: v.string() }, token: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    await requireOperator(ctx, args.token);
     const result = await evaluateById(ctx, args.caseId);
     if (!result) throw new Error("no such case");
     const { caseDoc, evaluation } = result;
@@ -262,8 +266,9 @@ export const attemptClose = mutation({
 });
 
 export const reopenAsDisputed = mutation({
-  args: { caseId: v.id("cases"), reason: v.string(), actor: v.string() },
+  args: { ...{ caseId: v.id("cases"), reason: v.string(), actor: v.string() }, token: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    await requireOperator(ctx, args.token);
     const caseDoc = await ctx.db.get(args.caseId);
     if (!caseDoc) throw new Error("no such case");
     await move(ctx, args.caseId, caseDoc.state, "DISPUTED", args.actor, true, args.reason);

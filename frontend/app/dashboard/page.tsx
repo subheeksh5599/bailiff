@@ -8,6 +8,7 @@ import { CaseView } from "@/components/board/case-detail";
 import { IntegrationsView } from "@/components/board/integrations";
 import { useBackend } from "@/components/providers";
 import { Panel } from "@/components/fabric/ui";
+import { SessionProvider, SignInGate } from "@/components/board/session";
 
 /**
  * The board, as one page.
@@ -78,12 +79,18 @@ export default function DashboardPage(): ReactNode {
     },
   };
 
+  // The public reads are served as JSON by the deployment; this screen is the
+  // operator's, so it sits behind a session and says so on the way in.
   return (
-    <Shell view={route.view} title={heading[route.view].title} lede={heading[route.view].lede}>
-      {route.view === "board" && <BoardView />}
-      {route.view === "new" && <NewCaseView />}
-      {route.view === "case" && (route.ref ? <CaseView caseRef={route.ref} /> : <BoardView />)}
-      {route.view === "integrations" && <IntegrationsView />}
-    </Shell>
+    <SessionProvider>
+      <SignInGate>
+        <Shell view={route.view} title={heading[route.view].title} lede={heading[route.view].lede}>
+          {route.view === "board" && <BoardView />}
+          {route.view === "new" && <NewCaseView />}
+          {route.view === "case" && (route.ref ? <CaseView caseRef={route.ref} /> : <BoardView />)}
+          {route.view === "integrations" && <IntegrationsView />}
+        </Shell>
+      </SignInGate>
+    </SessionProvider>
   );
 }

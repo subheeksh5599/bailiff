@@ -1,6 +1,7 @@
 "use client";
 
 import { useAction, useMutation, useQuery } from "convex/react";
+import { useSession } from "./session";
 import { useState, type ReactNode } from "react";
 import {
   api,
@@ -46,6 +47,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
   const snapshot = useQuery(api.snapshot, { ref: caseRef }) as Snapshot | null | undefined;
   const audit = useQuery(api.audit, { caseRef }) as AuditRow[] | undefined;
 
+  const { token } = useSession();
   const readSource = useAction(api.readSource);
   const startCall = useAction(api.startCall);
   const uploadUrl = useMutation(api.uploadUrl);
@@ -211,7 +213,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                   variant="outline"
                   disabled={busy !== null || !reason.trim()}
                   onClick={() =>
-                    act("reopen", () => reopen({ caseId: doc._id, reason: reason.trim(), actor: "board" }))
+                    act("reopen", () => reopen({ caseId: doc._id, reason: reason.trim(), actor: "board", token: token ?? undefined }))
                   }
                 >
                   {busy === "reopen" ? "Working…" : "Reopen as disputed"}
@@ -250,7 +252,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                       onClick={() =>
                         act(
                           "read",
-                          () => readSource({ caseRef: doc.ref, url: url.trim(), kind: readKind }),
+                          () => readSource({ caseRef: doc.ref, url: url.trim(), kind: readKind, token: token ?? undefined }),
                           setReadResult
                         )
                       }
@@ -283,7 +285,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                     <Button
                       disabled={busy !== null || !dialTo.trim()}
                       onClick={() =>
-                        act("call", () => startCall({ caseRef: doc.ref, to: dialTo.trim() }), setDialed)
+                        act("call", () => startCall({ caseRef: doc.ref, to: dialTo.trim(), token: token ?? undefined }), setDialed)
                       }
                     >
                       {busy === "call" ? "Dialling…" : "Dial"}
@@ -323,7 +325,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                         void act(
                           "upload",
                           async () => {
-                            const url = await uploadUrl({});
+                            const url = await uploadUrl({ token: token ?? undefined });
                             const put = await fetch(url, {
                               method: "POST",
                               headers: { "content-type": file.type || "application/octet-stream" },
@@ -338,6 +340,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                               ...(file.type ? { reportedType: file.type } : {}),
                               kind: docKind,
                               ...(fileNote.trim() ? { note: fileNote.trim() } : {}),
+                              token: token ?? undefined,
                             });
                           },
                           (filed) => setUploaded(filed.description)
@@ -480,7 +483,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                     onClick={() =>
                       act(
                         "close",
-                        () => close({ caseId: doc._id, actor: "board" }),
+                        () => close({ caseId: doc._id, actor: "board", token: token ?? undefined }),
                         (result) =>
                           setCloseResult(
                             result.closed

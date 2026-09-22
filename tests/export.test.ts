@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -79,7 +80,7 @@ describe("the case export", () => {
       actor: "intake",
       requirements: [{ key: "refund_issued", label: "Refund issued", kind: "payment_record" }],
     });
-    await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
 
     const diary = await t.query(api.ops.auditForCase, { caseRef: "case-diary" });
     const actions = diary.map((row) => row.action);

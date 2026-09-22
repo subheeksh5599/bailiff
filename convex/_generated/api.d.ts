@@ -9,6 +9,7 @@
  */
 
 import type * as attachments from "../attachments.js";
+import type * as auth from "../auth.js";
 import type * as billing from "../billing.js";
 import type * as board from "../board.js";
 import type * as cases from "../cases.js";
@@ -40,6 +41,7 @@ import type * as lib_hash from "../lib/hash.js";
 import type * as lib_messages from "../lib/messages.js";
 import type * as lib_metrics from "../lib/metrics.js";
 import type * as lib_rules from "../lib/rules.js";
+import type * as lib_session from "../lib/session.js";
 import type * as lib_states from "../lib/states.js";
 import type * as ops from "../ops.js";
 import type * as orchestrator from "../orchestrator.js";
@@ -55,6 +57,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   attachments: typeof attachments;
+  auth: typeof auth;
   billing: typeof billing;
   board: typeof board;
   cases: typeof cases;
@@ -86,6 +89,7 @@ declare const fullApi: ApiFromModules<{
   "lib/messages": typeof lib_messages;
   "lib/metrics": typeof lib_metrics;
   "lib/rules": typeof lib_rules;
+  "lib/session": typeof lib_session;
   "lib/states": typeof lib_states;
   ops: typeof ops;
   orchestrator: typeof orchestrator;

@@ -22,8 +22,9 @@ import { requirementMatchedBy } from "./lib/rules";
 
 /** Step one: where the browser may put the bytes. */
 export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx): Promise<string> => {
+  args: { token: v.optional(v.string()) },
+  handler: async (ctx, args): Promise<string> => {
+    await ctx.runQuery(internal.auth.requireSession, { token: args.token });
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -37,11 +38,13 @@ export const attach = action({
     reportedType: v.optional(v.string()),
     kind: v.optional(v.string()),
     note: v.optional(v.string()),
+    token: v.optional(v.string()),
   },
   handler: async (
     ctx: ActionCtx,
     args
   ): Promise<{ evidenceId: string; contentHash: string; satisfies: string[]; description: string }> => {
+    await ctx.runQuery(internal.auth.requireSession, { token: args.token });
     const snapshot = await ctx.runQuery(api.cases.get, { ref: args.caseRef });
     if (!snapshot) throw new Error(`no case ${args.caseRef}`);
     if (snapshot.case.state === "VERIFIED") {

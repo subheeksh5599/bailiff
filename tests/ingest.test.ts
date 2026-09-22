@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -79,7 +80,7 @@ describe("ingesting a call without dressing it up", () => {
       endedReason: "hangup",
       transcript: "agent: I promise the refund is already in your account",
     });
-    const result = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    const result = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     expect(result.closed).toBe(false);
     expect(result.unsatisfied.map((u) => u.key)).toEqual(["refund_issued"]);
   });

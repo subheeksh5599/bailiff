@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { MAX_UPLOAD_BYTES, checkUpload, describeFile, resolveType } from "../convex/lib/files";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -76,6 +77,7 @@ describe("filing an uploaded document", () => {
     const storageId = await t.run(async (ctx) => await ctx.storage.store(new Blob([new Uint8Array([1, 2, 3, 4, 5])])));
 
     const filed = await t.action(api.attachments.attach, {
+    token: await operatorToken(t),
       caseRef: "case-upload",
       storageId,
       fileName: "statement.pdf",
@@ -107,6 +109,7 @@ describe("filing an uploaded document", () => {
 
     await expect(
       t.action(api.attachments.attach, {
+    token: await operatorToken(t),
         caseRef: "case-badfile",
         storageId,
         fileName: "installer.exe",
@@ -124,13 +127,14 @@ describe("filing an uploaded document", () => {
     const storageId = await t.run(async (ctx) => await ctx.storage.store(new Blob([new Uint8Array([7])])));
 
     // satisfy it and close it, so the case is VERIFIED
-    await t.mutation(api.cases.attemptClose, { caseId, actor: "tester" }).catch(() => undefined);
+    await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "tester" }).catch(() => undefined);
     await t.run(async (ctx) => {
       await ctx.db.patch(caseId, { state: "VERIFIED" });
     });
 
     await expect(
       t.action(api.attachments.attach, {
+    token: await operatorToken(t),
         caseRef: "case-settled",
         storageId,
         fileName: "later.pdf",
@@ -145,6 +149,7 @@ describe("filing an uploaded document", () => {
     const storageId = await t.run(async (ctx) => await ctx.storage.store(new Blob([new Uint8Array([1])])));
 
     const filed = await t.action(api.attachments.attach, {
+    token: await operatorToken(t),
       caseRef: "case-theirs",
       storageId,
       fileName: "my-own-note.pdf",

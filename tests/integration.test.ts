@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -41,7 +42,7 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
       ingestedBy: "mailbox",
     });
 
-    const result = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    const result = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     expect(result.closed).toBe(false);
     expect(result.unsatisfied.map((u) => u.key)).toEqual(["refund_issued"]);
 
@@ -67,13 +68,13 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
       });
     }
 
-    const first = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    const first = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     expect(first.closed).toBe(true);
 
     const state = await t.query(api.cases.board, {});
     expect(state[0].state).toBe("VERIFIED");
 
-    const second = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    const second = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     expect(second.closed).toBe(true);
     if (second.closed) expect(second.alreadyVerified).toBe(true);
 
@@ -134,7 +135,7 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
         fetchedAt: long_ago,
       });
     }
-    const result = await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    const result = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     expect(result.closed).toBe(false);
     expect(result.unsatisfied[0].reason).toMatch(/read before the case opened/);
   });
@@ -189,7 +190,7 @@ describe("the audit trail explains every refusal", () => {
     const t = harness();
     const caseId = await openCase(t);
     await t.mutation(api.cases.freezeRequirements, { caseId, requirements: RULES, actor: "intake" });
-    await t.mutation(api.cases.attemptClose, { caseId, actor: "chase" });
+    await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "chase" });
     await t.mutation(api.billing.recordUsage, {
       idempotencyKey: "call-6",
       caseId,

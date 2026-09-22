@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -67,7 +68,7 @@ describe("reading a page as evidence refuses what it cannot honestly take", () =
   it("refuses a case that does not exist", async () => {
     const t = convexTest(schema, modules);
     await expect(
-      t.action(api.board.readSource, { caseRef: "case-nope", url: "https://example.com" })
+      t.action(api.board.readSource, { token: await operatorToken(t), caseRef: "case-nope", url: "https://example.com" })
     ).rejects.toThrow(/no case/);
   });
 
@@ -80,7 +81,7 @@ describe("reading a page as evidence refuses what it cannot honestly take", () =
       channel: "phone",
     });
     await expect(
-      t.action(api.board.readSource, { caseRef: "case-url", url: "not-a-url" })
+      t.action(api.board.readSource, { token: await operatorToken(t), caseRef: "case-url", url: "not-a-url" })
     ).rejects.toThrow(/http/i);
   });
 
@@ -97,7 +98,7 @@ describe("reading a page as evidence refuses what it cannot honestly take", () =
       await ctx.db.patch(caseId, { state: "VERIFIED", verifiedAt: Date.now() });
     });
     await expect(
-      t.action(api.board.readSource, { caseRef: "case-settled", url: "https://example.com" })
+      t.action(api.board.readSource, { token: await operatorToken(t), caseRef: "case-settled", url: "https://example.com" })
     ).rejects.toThrow(/settled/i);
   });
 });

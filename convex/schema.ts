@@ -46,6 +46,15 @@ export default defineSchema({
     .index("by_case", ["caseId"])
     .index("by_case_key", ["caseId", "key"]),
 
+  // Operator sessions. Only the hash of a token is stored, so a copy of this
+  // table is not a set of usable sessions.
+  operatorSessions: defineTable({
+    tokenHash: v.string(),
+    label: v.optional(v.string()),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  }).index("by_token", ["tokenHash"]),
+
   evidence: defineTable({
     caseId: v.id("cases"),
     kind: v.string(),

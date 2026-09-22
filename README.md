@@ -217,6 +217,7 @@ OPEN ──► FROZEN ──► CHASING ──► VERIFIED
 | `/selftest` | GET | anyone — the deployment checking itself |
 | `/cases`, `/case?ref=` | GET | anyone — the same rows the board renders, plus a `proof` block |
 | `/dashboard` | GET | anyone — the board, served from static hosting |
+| the board's actions | — | **an operator session only**: closing, reopening, spending a call, taking a file |
 | `/hooks/call-ended` | POST | the call platform only, with a shared secret |
 | `/hooks/inbound-email`, `/hooks/agentmail` | POST | the mail provider only, with a shared secret |
 | `/hooks/vapi-tools` | POST | the voice assistant's tools only, with a shared secret |
@@ -317,7 +318,6 @@ The landing page states what is verified and what is not, side by side, because 
 
 ## Limitations
 
-- **No auth on the board.** An app with no auth is a valid submission for this event, but a real deployment wants an operator sign-in before it exposes the actions.
 - **One operator.** There is no multi-user model: no roles, no seats, no sharing. The mailbox is the case's, and the person running it is you.
 - **The refusal that has not been exercised on a live call.** The assistant is instructed never to state a number it has not read; the mechanism is in place, and it has not yet been tested against a real caller who tries to get it to guess.
 - **No real debtor.** Every case on the deployment was created by driving the product, which is what "no sample data" means here: the records are real records of a real deployment, made against a counterparty that does not owe anyone anything.

@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { staleEvidenceIds } from "../convex/verifier";
+import { operatorToken } from "./helpers";
 
 const modules = import.meta.glob(["../convex/**/*.ts", "../convex/**/*.js"]);
 
@@ -90,14 +91,14 @@ describe("the verifier decides again every time, and trusts no flag", () => {
       await ctx.db.patch(requirement!._id, { satisfied: true, satisfiedByEvidenceId: undefined });
     });
 
-    const result = await t.mutation(api.cases.attemptClose, { caseId, actor: "board" });
+    const result = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "board" });
     expect(result.closed).toBe(false);
     expect((result.unsatisfied ?? []).map((u: { key: string }) => u.key)).toContain("refund_moved");
   });
 
   it("refuses while there is nothing at all behind the requirement", async () => {
     const { t, caseId } = await seeded();
-    const result = await t.mutation(api.cases.attemptClose, { caseId, actor: "board" });
+    const result = await t.mutation(api.cases.attemptClose, { token: await operatorToken(t), caseId, actor: "board" });
     expect(result.closed).toBe(false);
     expect((result.unsatisfied ?? []).length).toBeGreaterThan(0);
   });

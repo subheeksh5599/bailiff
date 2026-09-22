@@ -24,8 +24,9 @@ import { NotConfigured } from "./lib/config";
  * checked against the case's frozen requirements so the operator is told
  * immediately whether it satisfied one.
  */
+/** Reading a page as evidence is an operator action, so it needs a session. */
 export const readSource = action({
-  args: { caseRef: v.string(), url: v.string(), kind: v.optional(v.string()) },
+  args: { caseRef: v.string(), url: v.string(), kind: v.optional(v.string()), token: v.optional(v.string()) },
   handler: async (
     ctx: ActionCtx,
     args
@@ -35,6 +36,7 @@ export const readSource = action({
     satisfies: string[];
     excerpt: string;
   }> => {
+    await ctx.runQuery(internal.auth.requireSession, { token: args.token });
     const snapshot = await ctx.runQuery(api.cases.get, { ref: args.caseRef });
     if (!snapshot) throw new Error(`no case ${args.caseRef}`);
     if (snapshot.case.state === "VERIFIED") {
@@ -80,9 +82,11 @@ export const readSource = action({
  * something new needs to be asked, and the audit trail records which of the two
  * happened.
  */
+/** Dialling costs money on a real plan, so it needs a session too. */
 export const startCall = action({
-  args: { caseRef: v.string(), to: v.string() },
+  args: { caseRef: v.string(), to: v.string(), token: v.optional(v.string()) },
   handler: async (ctx: ActionCtx, args): Promise<{ callId: string | null; to: string }> => {
+    await ctx.runQuery(internal.auth.requireSession, { token: args.token });
     const snapshot = await ctx.runQuery(api.cases.get, { ref: args.caseRef });
     if (!snapshot) throw new Error(`no case ${args.caseRef}`);
     if (snapshot.case.state === "VERIFIED") {
