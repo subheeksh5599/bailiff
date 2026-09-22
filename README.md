@@ -4,7 +4,7 @@
 
 ### A case against a company that owes you stays open until their own record proves the outcome.
 
-[![Tests](https://img.shields.io/badge/tests-132%20passing-10b981)](#tests)
+[![Tests](https://img.shields.io/badge/tests-184%20passing-10b981)](#tests)
 [![Live](https://img.shields.io/badge/live-aware--jellyfish--285.convex.site-2ecc71)](https://aware-jellyfish-285.convex.site)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stack](https://img.shields.io/badge/Convex%20%2B%20Next.js%20%2B%20TypeScript-1f1f23)
@@ -94,7 +94,7 @@ No vendor keys and no network beyond the deployment — the rules are tested as 
 ```bash
 $ npm install && npm test
  Test Files  13 passed (13)
-      Tests  132 passed (132)
+      Tests  184 passed (184)
    Duration  16.30s
 ```
 
