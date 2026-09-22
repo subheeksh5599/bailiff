@@ -32,3 +32,10 @@ demo/build/
 demo/export.json
 demo/audio/
 .env.cloud
+
+# the site's own build output and generated files
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+frontend/next-env.d.ts
+frontend/tsconfig.tsbuildinfo
