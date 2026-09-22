@@ -64,6 +64,22 @@ describe("ingesting a call without dressing it up", () => {
     expect(transcripts[0].contentHash).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it("a retried inbound webhook is one reply, not two", async () => {
+    const t = convexTest(schema, modules);
+    await seed(t);
+    const reply = {
+      caseRef: "case-call-1",
+      from: "billing@example.com",
+      subject: "Re: refund",
+      text: "The refund was issued on the 20th, reference RF-119.",
+    };
+    const first = await t.mutation(internal.ingest.ingestReply, reply);
+    expect(first.duplicate).toBe(false);
+    const replay = await t.mutation(internal.ingest.ingestReply, reply);
+    expect(replay.duplicate).toBe(true);
+    expect(replay.evidenceId).toBe(first.evidenceId);
+  });
+
   it("a transcript of us talking is our own record, so it cannot satisfy a requirement about them", async () => {
     const t = convexTest(schema, modules);
     const caseId = await seed(t);

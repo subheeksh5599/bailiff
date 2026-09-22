@@ -117,13 +117,31 @@ export const ingestReply = internalMutation({
       .unique();
     if (!caseDoc) throw new Error(`no case ${args.caseRef}`);
 
+    // A retried webhook delivers the same message twice. The transcript path
+    // absorbs a replay by call reference; a reply keeps the same promise via
+    // the hash of what came back, scoped to this case. Without this, a
+    // counterparty statement can satisfy a requirement twice from one delivery.
+    const contentHash = await hashText(`${args.subject}\n${args.text}`);
+    const priorReply = await ctx.db
+      .query("evidence")
+      .withIndex("by_case", (q) => q.eq("caseId", caseDoc._id))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("kind"), "email_reply"),
+          q.eq(q.field("source"), `mail:${args.from}`),
+          q.eq(q.field("contentHash"), contentHash),
+        ),
+      )
+      .first();
+    if (priorReply) return { duplicate: true as const, evidenceId: priorReply._id };
+
     const evidenceId = await ctx.db.insert("evidence", {
       caseId: caseDoc._id,
       kind: "email_reply",
       sourceKind: "counterparty",
       source: `mail:${args.from}`,
       fetchedAt: Date.now(),
-      contentHash: await hashText(`${args.subject}\n${args.text}`),
+      contentHash,
       excerpt: args.text.slice(0, 4000),
       ingestedBy: "mail-hook",
     });
