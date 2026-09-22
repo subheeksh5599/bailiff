@@ -4,7 +4,7 @@
 
 ### A case against a company that owes you stays open until their own record proves the outcome.
 
-[![Tests](https://img.shields.io/badge/tests-198%20passing-10b981)](#tests)
+[![Tests](https://img.shields.io/badge/tests-200%20passing-10b981)](#tests)
 [![Live](https://img.shields.io/badge/live-aware--jellyfish--285.convex.site-2ecc71)](https://aware-jellyfish-285.convex.site)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stack](https://img.shields.io/badge/Convex%20%2B%20Next.js%20%2B%20TypeScript-1f1f23)
@@ -94,7 +94,7 @@ No vendor keys and no network beyond the deployment — the rules are tested as 
 ```bash
 $ npm install && npm test
  Test Files  13 passed (13)
-      Tests  198 passed (198)
+      Tests  200 passed (200)
    Duration  16.30s
 ```
 
@@ -344,7 +344,7 @@ The landing page states what is verified and what is not, side by side, because 
 
 ## Tech stack
 
-**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 198 across 26 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
+**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 200 across 26 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
 
 ## Project layout
 
@@ -352,7 +352,7 @@ The landing page states what is verified and what is not, side by side, because 
 convex/            the case, the pipeline, the gates, the adapters, the routes
 frontend/          the site: the landing page and the board
 demo/              the demo video and the click sheet
-tests/             198 tests across 26 files
+tests/             200 tests across 26 files
 docs/              integrations, deployments, the demo, what a live run printed
 scripts/           deploy, the live end-to-end run, the video assembly
 hackathon.md       the build log, including what a live deployment found
@@ -361,7 +361,7 @@ hackathon.md       the build log, including what a live deployment found
 ## Full command reference
 
 ```bash
-npm test                      # the rules, 198 tests, no vendor keys needed
+npm test                      # the rules, 200 tests, no vendor keys needed
 npm run typecheck             # no errors
 npx convex dev                # the backend, against your own deployment
 cd frontend && npm run dev    # the site (build refuses without NEXT_PUBLIC_CONVEX_URL)
@@ -407,7 +407,7 @@ which the passphrase is visible — on camera, a passphrase is published.
 ## Tests
 
 ```bash
-npm test                       # 198 tests across 26 files
+npm test                       # 200 tests across 26 files
 ```
 
 Each integration has a stubbed-transport test *and* a live probe, so the code is covered without pretending a vendor was reached. The rules that decide money — evidence freshness, authority, the grade, the exactly-once charge — are tested per rule rather than per file, because a rule with no test is a rule you are only claiming.

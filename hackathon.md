@@ -143,7 +143,7 @@ Every step below is a commit in this repository, in order.
 
 ```bash
 npm install          # convex, vitest, convex-test, typescript
-npm test             # 198 tests, no vendor keys needed
+npm test             # 200 tests, no vendor keys needed
 npm run typecheck
 npx convex dev       # backend
 cd web && npm install && npm run dev   # landing + case board
@@ -158,7 +158,7 @@ cd web && npm install && npm run dev   # landing + case board
 - `convex/lib/rules.ts` — the freshness, authority and grade rules, as pure functions.
 - `convex/verifier.ts` — the only path to a closed case.
 - `convex/billing.ts` — the gate, in one mutation, with the idempotency key.
-- `tests/` — 198 tests across 26 files; the ones that matter defend the three invariants above.
+- `tests/` — 200 tests across 26 files; the ones that matter defend the three invariants above.
 
 ## Live, and the four things a live deployment found
 
