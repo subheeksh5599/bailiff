@@ -3,7 +3,7 @@
 Site: `https://aware-jellyfish-285.convex.site` — browser full screen, no terminal tab, no GitHub tab.
 
 Before you start:
-- have the operator passphrase ready (it is in `/home/arch/bailiff/.env.local`, the `OPERATOR_PASSPHRASE` line)
+- set the passphrase you will type on camera first, so it is short and you know it: `./scripts/set-operator-passphrase.sh` (it is also readable in `/home/arch/bailiff/.env.local`)
 - have one file ready to upload (any PDF or text file — a bill, a statement)
 - open **two tabs** on the site, both on the board, signed in on both. The second tab exists to show a case arriving in the first (step 6).
 
@@ -62,3 +62,5 @@ Before you start:
 About two and a half minutes at a normal pace, and nothing above needs a terminal.
 
 Two buttons are dead clicks on this deployment, both tested: **Grade it** does nothing visible on a case with no ingested call, and **Dial** is refused by the phone platform's own outbound limit.
+
+The passphrase appears in the recording, so change it once with the same script afterwards — on camera, a passphrase is a published passphrase.
