@@ -8,10 +8,12 @@ fabricates a result: `GET /health` on the deployment reports which integrations
 are switched on, and every one of them is off until its key is set.
 
 ```
-tests            77 passing            (npm test)
+tests            82 passing            (npm test)
 typecheck        clean                 (npm run typecheck)
 web build        / and /board          (cd web && npm run build)
-integrations     0 of 9 configured     (reads its own environment)
+integrations     1 of 9 keyed          (extraction is configured; the provider
+                                       currently answers 402 insufficient quota,
+                                       so a run stops with that reason on the case)
 ```
 
 ## The problem in one paragraph
@@ -89,7 +91,7 @@ trail.
 | Billing gate, idempotency, retry of a failed delivery | Real, covered by tests |
 | Webhooks (call ended, inbound mail, assistant tools) | Real, fail-closed when the shared secret is unset |
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
-| Vendor integrations (crawl, extract, grade, meter, mail, knowledge, telephony) | Code complete and unit-tested on the request side; **no live calls made yet — no key set** |
+| Vendor integrations (crawl, extract, grade, meter, mail, knowledge, telephony) | Code complete and unit-tested on the request side. Extraction is keyed and reachable; the provider returns `402 insufficient_quota`, which the pipeline records on the case as `extraction.failed` and leaves ungraded and unbilled. The rest have no key yet |
 | Assistant's refusal to state an unread number | Mechanism in place (the tool is the only route to a value); not yet exercised on a live call |
 | Live deployment URL | Not deployed; no account, so no public URL exists yet |
 

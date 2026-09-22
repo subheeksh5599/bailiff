@@ -3,6 +3,7 @@ import { action, internalAction, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { gradeVerdict, type GradeCheck } from "./lib/rules";
 import { has } from "./lib/config";
+import type { Extracted } from "./integrations/openai";
 
 /**
  * The whole pipeline for one call, with every stop named.
@@ -55,9 +56,24 @@ export const deriveOutcome = internalAction({
       return { stopped: "extraction is not configured (OPENAI_API_KEY)" };
     }
 
-    const extracted = await ctx.runAction(internal.integrations.openai.extractClaims, {
-      transcript: transcript.excerpt,
-    });
+    let extracted: Extracted;
+    try {
+      extracted = await ctx.runAction(internal.integrations.openai.extractClaims, {
+        transcript: transcript.excerpt,
+      });
+    } catch (error) {
+      // A provider that answers with a quota error, an outage or a bad model id is a
+      // fact about this run, not a crash: it goes on the case with the provider's own
+      // words, and the call stays ungraded and unbilled.
+      const message = error instanceof Error ? error.message : "unknown failure";
+      await ctx.runMutation(internal.ops.audit, {
+        caseId: snapshot.case._id,
+        action: "extraction.failed",
+        actor: "orchestrator",
+        detail: message,
+      });
+      return { stopped: `extraction failed: ${message}` };
+    }
 
     // A promise is verified against our own recording: the transcript proves it was
     // said. A statement of fact cannot be - only the counterparty's record settles
