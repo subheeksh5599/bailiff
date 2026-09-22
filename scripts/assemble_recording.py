@@ -24,8 +24,8 @@ FINAL = DEMO / "bailiff-recorded.mp4"
 # step -> line. The step names are the ones the recorder wrote.
 LINES: list[tuple[str, str]] = [
     ("landing", "This is bailiff, on the live deployment."),
-    ("landing-hero", "A case against a company that owes you stays open until their own record shows the outcome."),
-    ("landing-what-is-verified", "It says what it can verify, and what it cannot, on the front page."),
+    ("landing-hero", "A case stays open until their own record shows the outcome."),
+    ("landing-what-is-verified", "And it says so itself, on the front page."),
     ("open-the-board", "The reads are public. Everything that changes a case waits behind a passphrase."),
     ("board-numbers", "Every case it has touched, with the counts taken from the same rows the list renders."),
     ("case-closed", "This one closed on the other side's own reply."),
@@ -79,7 +79,12 @@ def narrate() -> list[tuple[float, pathlib.Path]]:
             first_frame_at[step] = last_known_at + 4.0
             print(f"  {step!r} produced no repaint; placing its line after the previous step")
 
+    # Lines queue: a line is placed at its own beat, but never before the previous one has
+    # stopped speaking. Without this, two beats close together put two voices on top of each
+    # other, which is the one defect a viewer hears immediately and forgives never.
+    GAP = 0.35
     clips: list[tuple[float, pathlib.Path]] = []
+    previous_end = 0.0
     for step, line in LINES:
         text = VOICE / f"{step}.txt"
         audio = VOICE / f"{step}.mp3"
@@ -89,9 +94,19 @@ def narrate() -> list[tuple[float, pathlib.Path]]:
              "--file", str(text), "--write-media", str(audio)],
             capture_output=True, text=True, timeout=120,
         )
-        offset = max(0.4, first_frame_at[step] - started + 0.25)
+        beat = max(0.4, first_frame_at[step] - started + 0.25)
+        length = duration_of(audio)
+        offset = max(beat, previous_end + GAP)
+        if offset > beat + 0.05:
+            print(f"  {step:26} waits {offset - beat:4.1f}s so it does not talk over the line before it")
         clips.append((offset, audio))
-        print(f"  {offset:6.1f}s  {duration_of(audio):4.1f}s  {step:26} {line[:52]}")
+        previous_end = offset + length
+        print(f"  {offset:6.1f}s  {length:4.1f}s  {step:26} {line[:52]}")
+
+    # Fail loudly rather than shipping a cut where two voices overlap.
+    for (a_off, a_audio), (b_off, _) in zip(clips, clips[1:]):
+        if b_off < a_off + duration_of(a_audio) - 0.02:
+            raise SystemExit(f"overlapping narration: two lines start {b_off - a_off:.1f}s apart")
     return clips
 
 
