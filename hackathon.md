@@ -222,3 +222,11 @@ case rows.
   build deploying with no deployment address at all — export fine, upload fine, site
   empty — which is now a build-time refusal, and a 1280x577 capture being cropped into
   a 1920x1080 frame, which produced a segment with no video stream.
+
+- 2026-09-22  The last technical work, and what watching it found: the operator's board
+  is now behind a session (the reads stay public), the public hooks spend from two token
+  buckets so a flood on one case cannot spend another case's allowance, and the board
+  says out loud that it is a subscription. That last claim was checked rather than
+  asserted: a case opened in a second tab appeared in the first with no reload. The first
+  reading was "still 20 cases" and the cause was a backgrounded tab having its socket
+  throttled, which is the browser's business, not the product's.
