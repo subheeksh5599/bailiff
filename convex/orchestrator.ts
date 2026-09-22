@@ -20,7 +20,7 @@ export type OrchestrationResult = {
   grade?: string;
   checks?: GradeCheck[];
   claimsRecorded?: number;
-  independent?: { testCaseId: string | null; independentScore: number | null; note: string } | null;
+  independent?: { delivered: boolean; note: string } | null;
   billing?: unknown;
   emailed?: boolean;
 };
@@ -144,7 +144,7 @@ export const deriveOutcome = internalAction({
     let independent: OrchestrationResult["independent"] = null;
     if (has(process.env, "scorecard")) {
       try {
-        independent = await ctx.runAction(internal.integrations.scorecard.crossScore, {
+        independent = await ctx.runAction(internal.integrations.scorecard.deliverTrace, {
           bundle: {
             caseRef: args.caseRef,
             callRef: args.callRef,

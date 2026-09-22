@@ -19,7 +19,7 @@ export default function Landing() {
     <a href="#integrations">SDK</a>
     <a href="#integrations">Docs</a>
   </nav>
-  <a className="pill pill-white" href="./app.html">Request Demo</a>
+  <a className="pill pill-white" href="board/index.html">Request Demo</a>
 </div></header>
 
 <main id="top">
@@ -109,7 +109,7 @@ export default function Landing() {
     <span>how we do it</span>
   </div>
 </section>
-<a id="demoPill" href="./app.html">Request Demo</a>
+<a id="demoPill" href="board/index.html">Request Demo</a>
 
 {/* ================= PROCESS ================= */}
 <section className="process" id="process"><div className="wrap">
@@ -285,7 +285,7 @@ export default function Landing() {
   <div className="wrap">
     <div className="eyebrow rv">outcome verification</div>
     <h2 className="rv">See what your cases are actually doing</h2>
-    <a className="pill pill-outline rv" href="./app.html">Request Demo</a>
+    <a className="pill pill-outline rv" href="board/index.html">Request Demo</a>
   </div>
 </section>
 
@@ -302,7 +302,7 @@ export default function Landing() {
       <a href="#article"><span className="ar">&#8594;</span>Blog</a>
       <a href="#integrations"><span className="ar">&#8594;</span>Docs</a>
       <a href="#demo"><span className="ar">&#8594;</span>Contact Us</a>
-      <a className="pill pill-white" href="./app.html">Request Demo</a>
+      <a className="pill pill-white" href="board/index.html">Request Demo</a>
     </div>
   </div>
   <div className="f-rule"></div>

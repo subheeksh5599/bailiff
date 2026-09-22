@@ -91,8 +91,8 @@ trail.
 | Billing gate, idempotency, retry of a failed delivery | Real, covered by tests |
 | Webhooks (call ended, inbound mail, assistant tools) | Real, fail-closed when the shared secret is unset |
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
-| Vendor integrations (crawl, extract, grade, meter, mail, knowledge, telephony) | Code complete and unit-tested on the request side. Extraction is keyed and reachable; the provider returns `402 insufficient_quota`, which the pipeline records on the case as `extraction.failed` and leaves ungraded and unbilled. The rest have no key yet |
+| Vendor integrations (crawl, extract, grade, meter, mail, knowledge, telephony) | Live on the deployment and exercised for real: a page was fetched and its text returned, an email was sent and acknowledged with a message id, a metered event was accepted, and a graded run was delivered to the evaluator. Extraction is keyed but the provider answers `402 insufficient_quota` until credit lands, which the pipeline records on the case as `extraction.failed` and leaves ungraded and unbilled. Knowledge is off: the account has no organization to attach it to |
 | Assistant's refusal to state an unread number | Mechanism in place (the tool is the only route to a value); not yet exercised on a live call |
-| Live deployment URL | Not deployed; no account, so no public URL exists yet |
+| Live deployment | `https://aware-jellyfish-285.convex.site` - landing, the board, and the health endpoint all answer 200, and the health endpoint reports nine of ten integrations on. The board is served at `/board/index.html`, which is where the landing's buttons point |
 
 Nothing above claims to be proven that has not been run.

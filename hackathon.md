@@ -99,3 +99,29 @@ cd web && npm install && npm run dev   # landing + case board
 - `convex/verifier.ts` — the only path to a closed case.
 - `convex/billing.ts` — the gate, in one mutation, with the idempotency key.
 - `tests/` — 98 tests; the ones that matter defend the three invariants above.
+
+## Live, and the four things a live deployment found
+
+The backend, the environment and the site now live on one deployment, so a judge opens
+one address. Getting there turned up four defects that no amount of local testing had
+shown, which is the argument for deploying before writing anything else:
+
+1. Every call-to-action on the landing pointed at a filename from the imported design
+   that was never a route in this app: four dead buttons, on the most prominent element
+   of the page.
+2. The grading integration named a host that answers us with a TLS failure, and an
+   endpoint that does not exist on that platform's API at all. Both were replaced with
+   values read out of the platform's own SDK, and the delivery was rebuilt around the
+   mechanism its documentation describes.
+3. The meter had no feature to count against and no customer to count for, so every
+   passing resolution would have failed on a missing feature rather than being billed.
+4. The site's nested page was unreachable: the hosting layer serves exact paths and
+   falls back to the landing for anything else, so the board never resolved. The links
+   now point at the path that is actually served, verified by fetching it.
+
+Each of these is the same lesson: a claim about a deployed system is worth exactly what
+was observed on the deployed system. Everything asserted in this document was observed
+on the live URL, including the failures still standing - extraction stops with the
+provider's quota error recorded on the case, and knowledge reports itself off rather
+than pretending.
+

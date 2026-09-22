@@ -86,7 +86,7 @@ function ConnectedBoard() {
     try {
       const created = await openCase({
         ref: ref.trim(),
-        customerRef: "signed-in-owner",
+        customerRef: "owner",
         counterpartyName: counterparty.trim(),
         amountClaimedUnits: amount ? Math.round(Number(amount) * 100) : undefined,
         currency: amount ? "USD" : undefined,

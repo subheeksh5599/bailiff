@@ -3,7 +3,7 @@ import { KEYS, NotConfigured, configured, has, requireKey } from "../convex/lib/
 import { buildScrapeRequest } from "../convex/integrations/firecrawl";
 import { buildTrackRequest } from "../convex/integrations/autumn";
 import { EXTRACTION_SCHEMA, buildExtractionRequest } from "../convex/integrations/openai";
-import { buildTestCaseRequest, type GradingBundle } from "../convex/integrations/scorecard";
+import { buildOtlpTrace, type GradingBundle } from "../convex/integrations/scorecard";
 import { buildEmailRequest } from "../convex/integrations/resend";
 import { ASSISTANT_TOOLS, buildAssistantConfig, buildCallRequest } from "../convex/integrations/vapi";
 import { buildChatRequest } from "../convex/integrations/inkeep";
@@ -71,19 +71,29 @@ describe("what we send to each vendor", () => {
     expect(JSON.stringify(EXTRACTION_SCHEMA)).not.toMatch(/verdict|is_true|guilty/);
   });
 
-  it("sends the grader the evidence, not just our opinion", () => {
+  it("hands the evaluator the evidence, not just our opinion", () => {
     const bundle: GradingBundle = {
       caseRef: "case-1",
       callRef: "call-1",
       transcriptExcerpt: "agent: 41.20 was refunded",
-      claims: [{ kind: "fact", text: "refunded 41.20", verdict: "unverifiable" }],
+      claims: [
+        { kind: "fact", text: "refunded 41.20", verdict: "unverifiable" },
+        { kind: "promise", text: "by Friday", verdict: "verified" },
+      ],
       evidence: [{ kind: "payment_record", sourceKind: "counterparty", source: "https://example.com", excerpt: "refund 41.20" }],
     };
-    const request = buildTestCaseRequest(bundle);
-    expect(request.metadata).toEqual({ caseRef: "case-1", callRef: "call-1" });
-    const input = request.input as { claims: unknown[]; evidence: unknown[] };
-    expect(input.claims).toHaveLength(1);
-    expect(input.evidence).toHaveLength(1);
+    const trace = buildOtlpTrace(bundle, { traceId: "a".repeat(32), spanId: "b".repeat(16), now: 1790064000000 });
+    const span = trace.resourceSpans[0].scopeSpans[0].spans[0];
+    expect(span.name).toBe("call.graded");
+    expect(span.traceId).toHaveLength(32);
+    expect(span.spanId).toHaveLength(16);
+    const attrs = Object.fromEntries(span.attributes.map((a) => [a.key, Object.values(a.value)[0] as string]));
+    expect(attrs["case.ref"]).toBe("case-1");
+    expect(attrs["claims.count"]).toBe("2");
+    expect(attrs["claims.unverified"]).toBe("1");
+    expect(attrs["evidence.count"]).toBe("1");
+    // the run carries the evidence itself, so an evaluator can disagree with us
+    expect(attrs["transcript.excerpt"]).toContain("41.20");
   });
 
   it("composes an email with one recipient and the caller's own text", () => {
