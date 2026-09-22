@@ -1,86 +1,169 @@
+<div align="center">
+
+<img src="docs/screenshots/landing.jpg" alt="The landing page: a case closes when the outcome is verified" width="100%" />
+
+<br /><br />
+
 # Bailiff
 
-**A case against a company that owes you stays open until their own record shows the outcome — and nothing on it can be called done because someone said so.**
+**A case against a company stays open until their own record shows the outcome, and a charge is released by a grade that passes — never by a note.**
 
-Status: backend and web are built and green; no vendor key is configured yet, and
-the board says so out loud instead of pretending. Nothing in this repository
-fabricates a result: `GET /health` on the deployment reports which integrations
-are switched on, and every one of them is off until its key is set.
+[![deployment](https://img.shields.io/website?url=https%3A%2F%2Faware-jellyfish-285.convex.site&label=deployment&up_message=live&down_message=down)](https://aware-jellyfish-285.convex.site)
+![tests](https://img.shields.io/badge/tests-106%20passing-3fb950)
+![integrations](https://img.shields.io/badge/integrations-9%20of%2010%20on-3fb950)
+![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-```
-tests            82 passing            (npm test)
-typecheck        clean                 (npm run typecheck)
-web build        / and /board          (cd web && npm run build)
-integrations     1 of 9 keyed          (extraction is configured; the provider
-                                       currently answers 402 insufficient quota,
-                                       so a run stops with that reason on the case)
-```
+Built on Convex · Vapi · Firecrawl · AgentMail · OpenAI · Scorecard · Autumn
 
-## The problem in one paragraph
+**[Live deployment](https://aware-jellyfish-285.convex.site)** · **[Case board](https://aware-jellyfish-285.convex.site/dashboard.html)** · **[Health](https://aware-jellyfish-285.convex.site/health)** · **[Cases as JSON](https://aware-jellyfish-285.convex.site/cases)**
 
-Getting money or a correction out of a company is email work, and the work has no
-end condition. A ticket can be marked resolved without the refund existing. A
-support agent can say "it was issued on the 20th" and be wrong, and the person on
-the other end has no way to tell the difference between a promise and a record. So
-the chase continues by hand, and the only reason it ever stops is that somebody
-gives up.
+</div>
 
-## What this does
+## Contents
 
-A case is opened with a **frozen requirement set**: the specific things that must
-be true for it to be over. Every piece of evidence carries where it came from and
-when it was read. Every statement is recorded as a claim with a verdict derived
-from that evidence. The case can only reach `VERIFIED` through the verifier, and
-the verifier re-reads the requirement and evidence rows every time it is asked —
-it does not trust a stored boolean.
+- [What it does](#what-it-does)
+- [The three rules](#the-three-rules)
+- [Money](#money)
+- [The board](#the-board)
+- [Demo](#demo)
+- [Integrations](#integrations)
+- [Verify it yourself](#verify-it-yourself)
+- [Run it](#run-it)
+- [Repository layout](#repository-layout)
+- [Honesty table](#honesty-table)
 
-Three rules hold the whole thing up, and they are enforced in code, not prose:
+## What it does
 
-1. **A claim is verified only by evidence read after the case opened** — from the
-   counterparty's own record or from our own read-back. A third party's page can
-   corroborate but can never satisfy a requirement, so a forum post cannot close a
-   case about someone else's money.
-2. **A case closes only when every frozen requirement is satisfied.** Refusals name
-   the requirement and the reason, and the refusal is written to the case's diary.
-3. **A closure is not permanent.** A daily re-check re-examines verified cases; when
-   the evidence that closed one has aged out, the closure is withdrawn, the case
-   returns to dispute and the reason is recorded.
+Getting money or a correction out of a company is email work with no end condition. A ticket can be marked resolved without the refund existing. An agent can say "it was issued on the 20th" and be wrong, and there is no way to tell a promise from a record.
 
-The browser cannot write the evidence that closes its own case: it may attach the
-customer's own documents, and nothing else. Anything speaking for the counterparty
-arrives only through the ingest path.
+Bailiff is a case that cannot be closed that way.
+
+A case is opened with a **frozen requirement set** — the specific things that must be true for it to be over — hashed before any call is placed. Every piece of evidence carries where it came from and when it was read. Every statement becomes a claim with a verdict derived from that evidence. Only the verifier moves a case to `VERIFIED`, and it re-reads the requirement and evidence rows each time rather than trusting a stored flag.
+
+The browser can never write the evidence that closes its own case: it may attach the customer's own documents, and nothing else. Anything speaking for the counterparty arrives only through the ingest path — a page read on the server, a reply the mailbox received, or a call's transcript.
+
+## The three rules
+
+1. **A claim is verified only by evidence read after the case opened.** A third party's page can corroborate a requirement but can never satisfy one, so a forum post cannot close a case about someone else's money.
+2. **A case closes only when every frozen requirement is satisfied**, each by evidence of the same kind. Refusals name the requirement and the reason, and the refusal is written into the case's own diary.
+3. **A closure is not permanent.** A daily re-check re-examines verified cases; when the evidence that closed one has aged out, the closure is withdrawn, the case returns to dispute, and the reason is recorded.
 
 ## Money
 
-The phone line's worth is decided the same way. A call is transcribed, its claims
-are extracted, and it is graded against checks that are printed on the case. Only
-a passing grade releases a charge, and the billing row cannot be written without
-that grade in the same transaction. The idempotency key is the call's own
-reference, so a replayed webhook re-reads the same row instead of charging twice,
-and a meter that is unreachable leaves the row pending rather than silently
-consuming the call.
+A phone line opens cases. Nothing is stated on that call that was not fetched first and filed against the case: the assistant's only route to a value is a tool that reads and records.
+
+When the call ends, its claims are put against three checks that are printed on the case:
+
+```
+promises_on_record   a promise is checked against our own recording
+unverified           a statement about their behaviour needs their record
+resolved             whether the caller's problem was actually dealt with
+```
+
+Only a passing grade writes a billing row, and the row cannot be written without that grade in the same transaction. The idempotency key is the call's own reference, so a replayed webhook re-reads one row instead of charging twice. A meter that cannot be reached leaves the row **pending**, never quietly free.
+
+## The board
+
+<img src="docs/screenshots/board.jpg" alt="The case board: cases, their states, and what each one owes" width="100%" />
+
+Every case the pipeline has touched, newest first. The counts above the list are computed from the same rows the list renders, so they cannot disagree with what is underneath them.
+
+<img src="docs/screenshots/case.jpg" alt="One case: frozen requirements, the evidence that closed it, the grade and the charge" width="100%" />
+
+One case, with the requirement set it was frozen on, the evidence read back, the claims and their verdicts, the grade check by check, and what that grade released. An operator can read a page as evidence, file the owner's own document, run the pipeline on a call, attempt a close and read the refusal in the backend's own words, or reopen a settled case as disputed. A settled case refuses new evidence and says why rather than disabling a control silently.
+
+<img src="docs/screenshots/integrations.jpg" alt="Integrations: what carries a key, what does not, and the commands that show both" width="100%" />
+
+## Demo
+
+A recorded walkthrough goes here. **It is not recorded yet, and this section will say so until it is.** Until then the live deployment is the demo: open [the case board](https://aware-jellyfish-285.convex.site/dashboard.html), open a case, and read what closed it.
+
+## Integrations
+
+Every vendor call happens inside a Convex function, never in the browser and never in a route handler, so it lands in the same transaction log as the thing it justifies. A missing key is not approximated: the integration reports itself off and the pipeline stops at that step with the variable named on the case.
+
+| Piece | What it does | Verified on the deployment |
+|---|---|---|
+| Convex | The case, the evidence, the audit trail, every state move | Yes |
+| Vapi | The phone line: two tools, and the platform's own reading of the call | Yes |
+| Firecrawl | Reading a page as evidence, with the time it was read | Real page fetched, text returned |
+| AgentMail | The mailbox a case writes to and reads from | Real message sent, message id acknowledged |
+| OpenAI | Reading a call into claims, when the platform did not | Keyed; provider answers `402` until credit lands |
+| Scorecard | An outside evaluator receives the same graded run | Run delivered, acknowledgement received |
+| Autumn | Metering a released charge | Metered event accepted |
+| Inkeep | Grounding during a call | Off: the account has no organization to attach it to |
+
+## Verify it yourself
+
+Every claim here is checkable from a terminal. These are reads; none of them can write, close a case, or move a charge.
+
+```bash
+curl -s https://aware-jellyfish-285.convex.site/health
+# { "ok": true, "integrations": { "convex": true, "firecrawl": true, …,
+#   "knowledge": false } }
+
+curl -s https://aware-jellyfish-285.convex.site/cases
+# [ { "ref": "case-2026-0914-0188", "state": "VERIFIED", … } ]
+
+curl -s "https://aware-jellyfish-285.convex.site/case?ref=case-2026-0914-0188"
+# { "case": { "state": "VERIFIED", … },
+#   "requirements": [ { "key": "refund_moved", "satisfied": true,
+#     "satisfiedByEvidenceId": "js7954adh72r937s80c8kxz1v98ewz7p" } ], … }
+```
+
+`knowledge` reporting `false` is the point of that first command: what is off is reported rather than hidden.
 
 ## Run it
 
 ```bash
-npm install                 # convex, vitest, convex-test, typescript
-npm test                    # 73 tests, no vendor keys needed
+git clone https://github.com/subheeksh5599/bailiff && cd bailiff
+npm install && npm test                      # 106 tests; no vendor keys needed
 npm run typecheck
-npx convex dev              # backend (local deployment; no account needed)
-cd web && npm install && npm run dev
+
+npx convex dev                               # the backend, on a local deployment
+cd frontend && npm install && npm run dev    # the site and the board
 ```
 
-Copy `.env.example` to `.env.local` (repo root) and set only what you want
-switched on. Unset variables are not approximated: the integration reports itself
-as off and the pipeline stops at that step with the variable named in the audit
-trail.
+`frontend/.env.local` needs one line — `NEXT_PUBLIC_CONVEX_URL` — or the board says no backend is configured and shows nothing. That is deliberate: there is no sample data anywhere in this repository.
 
-## The web
+To deploy the way the live one is deployed:
 
-- `/` — the landing page.
-- `/board` — the case board: open a case, see its frozen requirements, the
-  evidence with the time it was read, the claims and their verdicts, the grades
-  and the billing rows, the refusal reasons, and the case's own diary.
+```bash
+npx convex dev --once                                   # functions and the hosting component
+npx convex env set --from-file .env.deployment          # the environment, in one write
+cd frontend && NEXT_PUBLIC_CONVEX_URL=… npx next build  # the static export
+npx @convex-dev/static-hosting upload -d frontend/out   # the site, served by the same deployment
+```
+
+## Tests
+
+```
+tests/rules.test.ts          claim verdicts, freshness, authority, requirement matching
+tests/states.test.ts         the state machine and which moves are guarded
+tests/hash.test.ts           requirement-set hashing
+tests/analysis.test.ts       reading the call platform's own analysis of a call
+tests/integration.test.ts    open, freeze, read back, close — and the refusals between
+tests/hooks.test.ts          the webhooks, signed and fail-closed
+tests/pipeline.test.ts       grade, billing, mail, and every stop by name
+tests/agentmail.test.ts      the mail path and where a report goes
+tests/export.test.ts         what a case export contains
+tests/integrations.test.ts   the request each vendor adapter builds
+```
+
+## Repository layout
+
+```
+convex/            the case, the pipeline, the vendor adapters, the HTTP routes
+  lib/             rules, states, hashing, config, the platform-analysis reader
+  integrations/    one adapter per vendor; adapters talk to vendors and nothing else
+frontend/          the site: the landing page, and the board
+  app/             the marketing page, and the board as one exported page
+  components/      the design system and the board's screens
+tests/             106 tests
+docs/              integrations, deployments, the demo beat sheet, run output
+scripts/           the live end-to-end run, the demo pipeline, deployment
+hackathon.md       the build log, including what a live deployment found
+```
 
 ## Honesty table
 
@@ -91,8 +174,16 @@ trail.
 | Billing gate, idempotency, retry of a failed delivery | Real, covered by tests |
 | Webhooks (call ended, inbound mail, assistant tools) | Real, fail-closed when the shared secret is unset |
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
-| Vendor integrations (crawl, extract, grade, meter, mail, knowledge, telephony) | Live on the deployment and exercised for real: a page was fetched and its text returned, an email was sent and acknowledged with a message id, a metered event was accepted, and a graded run was delivered to the evaluator. The call platform's own reading of a call is the preferred source of claims and needs no model key at all; the model is the fallback, and answers `402 insufficient_quota` until credit lands, which the pipeline records on the case as `extraction.failed` and leaves ungraded and unbilled. Knowledge is off: the account has no organization to attach it to |
-| Assistant's refusal to state an unread number | Mechanism in place (the tool is the only route to a value); not yet exercised on a live call |
-| Live deployment | `https://aware-jellyfish-285.convex.site` - landing, the board, and the health endpoint all answer 200, and the health endpoint reports nine of ten integrations on. The board is served at `/board/index.html`, which is where the landing's buttons point |
+| Page reads started from the board | Real: read on the server, timed, filed against the case |
+| Vendor integrations | 9 of 10 keyed and exercised on the deployment; the two exceptions are the rows below |
+| OpenAI-backed extraction | Keyed, but the provider answers `402 insufficient_quota`. The pipeline prefers the call platform's own reading of a call, so a graded run does not need this key at all |
+| Inkeep knowledge | Off. The account has no organization, so the health endpoint reports it false |
+| Assistant refusing to state an unread number | Mechanism in place — the tool is the only route to a value. Not yet exercised on a live call |
+| Live deployment | `https://aware-jellyfish-285.convex.site` — the landing, the board, health, `/cases` and `/case` all answer |
+| Demo video | Not recorded |
 
 Nothing above claims to be proven that has not been run.
+
+## Licence
+
+MIT.

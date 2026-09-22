@@ -53,9 +53,11 @@ export type Claim = {
 
 export type Grade = {
   _id: string;
+  subjectKind: string;
   subjectRef: string;
   verdict: string;
   checks: Array<{ name: string; passed: boolean; detail: string }>;
+  gradedAt: number;
 };
 
 export type BillingRow = {
@@ -101,6 +103,7 @@ export type Snapshot = {
   claims: Claim[];
   grades: Grade[];
   billing: BillingRow[];
+  calls: Array<{ _id: string; callRef: string; endedAt: number }>;
 };
 
 export type Unsatisfied = { key: string; label: string; reason: string };

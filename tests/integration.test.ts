@@ -89,6 +89,35 @@ describe("a case opens, freezes its requirements, and closes only on a read-back
     }
   });
 
+  it("returns the grade recorded against the case's call, not only case-level ones", async () => {
+    // A grade is recorded against the call it judged. The case view asked for
+    // case-level grades alone and came back empty, which made a graded case read
+    // as ungraded - the grade existed, the question was wrong.
+    const t = harness();
+    const caseId = await openCase(t, "case-graded");
+    const now = Date.now();
+    await t.mutation(internal.ingest.ingestCall, {
+      caseRef: "case-graded",
+      callRef: "call-graded",
+      startedAt: now,
+      endedAt: now + 90_000,
+      endedReason: "assistant-ended-call",
+      transcript: "agent: we will refund the 41.20 by Friday.",
+    });
+    await t.mutation(internal.grades.recordGrade, {
+      subjectKind: "call",
+      subjectRef: "call-graded",
+      rubricRef: "call/v1",
+      checks: [{ name: "promises_on_record", passed: true, detail: "1 promise, backed" }],
+      gradedBy: "test",
+    });
+
+    const back = await t.query(api.cases.get, { ref: "case-graded" });
+    expect(back?.grades.map((g) => g.subjectRef)).toContain("call-graded");
+    expect(back?.grades[0]?.checks[0]?.name).toBe("promises_on_record");
+    expect(back?.calls.map((c) => c.callRef)).toContain("call-graded");
+  });
+
   it("refuses to close on evidence that was read before the case existed", async () => {
     const t = harness();
     const caseId = await openCase(t);

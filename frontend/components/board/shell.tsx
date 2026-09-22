@@ -74,15 +74,18 @@ export function Shell({
               <Chip accent>live</Chip>
               <span className="text-[11px] text-neutral-500">deployment</span>
             </div>
-            <p className="data mt-2.5 text-[11px] leading-relaxed break-all text-neutral-500">
+            <p className="data mt-2.5 text-[11px] leading-relaxed break-all text-neutral-400">
               {host}
             </p>
-            <p className="mt-5 text-[11px] text-neutral-600">
-              Cases open on the phone line at{" "}
-              <a className="text-neutral-400 no-underline hover:text-white" href="tel:+14582765251">
-                {siteConfig.phone}
-              </a>
+            <p className="mt-5 text-[11px] text-neutral-500">
+              Cases open on the phone line:
             </p>
+            <a
+              className="data mt-1 inline-block text-[11px] whitespace-nowrap text-neutral-400 no-underline hover:text-white"
+              href={`tel:${siteConfig.phone.replace(/[^0-9]/g, "")}`}
+            >
+              {siteConfig.phone}
+            </a>
           </div>
         </aside>
 
@@ -93,10 +96,10 @@ export function Shell({
               {lede && <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-neutral-400">{lede}</p>}
             </div>
             <a
-              href="/case"
-              className="data text-[11px] text-neutral-500 no-underline hover:text-neutral-300"
+              href="/cases"
+              className="data text-[11px] text-neutral-400 no-underline hover:text-accent"
             >
-              /cases · /case?ref=
+              the same rows as JSON →
             </a>
           </header>
 

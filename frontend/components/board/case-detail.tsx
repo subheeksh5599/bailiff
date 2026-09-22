@@ -418,7 +418,12 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
               {grades.length === 0 && <p className="text-[13px] text-neutral-500">No grade yet.</p>}
               {grades.map((grade) => (
                 <div key={grade._id}>
-                  <p className="text-[13px] text-white">Grade {grade.verdict}</p>
+                  <p className="text-[13px] text-white">
+                    Grade {grade.verdict}
+                    <span className="data ml-2 text-[11px] text-neutral-500">
+                      {grade.subjectKind} {grade.subjectRef}
+                    </span>
+                  </p>
                   <ul className="mt-2 space-y-1">
                     {grade.checks.map((check) => (
                       <li key={check.name} className="text-[11px] text-neutral-400">

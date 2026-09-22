@@ -40,8 +40,8 @@ export function BoardView(): ReactNode {
         <Kpi label="Verified" value={String(verified.length)} note="the other side's record arrived" />
         <Kpi
           label="Last verification"
-          value={verified[0]?.verifiedAt ? when(verified[0].verifiedAt) : "—"}
-          note="most recent settlement"
+          value={verified[0]?.verifiedAt ? when(verified[0].verifiedAt).slice(0, 10) : "—"}
+          note={verified[0]?.verifiedAt ? `at ${when(verified[0].verifiedAt).slice(11)}` : "none yet"}
         />
       </div>
 
@@ -50,7 +50,7 @@ export function BoardView(): ReactNode {
           <a
             key={row.ref}
             href={`?view=case&ref=${encodeURIComponent(row.ref)}`}
-            className="block no-underline"
+            className="group block no-underline"
           >
             <Panel className="transition-colors duration-300 hover:bg-[#12141a]">
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
@@ -64,11 +64,18 @@ export function BoardView(): ReactNode {
                     {row.channel ? ` · opened on ${row.channel}` : ""}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="data text-sm text-white">
-                    {money(row.amountClaimedUnits, row.currency)}
-                  </p>
-                  <p className="mt-1 text-[11px] text-neutral-500">opened {when(row.openedAt)}</p>
+                <div className="flex items-center gap-5">
+                  <div className="text-right">
+                    <p className="data text-sm text-white">
+                      {money(row.amountClaimedUnits, row.currency)}
+                    </p>
+                    <p className="mt-1 text-[11px] text-neutral-400">
+                      opened {when(row.openedAt)}
+                    </p>
+                  </div>
+                  <span className="text-neutral-400 transition-colors duration-300 group-hover:text-accent">
+                    →
+                  </span>
                 </div>
               </div>
             </Panel>
@@ -76,9 +83,9 @@ export function BoardView(): ReactNode {
         ))}
       </div>
 
-      <p className="text-[11px] text-neutral-600">
-        {releases} of {rows.length} released a charge, and nothing releases one except a grade that
-        passed.
+      <p className="text-[11px] text-neutral-400">
+        Showing all {rows.length} cases, newest first. {releases} released a charge, and nothing
+        releases one except a grade that passed.
       </p>
     </div>
   );
@@ -90,7 +97,7 @@ function Kpi({ label, value, note }: { label: string; value: string; note: strin
       <div className="rounded-[calc(1.25rem-4px)] bg-[#0d0e11] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <p className="text-[11px] tracking-wide text-neutral-500 uppercase">{label}</p>
         <p className="data mt-2.5 text-[1.375rem] leading-none text-white">{value}</p>
-        <p className="mt-2 text-[11px] text-neutral-500">{note}</p>
+        <p className="mt-2 text-[11px] text-neutral-400">{note}</p>
       </div>
     </div>
   );

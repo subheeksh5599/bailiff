@@ -24,9 +24,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
  */
 
 const LINKS = [
-  { label: "The leak", href: "#leak", id: "leak" },
-  { label: "What's hidden", href: "#disclosure", id: "disclosure" },
-  { label: "How it moves", href: "#path", id: "path" },
+  { label: "The problem", href: "#leak", id: "leak" },
+  { label: "What is verified", href: "#disclosure", id: "disclosure" },
+  { label: "How a case moves", href: "#path", id: "path" },
   { label: "Verify", href: "#verify", id: "verify" },
 ];
 

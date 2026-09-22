@@ -271,14 +271,35 @@ export const get = query({
       .withIndex("by_ref", (q) => q.eq("ref", args.ref))
       .unique();
     if (!caseDoc) return null;
-    const [requirements, evidence, claims, grades, billing] = await Promise.all([
+    const [requirements, evidence, claims, billing, calls] = await Promise.all([
       ctx.db.query("requirements").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
       ctx.db.query("evidence").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
       ctx.db.query("claims").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
-      ctx.db.query("grades").withIndex("by_subject", (q) => q.eq("subjectKind", "case").eq("subjectRef", caseDoc.ref)).collect(),
       ctx.db.query("billingEvents").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
+      ctx.db.query("calls").withIndex("by_case", (q) => q.eq("caseId", caseDoc._id)).collect(),
     ]);
-    return { case: caseDoc, requirements, evidence, claims, grades, billing };
+
+    // A grade is recorded against the call it judged, so a case has to gather the
+    // grades of its calls to show what decided its charge. Asking only for
+    // case-level grades returned nothing, which made a graded case look ungraded —
+    // the grade was there, the question was wrong.
+    const subjects = ["call", "case"] as const;
+    const refs = [caseDoc.ref, ...calls.map((call) => call.callRef)];
+    const gradeSets = await Promise.all(
+      subjects.flatMap((subjectKind) =>
+        refs.map((subjectRef) =>
+          ctx.db
+            .query("grades")
+            .withIndex("by_subject", (q) =>
+              q.eq("subjectKind", subjectKind).eq("subjectRef", subjectRef)
+            )
+            .collect()
+        )
+      )
+    );
+    const grades = gradeSets.flat().sort((a, b) => b.gradedAt - a.gradedAt);
+
+    return { case: caseDoc, requirements, evidence, claims, grades, billing, calls };
   },
 });
 
