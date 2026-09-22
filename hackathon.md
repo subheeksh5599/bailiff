@@ -17,6 +17,7 @@
 - **The motion piece on its own:** [demo/hyperframes-narrated.mp4](demo/hyperframes-narrated.mp4) — 35 seconds, the opening and closing pieces with narration, for posting. The silent cut is [demo/hyperframes.mp4](demo/hyperframes.mp4).
 - **The demo, for anyone recording it:** [demo/CLICKS.md](demo/CLICKS.md) — every click and every line, in order.
 - **Repo:** [github.com/subheeksh5599/bailiff](https://github.com/subheeksh5599/bailiff), public.
+- **Social proof:** the build is posted at [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004).
 
 ## What is real right now, and what is not
 

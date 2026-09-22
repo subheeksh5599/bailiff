@@ -37,6 +37,7 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 | Metering | **LIVE** | a metered event accepted, keyed on the call reference that justified it |
 | OpenAI | **KEYED, 402** | the provider answers `402 insufficient_quota` until credit lands. It does not block the pipeline: claims come from the call platform's own end-of-call analysis, so money is decided without any model key |
 | Inkeep | **OFF** | that account belongs to no organization. `/health` reports it `false` rather than pretending |
+| The build, posted | **LIVE** | [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004) — tagged to the four sponsors, as the event asks |
 
 ## ▶ Demo
 
