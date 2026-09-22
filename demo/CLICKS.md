@@ -21,7 +21,7 @@ Before you start:
 **4.** Type the passphrase in the field, CLICK **Sign in**.
 **SAY:** One passphrase, and the deployment keeps only hashes of the sessions it hands out.
 
-**5.** SCROLL to the line **"Showing all 21 cases, newest first…"** and the line just below it that begins **"This list is a live subscription…"**.
+**5.** SCROLL to the line that begins **"Showing all … cases, newest first"**, and the line just below it beginning **"This list is a live subscription…"**.
 **SAY:** Every case the pipeline has touched, with the counts taken from the same rows the list renders.
 
 **6.** SWITCH to the second tab, already signed in and on the board. CLICK **Open a case** in the left sidebar. Type a reference and a company name, CLICK **Open the case**, then CLICK **Freeze the set**. SWITCH BACK to the first tab.
