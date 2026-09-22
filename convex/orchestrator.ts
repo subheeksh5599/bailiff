@@ -5,6 +5,7 @@ import { gradeVerdict, type GradeCheck } from "./lib/rules";
 import { emailPath, has, ownerMailbox } from "./lib/config";
 import type { Extracted } from "./integrations/openai";
 import { parseCallAnalysis } from "./lib/analysis";
+import { callReport } from "./lib/messages";
 
 /**
  * The whole pipeline for one call, with every stop named.
@@ -248,33 +249,33 @@ export const deriveOutcome = internalAction({
           detail: `mail is configured (${mailPath}) but OWNER_EMAIL is not set, so no report was sent`,
         });
       } else {
-        const report = [
-          `Case: ${args.caseRef}`,
-          `Call: ${args.callRef}`,
-          `Grade: ${verdict}`,
-          `Caller wanted: ${extracted.caller_wanted}`,
-          "",
-          "Checks:",
-          ...checks.map((c) => `- ${c.name}: ${c.passed ? "pass" : "fail"} - ${c.detail}`),
-          "",
-          verdict === "pass" ? "Billable, once." : "Not billable.",
-        ].join("\n");
-        const subject =
-          (verdict === "pass"
-            ? `Resolved call, billable: ${args.caseRef}`
-            : `Call not billable (${verdict}): ${args.caseRef}`) + ` [case:${args.caseRef}]`;
+        // One place builds what the product says, so the wording is reviewable next
+        // to the rules it describes and the case reference is always attached.
+        const report = callReport({
+          caseRef: args.caseRef,
+          verdict,
+          checks: checks.map((c) => ({ name: c.name, passed: c.passed, detail: c.detail })),
+          billing: {
+            released: billing !== null && billing !== undefined,
+            note: billing
+              ? `one row, keyed on ${args.callRef}; a replay re-reads it`
+              : "an unreachable meter leaves a row pending rather than consuming the call",
+          },
+        });
+        const subject = report.subject;
+        const text = report.text;
         const sent =
           mailPath === "agentmail"
             ? await ctx.runAction(internal.integrations.agentmail.sendMessage, {
                 to: owner,
                 subject,
-                text: report,
+                text,
                 purpose: `call report for ${args.caseRef}`,
               })
             : await ctx.runAction(internal.integrations.resend.sendEmail, {
                 to: owner,
                 subject,
-                text: report,
+                text,
                 purpose: `call report for ${args.caseRef}`,
               });
         emailed = sent.sent;

@@ -43,6 +43,10 @@ export type Evidence = {
   value?: string;
   excerpt: string;
   ingestedBy: string;
+  storageId?: string;
+  fileName?: string;
+  mimeType?: string;
+  sizeBytes?: number;
 };
 
 export type Claim = {
@@ -134,6 +138,22 @@ export const api = {
   audit: query<"query", { caseRef: string }, AuditRow[]>("ops:auditForCase"),
   health: query<"query", Record<string, never>, Record<string, boolean>>("ops:integrationHealth"),
 
+  insights: query<
+    "query",
+    Record<string, never>,
+    {
+      total: number;
+      byState: Record<string, number>;
+      verified: number;
+      abandoned: number;
+      open: number;
+      medianHoursToClosure: number | null;
+      chases: { cases: number; total: number };
+      counterparties: Array<{ name: string; cases: number }>;
+      refusalReasons: Array<{ reason: string; count: number }>;
+    }
+  >("insights:overview"),
+
   openCase: mutation<
     "mutation",
     {
@@ -188,6 +208,23 @@ export const api = {
   startCall: actionRef<"action", { caseRef: string; to: string }, { callId: string | null; to: string }>(
     "board:startCall"
   ),
+
+  uploadUrl: mutation<"mutation", Record<string, never>, string>("attachments:generateUploadUrl"),
+
+  attachFile: actionRef<
+    "action",
+    {
+      caseRef: string;
+      storageId: string;
+      fileName: string;
+      reportedType?: string;
+      kind?: string;
+      note?: string;
+    },
+    { evidenceId: string; contentHash: string; satisfies: string[]; description: string }
+  >("attachments:attach"),
+
+  fileUrl: query<"query", { evidenceId: string }, string | null>("attachments:fileUrl"),
 };
 
 /** Where the deployment answers: the site and the backend share one address. */

@@ -30,3 +30,18 @@ export async function requirementSetHash(
 ): Promise<string> {
   return sha256Hex(canonicalJson([...requirements].sort((a, b) => (a.key < b.key ? -1 : 1))));
 }
+
+/**
+ * The hash of a file's bytes.
+ *
+ * Documents are hashed from what was actually uploaded rather than from a
+ * description of it, so the row on the case can be checked against the file
+ * itself later - and so a re-upload of the same statement is recognisably the
+ * same document.
+ */
+export async function sha256HexOfBytes(bytes: ArrayBuffer): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}

@@ -57,6 +57,12 @@ export default defineSchema({
     valueUnits: v.optional(v.number()),
     excerpt: v.string(),
     ingestedBy: v.string(),
+    // A document that was uploaded rather than read: the file itself, kept in
+    // storage, with what it was when it arrived.
+    storageId: v.optional(v.id("_storage")),
+    fileName: v.optional(v.string()),
+    mimeType: v.optional(v.string()),
+    sizeBytes: v.optional(v.number()),
   })
     .index("by_case", ["caseId"])
     .index("by_case_fetched", ["caseId", "fetchedAt"])

@@ -82,6 +82,15 @@ export const evaluateCaseById = internalQuery({
   },
 });
 
+/** How many cases exist, for the self-test to have something to read. */
+export const caseCount = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("cases").collect();
+    return rows.length;
+  },
+});
+
 export const integrationHealth = query({
   args: {},
   handler: async () => configured(process.env),

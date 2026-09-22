@@ -3,6 +3,7 @@ import { internalAction, internalMutation, type ActionCtx } from "./_generated/s
 import { api, internal } from "./_generated/api";
 import { emailPath, ownerMailbox } from "./lib/config";
 import { MAX_CHASES, chaseDue, chaseNumber } from "./lib/cadence";
+import { abandonmentNotice, chaseMessage } from "./lib/messages";
 
 /**
  * Chasing what is still outstanding, on a cadence, until it stops honestly.
@@ -93,6 +94,20 @@ export const one = internalAction({
     });
 
     if (decision.abandon) {
+      // The owner is told the case was given up on, in the same words the audit
+      // trail uses, so the two never disagree about what happened.
+      const notice = abandonmentNotice({
+        caseRef: doc.ref,
+        counterparty: doc.counterpartyName,
+        attempts: doc.chaseCount ?? MAX_CHASES,
+        outstanding: evaluation.unsatisfied,
+      });
+      await ctx.runMutation(internal.ops.audit, {
+        caseId: args.caseId,
+        actor: "chase",
+        action: "abandonment.recorded",
+        detail: notice.subject,
+      });
       await ctx.runMutation(internal.cases.advance, {
         caseId: args.caseId,
         to: "ABANDONED",
@@ -121,19 +136,14 @@ export const one = internalAction({
     }
 
     const attempt = chaseNumber(doc.chaseCount ?? 0);
-    const subject = `Still outstanding on ${doc.counterpartyName} [case:${doc.ref}]`;
-    const body = [
-      `${attempt} on case ${doc.ref} against ${doc.counterpartyName}.`,
-      "",
-      "What the case is still waiting for:",
-      ...evaluation.unsatisfied.map((u: { label: string; key: string; reason: string }) => `  - ${u.label} (${u.key}): ${u.reason}`),
-      "",
-      "What would close it: evidence of the same kind, read back after the case opened.",
-      `Reply to this message and the reply is filed against ${doc.ref} automatically.`,
-      "",
-      "Once the cadence runs out the case is abandoned and says so, rather than staying open.",
-    ].join("\n");
-
+    const message = chaseMessage({
+      caseRef: doc.ref,
+      counterparty: doc.counterpartyName,
+      attempt,
+      outstanding: evaluation.unsatisfied,
+    });
+    const subject = message.subject;
+    const body = message.text;
     // To the counterparty when a contact is known, otherwise to the owner as a
     // reminder - and the audit says which, so a chase is never assumed to have
     // reached anyone it did not reach.

@@ -26,12 +26,30 @@ import { Reading, StateChip } from "@/components/board/board";
  * A settled case accepts no more evidence and says so instead of disabling a
  * control without explaining why.
  */
+/** The file behind a row, fetched when the row is rendered rather than with the list. */
+function FileLink({ evidenceId }: { evidenceId: string }): ReactNode {
+  const url = useQuery(api.fileUrl, { evidenceId }) as string | null | undefined;
+  if (!url) return null;
+  return (
+    <a
+      className="data mt-1 inline-block text-[11px] text-accent/80 no-underline hover:text-accent"
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+    >
+      the file itself →
+    </a>
+  );
+}
+
 export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
   const snapshot = useQuery(api.snapshot, { ref: caseRef }) as Snapshot | null | undefined;
   const audit = useQuery(api.audit, { caseRef }) as AuditRow[] | undefined;
 
   const readSource = useAction(api.readSource);
   const startCall = useAction(api.startCall);
+  const uploadUrl = useMutation(api.uploadUrl);
+  const attachFile = useAction(api.attachFile);
   const run = useAction(api.run);
   const attach = useMutation(api.attach);
   const close = useMutation(api.close);
@@ -44,6 +62,8 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
   const [callRef, setCallRef] = useState("");
   const [docKind, setDocKind] = useState("own_document");
   const [docText, setDocText] = useState("");
+  const [fileNote, setFileNote] = useState("");
+  const [uploaded, setUploaded] = useState<string | null>(null);
   const [reason, setReason] = useState("");
 
   const [busy, setBusy] = useState<string | null>(null);
@@ -281,11 +301,77 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
 
                 <div className="border-t border-white/[0.06] pt-5">
                   <p className="text-[13px] font-medium text-neutral-200">
-                    Add the owner&rsquo;s own document
+                    Upload the owner&rsquo;s document
                   </p>
                   <p className="mt-1 text-[12px] text-neutral-500">
-                    Filed as our own record. It can never satisfy a requirement that asks for the
-                    other side&rsquo;s.
+                    A statement or a photo of one. It is hashed as it arrived, filed as our own
+                    record, and can never satisfy a requirement that asks for the other side&rsquo;s.
+                  </p>
+                  <div className="mt-3">
+                    <Input
+                      value={fileNote}
+                      placeholder="what this document is (optional)"
+                      onChange={(e) => setFileNote(e.target.value)}
+                    />
+                  </div>
+                  <div className="mt-2.5 grid grid-cols-[auto_11rem] gap-2.5">
+                    <input
+                      type="file"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (!file) return;
+                        void act(
+                          "upload",
+                          async () => {
+                            const url = await uploadUrl({});
+                            const put = await fetch(url, {
+                              method: "POST",
+                              headers: { "content-type": file.type || "application/octet-stream" },
+                              body: file,
+                            });
+                            if (!put.ok) throw new Error(`the upload was refused (${put.status})`);
+                            const { storageId } = (await put.json()) as { storageId: string };
+                            return await attachFile({
+                              caseRef: doc.ref,
+                              storageId,
+                              fileName: file.name,
+                              ...(file.type ? { reportedType: file.type } : {}),
+                              kind: docKind,
+                              ...(fileNote.trim() ? { note: fileNote.trim() } : {}),
+                            });
+                          },
+                          (filed) => setUploaded(filed.description)
+                        );
+                      }}
+                      className="text-[12px] text-neutral-400 file:mr-3 file:rounded-lg file:border-0 file:bg-white/[0.06] file:px-3 file:py-2 file:text-[12px] file:text-neutral-200"
+                    />
+                    <select
+                      value={docKind}
+                      onChange={(e) => setDocKind(e.target.value)}
+                      className="w-full rounded-xl bg-black/40 px-3 py-2.5 text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+                    >
+                      <option value="own_document">own_document</option>
+                      {requirements.map((r) => (
+                        <option key={r._id} value={r.kind}>
+                          {r.kind}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {busy === "upload" && (
+                    <p className="mt-2 text-[12px] text-neutral-400">Uploading and hashing it…</p>
+                  )}
+                  {uploaded && (
+                    <p className="data mt-2 text-[11px] break-all text-accent/80">{uploaded}</p>
+                  )}
+                </div>
+
+                <div className="border-t border-white/[0.06] pt-5">
+                  <p className="text-[13px] font-medium text-neutral-200">
+                    Or type what a document says
+                  </p>
+                  <p className="mt-1 text-[12px] text-neutral-500">
+                    Filed as our own record, with the same limits.
                   </p>
                   <div className="mt-3 grid grid-cols-[11rem_1fr] gap-2.5">
                     <select
@@ -453,6 +539,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                     <span className="text-[11px] text-neutral-600">{when(item.fetchedAt)}</span>
                   </div>
                   <p className="data mt-2 text-[11px] break-all text-neutral-500">{item.source}</p>
+                  {item.storageId && <FileLink evidenceId={item._id} />}
                   <p className="mt-2 line-clamp-4 text-[12px] leading-relaxed text-neutral-400">
                     {item.excerpt}
                   </p>

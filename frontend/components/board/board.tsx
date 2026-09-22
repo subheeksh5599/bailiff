@@ -88,11 +88,95 @@ export function BoardView(): ReactNode {
         ))}
       </div>
 
+      <InsightsPanel />
+
       <p className="text-[11px] text-neutral-400">
         Showing all {rows.length} cases, newest first. {releases} released a charge, and nothing
         releases one except a grade that passed.
       </p>
     </div>
+  );
+}
+
+/**
+ * What the numbers say.
+ *
+ * The question the product exists to answer is not how many cases there are but
+ * whether this is working and where it is stuck, so this reads outcomes: how long
+ * a closure takes, why cases are being refused, how much chasing it took, and who
+ * keeps coming back. Every figure is computed from the same rows the list above
+ * renders, so the summary cannot disagree with the detail.
+ */
+function InsightsPanel(): ReactNode {
+  const insights = useQuery(api.insights, {}) as
+    | {
+        total: number;
+        medianHoursToClosure: number | null;
+        chases: { cases: number; total: number };
+        refusalReasons: Array<{ reason: string; count: number }>;
+        counterparties: Array<{ name: string; cases: number }>;
+      }
+    | undefined;
+
+  if (!insights) return null;
+
+  const closure =
+    insights.medianHoursToClosure === null
+      ? "—"
+      : insights.medianHoursToClosure < 1
+        ? `${Math.round(insights.medianHoursToClosure * 60)} min`
+        : `${insights.medianHoursToClosure.toFixed(1)} h`;
+
+  return (
+    <Panel>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="text-[1.0625rem] text-white">What the numbers say</h2>
+        <span className="text-[11px] text-neutral-500">
+          computed from the same rows as the list, so the two cannot disagree
+        </span>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
+        <div>
+          <p className="text-[11px] tracking-wide text-neutral-500 uppercase">Median to closure</p>
+          <p className="data mt-2 text-[1.125rem] text-white">{closure}</p>
+          <p className="mt-1 text-[11px] text-neutral-500">from opening to verified</p>
+        </div>
+        <div>
+          <p className="text-[11px] tracking-wide text-neutral-500 uppercase">Chases sent</p>
+          <p className="data mt-2 text-[1.125rem] text-white">{insights.chases.total}</p>
+          <p className="mt-1 text-[11px] text-neutral-500">
+            across {insights.chases.cases} case{insights.chases.cases === 1 ? "" : "s"}
+          </p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-[11px] tracking-wide text-neutral-500 uppercase">Why closures are refused</p>
+          <ul className="mt-2 space-y-1">
+            {insights.refusalReasons.length === 0 && (
+              <li className="text-[12px] text-neutral-500">nothing has been refused yet</li>
+            )}
+            {insights.refusalReasons.slice(0, 3).map((row) => (
+              <li key={row.reason} className="text-[12px] text-neutral-400">
+                <span className="data text-white">{row.count}×</span> {row.reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {insights.counterparties.length > 0 && (
+        <div className="mt-5 border-t border-white/[0.06] pt-4">
+          <p className="text-[11px] tracking-wide text-neutral-500 uppercase">Who keeps coming back</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {insights.counterparties.map((row) => (
+              <Chip key={row.name}>
+                {row.name} · {row.cases}
+              </Chip>
+            ))}
+          </div>
+        </div>
+      )}
+    </Panel>
   );
 }
 
