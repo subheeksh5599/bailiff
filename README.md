@@ -28,7 +28,7 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 | Surface | Status | The evidence |
 |---|---|---|
 | The deployment | **LIVE** | `/health` reports **9 of 10** integrations carrying a key; the tenth says so itself |
-| The board | **LIVE** | 20 cases, rendered from the same rows `/cases` returns, clickable through to each one |
+| The board | **LIVE** | behind an operator session, and a live subscription rather than a snapshot: a case that moves in another tab, from a webhook or on the sweep lands here without a refresh |
 | The self-test | **LIVE** | 5 checks: integrations, **storage written and read back**, mail path, 20 cases readable, the grade's rubric intact |
 | A case closing | **LIVE** | a case that was refused closed only once the counterparty's own reply arrived, and it names that reply |
 | Firecrawl | **LIVE** | a real page fetched, its text stored with the time and a hash of what came back |
@@ -334,6 +334,8 @@ The landing page states what is verified and what is not, side by side, because 
 - **The browser is not trusted.** Reads happen on the server. The client can attach the owner's own document and nothing else; it cannot assert what a page said.
 - **Uploads are bounded.** A type or size the rule does not accept is refused with the reason, and a refused upload is deleted rather than left in storage.
 - **The money path is keyed.** The charge is written once, keyed on the call reference, so a retry or a replay cannot bill twice.
+- **The board is a subscription, not a snapshot.** It reads the deployment's rows and re-renders when they change, so a case that a webhook moves, a cron sweep chases, or another tab closes appears without a refresh.
+- **The board is a subscription, not a snapshot.** It reads the deployment's rows and re-renders when they change, so a case a webhook moves, a sweep chases, or another tab closes appears without a refresh.
 - **The hooks are bounded.** Each carries its own shared secret, and each spends from two token buckets — one per case and one for the deployment — so a provider retrying or a loop in someone else's cron cannot hammer a case or the deployment. A flood aimed at one case does not touch another case's allowance.
 
 ## Tech stack

@@ -94,6 +94,16 @@ export function BoardView(): ReactNode {
         Showing all {rows.length} cases, newest first. {releases} released a charge, and nothing
         releases one except a grade that passed.
       </p>
+
+      {/*
+        A reader cannot see a subscription, so the page says so. This list is not a page
+        that was fetched once: it is the deployment's rows, and a change made anywhere -
+        another tab, a webhook, a cron sweep - lands here as it happens.
+      */}
+      <p className="text-[11px] text-neutral-500">
+        This list is a live subscription, not a snapshot: a case that moves elsewhere — in
+        another tab, or from a webhook, or on the sweep — appears here without a refresh.
+      </p>
     </div>
   );
 }
