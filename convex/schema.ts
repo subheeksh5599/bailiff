@@ -16,10 +16,15 @@ export default defineSchema({
     customerRef: v.string(),
     counterpartyName: v.string(),
     counterpartyDomain: v.optional(v.string()),
+    counterpartyContact: v.optional(v.string()),
     amountClaimedUnits: v.optional(v.number()),
     currency: v.optional(v.string()),
     channel: v.string(),
     openedAt: v.number(),
+    // The chase cadence: when it last went out, and how many have. Both live on the
+    // case so an interrupted sweep resumes where it left off rather than restarting.
+    chasedAt: v.optional(v.number()),
+    chaseCount: v.optional(v.number()),
     frozenAt: v.optional(v.number()),
     requirementSetHash: v.optional(v.string()),
     verifiedAt: v.optional(v.number()),

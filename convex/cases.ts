@@ -1,11 +1,13 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { checkTransition, requiresGuard, type CaseState } from "./lib/states";
+import { CHASE_INTERVAL_MS } from "./lib/cadence";
 import { claimVerdict, isFresh, requirementMatchedBy } from "./lib/rules";
 import { requirementSetHash, sha256Hex } from "./lib/hash";
 import { evaluateById } from "./verifier";
+import { internal } from "./_generated/api";
 
 /**
  * Case operations.
@@ -54,6 +56,7 @@ export const openCase = mutation({
     customerRef: v.string(),
     counterpartyName: v.string(),
     counterpartyDomain: v.optional(v.string()),
+    counterpartyContact: v.optional(v.string()),
     channel: v.string(),
     currency: v.optional(v.string()),
     amountClaimedUnits: v.optional(v.number()),
@@ -71,6 +74,7 @@ export const openCase = mutation({
       customerRef: args.customerRef,
       counterpartyName: args.counterpartyName,
       counterpartyDomain: args.counterpartyDomain,
+      counterpartyContact: args.counterpartyContact,
       amountClaimedUnits: args.amountClaimedUnits,
       currency: args.currency,
       channel: args.channel,
@@ -122,6 +126,11 @@ export const freezeRequirements = mutation({
       to: "REQUIREMENTS_FROZEN",
       detail: `${args.requirements.length} requirements, set hash ${hash.slice(0, 12)}`,
     });
+    // The case schedules its own first chase. A poll would also find it, but a
+    // cadence that depends on a cron being alive is a cadence that can silently
+    // stop, and this is the moment the clock should start.
+    await ctx.scheduler.runAfter(CHASE_INTERVAL_MS, internal.chase.one, { caseId: args.caseId });
+
     return { hash, count: args.requirements.length };
   },
 });
@@ -327,4 +336,32 @@ export const evidenceFor = query({
   args: { caseId: v.id("cases") },
   handler: async (ctx, args) =>
     ctx.db.query("evidence").withIndex("by_case", (q) => q.eq("caseId", args.caseId)).collect(),
+});
+
+/**
+ * An unguarded move, for the cadence.
+ *
+ * The chase needs to move a case between states that need no proof - into
+ * CHASING, or out to ABANDONED. Anything that does need a guard is refused here
+ * rather than waved through: this path cannot prove one, so it must not be able to
+ * perform one.
+ */
+export const advance = internalMutation({
+  args: {
+    caseId: v.id("cases"),
+    to: v.string(),
+    actor: v.string(),
+    detail: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const caseDoc = await ctx.db.get(args.caseId);
+    if (!caseDoc) throw new Error("no such case");
+    if (requiresGuard(caseDoc.state, args.to)) {
+      throw new Error(
+        `refused: ${caseDoc.state} -> ${args.to} requires an evaluated guard, and this path cannot prove one`
+      );
+    }
+    await move(ctx, args.caseId, caseDoc.state, args.to as CaseState, args.actor, false, args.detail);
+    return { state: args.to };
+  },
 });

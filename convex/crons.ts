@@ -18,4 +18,20 @@ crons.daily(
   { maxAgeDays: 30 }
 );
 
+/**
+ * The chase sweep.
+ *
+ * Hourly rather than daily: a case is chased every second day, and an hourly
+ * sweep means the message goes out close to when it is due instead of whenever the
+ * daily job happens to run. It is a safety net as much as a mechanism - each case
+ * schedules its own chase too, and a case whose scheduled job was lost is still
+ * found here.
+ */
+crons.hourly(
+  "chase what is outstanding",
+  { minuteUTC: 20 },
+  internal.chase.sweep,
+  { limit: 25 }
+);
+
 export default crons;

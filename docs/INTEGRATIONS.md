@@ -79,3 +79,14 @@ surfaced in the provider's own words rather than reduced to a status code, and t
 board shows it. Inbound calls to the same number answer on the product's assistant,
 which is the path the demo uses.
 
+## The chase, on a cadence
+
+A frozen case schedules its own first chase; an hourly sweep catches anything the
+scheduler missed. The interval is two days and the cadence stops at three attempts,
+after which the case is abandoned with the outstanding requirements recorded.
+
+Verified on the deployment: with the clock moved three days past the freeze, the
+chase was sent and accepted (`chase 1 of 3`, to the owner because the case carried
+no counterparty contact), the case moved to `CHASING`, and a run moments later
+answered `next chase in about 48h`.
+

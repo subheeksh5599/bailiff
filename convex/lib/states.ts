@@ -40,6 +40,10 @@ const BASE_TRANSITIONS: ReadonlyArray<readonly [CaseState, CaseState]> = [
   ["CHASING", "READBACK_PENDING"],
   ["READBACK_PENDING", "CHASING"],
   ["READBACK_PENDING", "VERIFIED"],
+  // Anything that has not settled can be given up on. Without this a case whose
+  // requirements will never be read back could only sit open forever, which is the
+  // failure this whole product is about.
+  ["REQUIREMENTS_FROZEN", "ABANDONED"],
   ["CHASING", "ABANDONED"],
   ["READBACK_PENDING", "ABANDONED"],
   ["VERIFIED", "DISPUTED"],

@@ -11,6 +11,7 @@
 import type * as billing from "../billing.js";
 import type * as board from "../board.js";
 import type * as cases from "../cases.js";
+import type * as chase from "../chase.js";
 import type * as crons from "../crons.js";
 import type * as grades from "../grades.js";
 import type * as http from "../http.js";
@@ -26,6 +27,7 @@ import type * as integrations_resend from "../integrations/resend.js";
 import type * as integrations_scorecard from "../integrations/scorecard.js";
 import type * as integrations_vapi from "../integrations/vapi.js";
 import type * as lib_analysis from "../lib/analysis.js";
+import type * as lib_cadence from "../lib/cadence.js";
 import type * as lib_config from "../lib/config.js";
 import type * as lib_hash from "../lib/hash.js";
 import type * as lib_rules from "../lib/rules.js";
@@ -45,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   board: typeof board;
   cases: typeof cases;
+  chase: typeof chase;
   crons: typeof crons;
   grades: typeof grades;
   http: typeof http;
@@ -60,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/scorecard": typeof integrations_scorecard;
   "integrations/vapi": typeof integrations_vapi;
   "lib/analysis": typeof lib_analysis;
+  "lib/cadence": typeof lib_cadence;
   "lib/config": typeof lib_config;
   "lib/hash": typeof lib_hash;
   "lib/rules": typeof lib_rules;

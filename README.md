@@ -9,7 +9,7 @@
 **A case against a company stays open until their own record shows the outcome, and a charge is released by a grade that passes — never by a note.**
 
 [![deployment](https://img.shields.io/website?url=https%3A%2F%2Faware-jellyfish-285.convex.site&label=deployment&up_message=live&down_message=down)](https://aware-jellyfish-285.convex.site)
-![tests](https://img.shields.io/badge/tests-106%20passing-3fb950)
+![tests](https://img.shields.io/badge/tests-116%20passing-3fb950)
 ![integrations](https://img.shields.io/badge/integrations-9%20of%2010%20on-3fb950)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
@@ -41,6 +41,21 @@ Bailiff is a case that cannot be closed that way.
 A case is opened with a **frozen requirement set** — the specific things that must be true for it to be over — hashed before any call is placed. Every piece of evidence carries where it came from and when it was read. Every statement becomes a claim with a verdict derived from that evidence. Only the verifier moves a case to `VERIFIED`, and it re-reads the requirement and evidence rows each time rather than trusting a stored flag.
 
 The browser can never write the evidence that closes its own case: it may attach the customer's own documents, and nothing else. Anything speaking for the counterparty arrives only through the ingest path — a page read on the server, a reply the mailbox received, or a call's transcript.
+
+## The chase, and its end
+
+An open case that nothing is doing about is a lie the board would otherwise keep
+telling. So a frozen case chases itself: the first chase is scheduled the moment its
+requirements are frozen, a sweep runs hourly so a case frozen before this existed is
+still found, and the cadence is finite and written down — chased every two days, at
+most three times.
+
+A chase goes to the counterparty's contact when the case carries one, and to the
+owner when it does not, and the audit says which. No mail path means no chase: the
+case is not advanced and the missing variable is written down rather than moving a
+case on the strength of a message nobody sent. When the cadence runs out the case is
+**abandoned**, with the reason and what was never read back recorded — instead of
+sitting open forever looking like work in progress.
 
 ## The three rules
 
@@ -117,7 +132,7 @@ curl -s "https://aware-jellyfish-285.convex.site/case?ref=case-2026-0914-0188"
 
 ```bash
 git clone https://github.com/subheeksh5599/bailiff && cd bailiff
-npm install && npm test                      # 106 tests; no vendor keys needed
+npm install && npm test                      # 116 tests; no vendor keys needed
 npm run typecheck
 
 npx convex dev                               # the backend, on a local deployment
@@ -142,6 +157,7 @@ tests/rules.test.ts          claim verdicts, freshness, authority, requirement m
 tests/states.test.ts         the state machine and which moves are guarded
 tests/hash.test.ts           requirement-set hashing
 tests/analysis.test.ts       reading the call platform's own analysis of a call
+tests/chase.test.ts          the cadence: when to chase, when to stop, and giving up
 tests/integration.test.ts    open, freeze, read back, close — and the refusals between
 tests/hooks.test.ts          the webhooks, signed and fail-closed
 tests/pipeline.test.ts       grade, billing, mail, and every stop by name
@@ -159,7 +175,7 @@ convex/            the case, the pipeline, the vendor adapters, the HTTP routes
 frontend/          the site: the landing page, and the board
   app/             the marketing page, and the board as one exported page
   components/      the design system and the board's screens
-tests/             106 tests
+tests/             116 tests
 docs/              integrations, deployments, the demo beat sheet, run output
 scripts/           the live end-to-end run, the demo pipeline, deployment
 hackathon.md       the build log, including what a live deployment found
@@ -180,6 +196,7 @@ hackathon.md       the build log, including what a live deployment found
 | Inkeep knowledge | Off. The account has no organization, so the health endpoint reports it false |
 | Assistant refusing to state an unread number | Mechanism in place — the tool is the only route to a value. Not yet exercised on a live call |
 | Dialling out from the board | Implemented, and refused by the plan rather than by the code: numbers bought from the call platform carry a daily outbound limit, and the board shows that refusal in the provider's own words. Inbound calls to the number answer on this assistant, which is the path the demo uses |
+| The chase cadence | Real, covered by tests, and exercised on the deployment: a case was chased with the clock moved past its interval, the message was accepted by the mail provider, the case moved to `CHASING`, and a second run answered "next chase in about 48h". A case whose cadence is exhausted is abandoned with its reason recorded |
 | Live deployment | `https://aware-jellyfish-285.convex.site` — the landing, the board, health, `/cases` and `/case` all answer |
 | Demo video | Not recorded |
 

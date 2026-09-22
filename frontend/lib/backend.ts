@@ -15,6 +15,8 @@ export type CaseRow = {
   state: string;
   counterparty: string;
   openedAt: number;
+  chasedAt?: number;
+  chaseCount?: number;
   verifiedAt?: number;
   amountClaimedUnits?: number;
   currency?: string;
@@ -89,11 +91,14 @@ export type Snapshot = {
     state: string;
     counterpartyName: string;
     counterpartyDomain?: string;
+    counterpartyContact?: string;
     customerRef: string;
     channel: string;
     currency?: string;
     amountClaimedUnits?: number;
     openedAt: number;
+    chasedAt?: number;
+    chaseCount?: number;
     frozenAt?: number;
     requirementSetHash?: string;
     verifiedAt?: number;
@@ -136,6 +141,7 @@ export const api = {
       customerRef: string;
       counterpartyName: string;
       counterpartyDomain?: string;
+      counterpartyContact?: string;
       channel: string;
       currency?: string;
       amountClaimedUnits?: number;
@@ -208,6 +214,8 @@ export function stateLabel(state: string): string {
       return "Verified";
     case "DISPUTED":
       return "Disputed";
+    case "ABANDONED":
+      return "Given up on";
     default:
       return state;
   }

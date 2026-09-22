@@ -147,3 +147,27 @@ call, carried in its end-of-call report. It comes from the call itself, in the s
 it is preferred over a second model's pass over the same text - and it means the pipeline has no
 dependency on a model key to decide whether money moves. The model remains the fallback.
 
+## The state the machine declared and nothing ever entered
+
+Auditing the product against its own opening paragraph turned up a hole: `CHASING`
+was a legal state, with legal transitions in and out of it, that nothing ever moved a
+case into. A frozen case with an outstanding requirement sat there indefinitely -
+which is exactly the problem this product is about, reproduced inside it.
+
+So the cadence is now real and finite. A case schedules its own first chase the
+moment its requirements are frozen; an hourly sweep finds anything the scheduler
+missed; and the chase goes out every two days, at most three times, after which the
+case is abandoned with the reason and the outstanding requirements recorded. No mail
+path means no chase and no state move - a case is never advanced on the strength of a
+message nobody sent.
+
+Testing it found a second hole in the same minute: `REQUIREMENTS_FROZEN -> ABANDONED`
+was not a legal move, so a case whose requirements would never be read back could not
+be given up on before it had been chased. That transition exists now, and the states
+test holds it.
+
+Verified on the live deployment rather than in a test: with the clock moved three days
+on, the chase was sent and accepted, the case moved to `CHASING`, its diary recorded
+`chase.sent` with the outstanding requirement named, and a second run answered
+`next chase in about 48h`.
+

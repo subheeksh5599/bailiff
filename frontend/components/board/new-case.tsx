@@ -38,6 +38,7 @@ export function NewCaseView(): ReactNode {
   const [ref, setRef] = useState(freshRef);
   const [company, setCompany] = useState("");
   const [domain, setDomain] = useState("");
+  const [contact, setContact] = useState("");
   const [owed, setOwed] = useState("41.20");
   const [currency, setCurrency] = useState("GBP");
   const [channel, setChannel] = useState("phone");
@@ -62,6 +63,7 @@ export function NewCaseView(): ReactNode {
         customerRef: "owner",
         counterpartyName: company.trim(),
         ...(domain.trim() ? { counterpartyDomain: domain.trim() } : {}),
+        ...(contact.trim() ? { counterpartyContact: contact.trim() } : {}),
         channel,
         currency,
         ...(Number.isFinite(units) && units > 0 ? { amountClaimedUnits: units } : {}),
@@ -110,6 +112,13 @@ export function NewCaseView(): ReactNode {
           </Field>
           <Field label="Their domain" hint="optional; where a page would be read from">
             <Input value={domain} placeholder="example.com" onChange={(e) => setDomain(e.target.value)} />
+          </Field>
+          <Field label="Their email" hint="optional; where a chase goes, otherwise it comes to you">
+            <Input
+              value={contact}
+              placeholder="billing@example.com"
+              onChange={(e) => setContact(e.target.value)}
+            />
           </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Owed">

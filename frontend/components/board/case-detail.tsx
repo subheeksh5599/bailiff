@@ -102,6 +102,12 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
           <div className="text-right text-[11px] text-neutral-500">
             <p>opened {when(doc.openedAt)}</p>
             {doc.frozenAt && <p className="mt-1">requirements frozen {when(doc.frozenAt)}</p>}
+            {(doc.chaseCount ?? 0) > 0 && (
+              <p className="mt-1">
+                {doc.chaseCount} chase{(doc.chaseCount ?? 0) === 1 ? "" : "s"} · last{" "}
+                {when(doc.chasedAt)}
+              </p>
+            )}
             {doc.verifiedAt && <p className="mt-1 text-accent">verified {when(doc.verifiedAt)}</p>}
           </div>
         </div>
@@ -121,6 +127,16 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
           </a>
         </div>
       </Panel>
+
+      {doc.state === "ABANDONED" && (
+        <Panel>
+          <p className="text-[13px] leading-relaxed text-neutral-300">
+            This case was given up on after the cadence ran out, and it says so rather than sitting
+            open looking like work in progress. The reason, and what was never read back, are in the
+            audit trail below.
+          </p>
+        </Panel>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-6">

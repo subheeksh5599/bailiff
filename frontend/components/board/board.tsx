@@ -29,14 +29,19 @@ export function BoardView(): ReactNode {
   }
 
   const verified = rows.filter((r) => stateSettled(r.state));
-  const open = rows.length - verified.length;
+  const abandoned = rows.filter((r) => r.state === "ABANDONED");
+  const open = rows.length - verified.length - abandoned.length;
   const releases = verified.filter((r) => r.verifiedAt).length;
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi label="Cases" value={String(rows.length)} note="opened here" />
-        <Kpi label="Still open" value={String(open)} note="no read-back has closed them" />
+        <Kpi
+          label="Still open"
+          value={String(open)}
+          note={abandoned.length > 0 ? `${abandoned.length} given up on` : "no read-back has closed them"}
+        />
         <Kpi label="Verified" value={String(verified.length)} note="the other side's record arrived" />
         <Kpi
           label="Last verification"
@@ -106,15 +111,24 @@ function Kpi({ label, value, note }: { label: string; value: string; note: strin
 /** Settled reads as settled. Open reads as open — never the same badge twice. */
 export function StateChip({ state }: { state: string }): ReactNode {
   const settled = stateSettled(state);
+  const abandoned = state === "ABANDONED";
+
+  // Three tones, because there are three things a case can be: settled, still
+  // being worked, or given up on. A reader should not have to open the case to
+  // find out which.
+  const tone = settled
+    ? "bg-accent/[0.1] text-accent shadow-[inset_0_0_0_1px_rgba(163,230,53,0.2)]"
+    : abandoned
+      ? "bg-transparent text-neutral-500 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]"
+      : "bg-white/[0.05] text-neutral-300 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]";
+
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium ${
-        settled
-          ? "bg-accent/[0.1] text-accent shadow-[inset_0_0_0_1px_rgba(163,230,53,0.2)]"
-          : "bg-white/[0.05] text-neutral-400 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]"
-      }`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${settled ? "bg-accent" : "bg-neutral-500"}`} />
+    <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium ${tone}`}>
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          settled ? "bg-accent" : abandoned ? "bg-neutral-600" : "bg-neutral-400"
+        }`}
+      />
       {stateLabel(state)}
     </span>
   );
