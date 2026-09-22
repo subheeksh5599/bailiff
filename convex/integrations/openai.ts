@@ -1,8 +1,16 @@
 import { v } from "convex/values";
 import { internalAction, type ActionCtx } from "../_generated/server";
-import { ENDPOINTS, MODELS } from "./endpoints";
-import { postJson } from "./http";
-import { NotConfigured, has, requireKey } from "../lib/config";
+import { MODELS } from "./endpoints";
+import { readWithReaders, EXTRACTION_SCHEMA, buildExtractionRequest as build, type Extracted } from "./readers";
+
+/**
+ * The action the pipeline calls to read a transcript.
+ *
+ * It is a thin wrapper now: the readers, their order and the request shape live in
+ * ./readers.ts, and this exposes one entry point plus the test-visible builders so
+ * the shape stays pinned without the chain being duplicated.
+ */
+export { EXTRACTION_SCHEMA };
 
 /**
  * Adapter: read a transcript into claims.
@@ -14,94 +22,16 @@ import { NotConfigured, has, requireKey } from "../lib/config";
  * claims and the orchestrator records them, which is also where the promise/fact
  * distinction gets applied.
  */
-export const EXTRACTION_SCHEMA = {
-  type: "json_schema",
-  json_schema: {
-    name: "call_claims",
-    strict: true,
-    schema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        caller_wanted: { type: "string" },
-        resolved: { type: "boolean" },
-        promises: {
-          type: "array",
-          items: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              text: { type: "string" },
-              promised_when: { type: ["string", "null"] },
-            },
-            required: ["text", "promised_when"],
-          },
-        },
-        facts: {
-          type: "array",
-          items: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              text: { type: "string" },
-              subject: { type: "string" },
-            },
-            required: ["text", "subject"],
-          },
-        },
-      },
-      required: ["caller_wanted", "resolved", "promises", "facts"],
-    },
-  },
-} as const;
-
-export function buildExtractionRequest(transcript: string) {
-  return {
-    model: MODELS.extraction,
-    temperature: 0,
-    response_format: EXTRACTION_SCHEMA,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You read one customer service call transcript and report only what it contains. " +
-          "A promise is a commitment about the future. A fact is a statement about something " +
-          "that already happened or already exists. Do not judge whether either is true. If the " +
-          "transcript is truncated or unintelligible, report the claims you can see and set " +
-          "resolved to false.",
-      },
-      { role: "user", content: transcript.slice(0, 60_000) },
-    ],
-  };
+export function buildExtractionRequest(transcript: string, model = MODELS.extraction, schema = true) {
+  return build(transcript, model, schema);
 }
 
-export type Extracted = {
-  caller_wanted: string;
-  resolved: boolean;
-  promises: Array<{ text: string; promised_when: string | null }>;
-  facts: Array<{ text: string; subject: string }>;
-};
+export type { Extracted };
 
 export const extractClaims = internalAction({
   args: { transcript: v.string() },
-  handler: async (_ctx: ActionCtx, args): Promise<Extracted> => {
-    if (!has(process.env, "openai")) throw new NotConfigured("extraction", "OPENAI_API_KEY");
-    const key = requireKey(process.env, "openai", "extraction");
-
-    const response = await postJson<{ choices?: Array<{ message?: { content?: string } }> }>(
-      `${ENDPOINTS.openai.base}${ENDPOINTS.openai.chat}`,
-      buildExtractionRequest(args.transcript),
-      { token: key, timeoutMs: 60_000 }
-    );
-    if (!response.ok) throw new Error(`extraction failed: ${response.status} ${response.error}`);
-
-    const content = response.data?.choices?.[0]?.message?.content;
-    if (!content) throw new Error("extraction returned nothing to read");
-
-    const parsed = JSON.parse(content) as Extracted;
-    if (!Array.isArray(parsed.promises) || !Array.isArray(parsed.facts)) {
-      throw new Error("extraction returned a shape we do not recognise; nothing is recorded");
-    }
-    return parsed;
+  handler: async (_ctx: ActionCtx, args): Promise<Extracted & { read_by: string }> => {
+    const outcome = await readWithReaders(process.env, args.transcript);
+    return { ...outcome.claims, read_by: outcome.provider };
   },
 });

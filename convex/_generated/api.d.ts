@@ -29,6 +29,7 @@ import type * as integrations_firecrawl from "../integrations/firecrawl.js";
 import type * as integrations_http from "../integrations/http.js";
 import type * as integrations_inkeep from "../integrations/inkeep.js";
 import type * as integrations_openai from "../integrations/openai.js";
+import type * as integrations_readers from "../integrations/readers.js";
 import type * as integrations_resend from "../integrations/resend.js";
 import type * as integrations_scorecard from "../integrations/scorecard.js";
 import type * as integrations_vapi from "../integrations/vapi.js";
@@ -80,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/http": typeof integrations_http;
   "integrations/inkeep": typeof integrations_inkeep;
   "integrations/openai": typeof integrations_openai;
+  "integrations/readers": typeof integrations_readers;
   "integrations/resend": typeof integrations_resend;
   "integrations/scorecard": typeof integrations_scorecard;
   "integrations/vapi": typeof integrations_vapi;

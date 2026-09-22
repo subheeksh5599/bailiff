@@ -3,6 +3,7 @@ import { action, internalAction, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { gradeVerdict, type GradeCheck } from "./lib/rules";
 import { emailPath, has, ownerMailbox } from "./lib/config";
+import { readersReady } from "./integrations/readers";
 import type { Extracted } from "./integrations/openai";
 import { parseCallAnalysis } from "./lib/analysis";
 import { callReport } from "./lib/messages";
@@ -57,10 +58,10 @@ export const deriveOutcome = internalAction({
     );
     const fromPlatform = parseCallAnalysis(analysis?.excerpt);
 
-    if (!fromPlatform && !has(process.env, "openai")) {
+    if (!fromPlatform && readersReady(process.env).length === 0) {
       const unusable = analysis
-        ? "the call carried an analysis we could not read, and no model is configured: set OPENAI_API_KEY"
-        : "extraction is not configured: set OPENAI_API_KEY";
+        ? "the call carried an analysis we could not read, and no reader is configured: set OPENAI_API_KEY or ROUTER_API_KEY"
+        : "extraction is not configured: set OPENAI_API_KEY or ROUTER_API_KEY";
       await ctx.runMutation(internal.ops.audit, {
         caseId: snapshot.case._id,
         action: "pipeline.stopped",
@@ -70,7 +71,7 @@ export const deriveOutcome = internalAction({
       return { stopped: unusable };
     }
 
-    let extracted: Extracted;
+    let extracted: Extracted & { read_by?: string };
     if (fromPlatform) {
       extracted = fromPlatform;
       await ctx.runMutation(internal.ops.audit, {
@@ -97,6 +98,19 @@ export const deriveOutcome = internalAction({
         detail: message,
       });
       return { stopped: `extraction failed: ${message}` };
+    }
+
+    // Which reader answered is part of the record: a claim that cannot say what read
+    // it is a claim someone has to take on faith, which is the thing this refuses.
+    if (extracted.read_by) {
+      await ctx.runMutation(internal.ops.audit, {
+        caseId: snapshot.case._id,
+        action: "extraction.read",
+        actor: "orchestrator",
+        detail:
+          `read by ${extracted.read_by}: ` +
+          `${extracted.promises.length} promise(s), ${extracted.facts.length} fact(s)`,
+      });
     }
 
     // A promise is verified against our own recording: the transcript proves it was

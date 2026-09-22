@@ -11,6 +11,7 @@ export type Env = Record<string, string | undefined>;
 
 export const KEYS = {
   openai: "OPENAI_API_KEY",
+  router: "ROUTER_API_KEY",
   firecrawl: "FIRECRAWL_API_KEY",
   scorecard: "SCORECARD_API_KEY",
   autumn: "AUTUMN_SECRET_KEY",
@@ -61,7 +62,9 @@ export function configured(env: Env = process.env): Record<string, boolean> {
   return {
     convex: true,
     firecrawl: has(env, "firecrawl"),
-    extraction: has(env, "openai"),
+    // Any reader that will answer makes extraction configured: a transcript still
+    // has to be read, and a second reader is not a lesser one.
+    extraction: has(env, "openai") || has(env, "router"),
     grading: has(env, "scorecard"),
     metering: has(env, "autumn"),
     email: emailPath(env) !== null,

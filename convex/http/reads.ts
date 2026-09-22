@@ -1,5 +1,6 @@
 import { httpAction } from "../_generated/server";
 import { configured } from "../lib/config";
+import { readersReady, modelFor } from "../integrations/readers";
 import { components } from "../_generated/api";
 import { api } from "../_generated/api";
 import { json } from "./json";
@@ -20,7 +21,14 @@ http.route({
   path: "/health",
   method: "GET",
   handler: httpAction(async () => {
-    return json({ ok: true, integrations: configured(process.env) });
+    // The integrations say what carries a key. The readers say which of them would
+    // actually read a transcript, in the order they would be tried, so a deployment
+    // that is one provider short can be seen to be one provider short.
+    return json({
+      ok: true,
+      integrations: configured(process.env),
+      readers: readersReady(process.env).map((reader) => `${reader.name}:${modelFor(reader, process.env)}`),
+    });
   }),
 });
 

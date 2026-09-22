@@ -40,7 +40,7 @@ cuts it and places each narration line at the moment its step began.
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
 | Firecrawl reads | Keyed and reachable (verified against the vendor) |
 | AgentMail send + inbound reply | Real: the report is sent and the reply that comes back becomes evidence. Verified live, message id and all |
-| Extraction (OpenAI) | Keyed and reachable; the provider answers `402 insufficient quota` until the quota refills automatically on 24 September 2026, after this event closes. The refusal is recorded on the case as `extraction.failed`, and the pipeline does not depend on it |
+| Extraction | Two readers in a chain. The first is keyed and answers `402 insufficient quota` until the quota refills automatically on 24 September 2026; the chain then falls through instead of stopping, and the second reader read a live transcript on this deployment with the run recorded as `read_by: router`. A run where every reader refuses is recorded as `extraction.failed` with each provider's own words, and the pipeline still does not depend on any of them |
 | Metering (Autumn) | Keyed and reachable (verified) |
 | Telephony (Vapi) | Real: a number answers on this project's own assistant, which carries the server URL, the shared secret and both tools. Outbound is refused by the platform's own daily limit; inbound is what the demo uses |
 | Live URL | Live, and every row above was run against it |
@@ -86,6 +86,12 @@ hold is platform engagement, which is zero only because the app was not listed y
 Engagement is scored out of 20 with ten points attached, so **two vibes move this from 4th to
 2nd** — past both apps that are ahead on nothing else. That is the entire remaining gap, and
 it is not a gap in the work.
+
+### Fixing the one leg that could die
+
+Extraction was the pipeline's single point of vendor failure: one provider, one key, and a quota problem meant a call could not be read at all. It is now a chain, in `convex/integrations/readers.ts`, tried in order, with two rules. The reader that answered is written on the case as `read_by`, so a claim can be traced to the thing that read it. And a refusal from every reader is reported with each provider's own words, because a run that stopped is a fact worth recording rather than a failure to hide.
+
+Exercising it live found three things worth keeping. The first reader refused with `402 insufficient quota` and the chain reached the second, which is what the aggregated error showed. The second reader refused the model I had chosen with `MODEL_NOT_IN_PLAN`, which is a fact about a subscription rather than a bug, and probing the catalogue found six models the plan will actually serve. And one of those models wraps its JSON in a code fence every single time, which the parser had been treating as a refusal — a correct answer thrown away. It is read now, and there is a test for exactly that shape because it was observed rather than imagined.
 
 ## How the mechanism works
 
@@ -137,7 +143,7 @@ Every step below is a commit in this repository, in order.
 
 ```bash
 npm install          # convex, vitest, convex-test, typescript
-npm test             # 184 tests, no vendor keys needed
+npm test             # 198 tests, no vendor keys needed
 npm run typecheck
 npx convex dev       # backend
 cd web && npm install && npm run dev   # landing + case board
@@ -152,7 +158,7 @@ cd web && npm install && npm run dev   # landing + case board
 - `convex/lib/rules.ts` — the freshness, authority and grade rules, as pure functions.
 - `convex/verifier.ts` — the only path to a closed case.
 - `convex/billing.ts` — the gate, in one mutation, with the idempotency key.
-- `tests/` — 184 tests across 25 files; the ones that matter defend the three invariants above.
+- `tests/` — 198 tests across 26 files; the ones that matter defend the three invariants above.
 
 ## Live, and the four things a live deployment found
 

@@ -4,7 +4,7 @@
 
 ### A case against a company that owes you stays open until their own record proves the outcome.
 
-[![Tests](https://img.shields.io/badge/tests-184%20passing-10b981)](#tests)
+[![Tests](https://img.shields.io/badge/tests-198%20passing-10b981)](#tests)
 [![Live](https://img.shields.io/badge/live-aware--jellyfish--285.convex.site-2ecc71)](https://aware-jellyfish-285.convex.site)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stack](https://img.shields.io/badge/Convex%20%2B%20Next.js%20%2B%20TypeScript-1f1f23)
@@ -35,7 +35,7 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 | AgentMail | **LIVE** | the report sent, the reply received, and the reply filed as the evidence that closed the case |
 | The call platform | **LIVE** | a number answers on this project's own assistant, carrying the server URL, the shared secret and both tools |
 | Metering | **LIVE** | a metered event accepted, keyed on the call reference that justified it |
-| OpenAI | **KEYED, 402** | the provider answers `402 insufficient_quota`; the quota refills automatically on 24 September 2026, after this event closes. It does not block the pipeline: claims come from the call platform's own end-of-call analysis, so money is decided without any model key |
+| OpenAI | **KEYED, 402, FALLS BACK** | the first reader answers `402 insufficient_quota`; the quota refills automatically on 24 September 2026, after this event closes. The chain in `convex/integrations/readers.ts` falls through to a second reader rather than stopping, and that reader read a live transcript on this deployment — the claims came back with `read_by: router`. `/health` reports the readers, in the order they are tried |
 | Inkeep | **OFF** | that account belongs to no organization. `/health` reports it `false` rather than pretending |
 | The public hooks | **BOUNDED** | two token buckets, one per case (30/min, burst 10) and one for the deployment (240/min, burst 60). A burst of 16 was refused live, naming the limit and the retry |
 | The build, posted | **LIVE** | [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004) — tagged to the four sponsors, as the event asks |
@@ -94,7 +94,7 @@ No vendor keys and no network beyond the deployment — the rules are tested as 
 ```bash
 $ npm install && npm test
  Test Files  13 passed (13)
-      Tests  184 passed (184)
+      Tests  198 passed (198)
    Duration  16.30s
 ```
 
@@ -255,7 +255,11 @@ OPEN ──► FROZEN ──► CHASING ──► VERIFIED
 
 ## Where the model sits
 
-The model does one job: turn a transcript into claims, at zero temperature, in a fixed shape. It cannot cast a verdict, cannot close a case, and cannot write a charge — a claim is not allowed to carry its own verdict. And it is the *fallback*: the pipeline prefers the call platform's own end-of-call analysis, so the pipeline can decide money with no model key present at all. That is why the `402` above is an inconvenience rather than a blocker.
+The model does one job: turn a transcript into claims, at zero temperature, in a fixed shape. It cannot cast a verdict, cannot close a case, and cannot write a charge — a claim is not allowed to carry its own verdict.
+
+The reader is a list, not a constant (`convex/integrations/readers.ts`). The event's own stack leads, a second reader the operator subscribes to follows, and a provider that refuses — no key, no quota, an outage, a model id that has moved — is a fact about that provider rather than the end of the run. Every refusal is reported with the provider's own words, and a run where all of them refuse says so instead of producing an empty case. Which reader answered is written on the case as `read_by`, so a claim can be traced to the thing that read it rather than to "a model".
+
+The model is still the fallback: the pipeline prefers the call platform's own end-of-call analysis, so it can decide money with no model key present at all. That is why the `402` above is an inconvenience rather than a blocker, and why the fall-through exists rather than a retry.
 
 ## Who approves what
 
@@ -288,7 +292,7 @@ The model does one job: turn a transcript into claims, at zero temperature, in a
 | Webhooks | Real, fail-closed without the shared secret |
 | File uploads | Real: uploaded, hashed from the bytes, readable again |
 | Firecrawl, AgentMail, the call platform, metering, tracing | Keyed and exercised live |
-| OpenAI extraction | Keyed; the provider answers `402 insufficient_quota` until the quota refills on 24 September 2026. The pipeline prefers the call platform's own reading of the call, so this does not block anything |
+| OpenAI extraction | Keyed, and first in the chain; it answers `402 insufficient_quota` until the quota refills on 24 September 2026. The chain falls through rather than stopping: verified live, a transcript read by the second reader with the run recorded as `read_by: router`. The pipeline also prefers the call platform's own reading of the call, so nothing here depends on a model |
 | Inkeep | Off: that account belongs to no organization. `/health` reports it `false` |
 | Dialling out anywhere | Refused by the phone platform's own daily limit on purchased numbers. Inbound works, and the board shows the platform's own sentence verbatim rather than pretending the call happened |
 | The assistant never stating an unread number | Mechanism in place, not yet exercised on a live call |
@@ -340,7 +344,7 @@ The landing page states what is verified and what is not, side by side, because 
 
 ## Tech stack
 
-**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 184 across 25 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
+**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 198 across 26 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
 
 ## Project layout
 
@@ -348,7 +352,7 @@ The landing page states what is verified and what is not, side by side, because 
 convex/            the case, the pipeline, the gates, the adapters, the routes
 frontend/          the site: the landing page and the board
 demo/              the demo video and the click sheet
-tests/             184 tests across 25 files
+tests/             198 tests across 26 files
 docs/              integrations, deployments, the demo, what a live run printed
 scripts/           deploy, the live end-to-end run, the video assembly
 hackathon.md       the build log, including what a live deployment found
@@ -357,7 +361,7 @@ hackathon.md       the build log, including what a live deployment found
 ## Full command reference
 
 ```bash
-npm test                      # the rules, 184 tests, no vendor keys needed
+npm test                      # the rules, 198 tests, no vendor keys needed
 npm run typecheck             # no errors
 npx convex dev                # the backend, against your own deployment
 cd frontend && npm run dev    # the site (build refuses without NEXT_PUBLIC_CONVEX_URL)
@@ -403,7 +407,7 @@ which the passphrase is visible — on camera, a passphrase is published.
 ## Tests
 
 ```bash
-npm test                       # 184 tests across 25 files
+npm test                       # 198 tests across 26 files
 ```
 
 Each integration has a stubbed-transport test *and* a live probe, so the code is covered without pretending a vendor was reached. The rules that decide money — evidence freshness, authority, the grade, the exactly-once charge — are tested per rule rather than per file, because a rule with no test is a rule you are only claiming.
