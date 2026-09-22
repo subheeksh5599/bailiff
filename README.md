@@ -75,7 +75,7 @@ Not a mockup — every one of these is wired to the live deployment, and I've ru
 
 <a href="https://youtu.be/nlCXhzFYia4"><img src="demo/preview.gif" alt="The case that refused to close, then closed on the other side's own reply" width="100%" /></a>
 
-<sub>**Two cuts, both under three minutes.** Take the <a href="demo/bailiff-clickthrough.mp4"><b>click-through</b></a> — 61 seconds, twelve real steps, a caption on each: the board, a case that closed, a case refused, a document hashed as it arrived, the deployment checking itself. <a href="""" + YT + """">Watch the explainer on YouTube</a> for the reasoning behind it.</sub>
+<sub>**Two cuts, both under three minutes.** Take the <a href="demo/bailiff-clickthrough.mp4"><b>click-through</b></a> — 61 seconds, twelve real steps, a caption on each: the board, a case that closed, a case refused, a document hashed as it arrived, the deployment checking itself. <a href="https://youtu.be/nlCXhzFYia4">Watch the explainer on YouTube</a> for the reasoning behind it.</sub>
 
 <sub>Every frame of both comes from the live deployment. In the explainer the open and the close are rendered pieces; in the click-through even those are the product's own screens.</sub>
 

@@ -1,1 +1,0 @@
-the self-test: one request, five checks

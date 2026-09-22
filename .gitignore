@@ -39,3 +39,5 @@ frontend/out/
 frontend/.vercel/
 frontend/next-env.d.ts
 frontend/tsconfig.tsbuildinfo
+demo/build/
+demo/build-click/

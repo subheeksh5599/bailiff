@@ -1,6 +1,0 @@
-file '/home/arch/bailiff/demo/click/12a.png'
-duration 1.7
-file '/home/arch/bailiff/demo/click/12b.png'
-duration 1.7
-duration 2.41
-file '/home/arch/bailiff/demo/click/12b.png'
