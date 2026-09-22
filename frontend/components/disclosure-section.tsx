@@ -118,8 +118,8 @@ export function DisclosureSection(): ReactNode {
             {disclosureConfig.limitation.label}
           </p>
           <p className="col-span-1 text-[1rem] leading-[1.6] text-ink-2 lg:col-span-8">
-            <span className="data text-[0.9375rem] text-ink">msg.sender</span>
-            {disclosureConfig.limitation.body.replace("msg.sender", "")}
+            <span className="data text-[0.9375rem] text-ink">{disclosureConfig.limitation.code}</span>
+            {disclosureConfig.limitation.body.replace(disclosureConfig.limitation.code, "")}
           </p>
         </div>
       </div>

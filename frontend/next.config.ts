@@ -1,19 +1,18 @@
 import type { NextConfig } from "next";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-/** Monorepo root — keeps standalone output at apps/web/.next/standalone/apps/web */
-const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const isVercel = !!process.env.VERCEL;
-
+/**
+ * One address, no server.
+ *
+ * The site is exported as static files and served by the same deployment that
+ * answers its HTTP routes, so the product is a single origin and nothing needs
+ * a second host or a domain wired up. Images are served as they are: the export
+ * has no optimiser behind it, and pretending otherwise would only produce
+ * broken URLs.
+ */
 const nextConfig: NextConfig = {
-  // VPS uses standalone Docker image; Vercel manages its own output layout.
-  ...(isVercel ? {} : { output: "standalone" as const }),
-  outputFileTracingRoot: monorepoRoot,
+  output: "export",
+  images: { unoptimized: true },
   productionBrowserSourceMaps: false,
-  compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
-  },
 };
 
 export default nextConfig;

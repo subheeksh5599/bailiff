@@ -1,6 +1,6 @@
 "use client";
 
-import { KairosMark } from "@/components/kairos-logo";
+import { BailiffMark } from "@/components/logo";
 import { Action } from "@/components/action";
 import { siteConfig } from "@/lib/config";
 import { AnimatePresence, motion } from "motion/react";
@@ -90,7 +90,7 @@ export function Header(): ReactNode {
           aria-label={`${siteConfig.name} home`}
           className="focus-ring flex shrink-0 items-center gap-2.5 text-ink"
         >
-          <KairosMark className="h-[1.05em] w-auto" />
+          <BailiffMark className="h-[1.05em] w-auto" />
           {/* The wordmark in the display face, so the brand speaks in the same
               voice as the headline rather than in the interface font. */}
           <span className="display text-[1.375rem] leading-none">{siteConfig.name}</span>

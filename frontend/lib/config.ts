@@ -1,35 +1,33 @@
 /**
- * Kairos — landing page copy.
+ * Landing page copy.
  *
  * Rule for everything in this file: no claim that is not already true and
- * checkable. The addresses and endpoints below are the live ones, and the
- * limitations are stated in the same voice as the features.
+ * checkable. The deployment, the endpoints and the limitations are stated in
+ * the same voice as the features, and the verification commands are the ones
+ * that were run against the live deployment.
  */
 
 export const siteConfig = {
-  name: "Kairos",
-  tagline: "Confidential spending limits for AI agents",
+  name: "Bailiff",
+  tagline: "A case closes when the outcome is verified",
   description:
-    "Give an AI agent a budget it cannot exceed, without publishing the budget. Caps, balances and settlement amounts stay encrypted inside iExec Nox and are compared in a TEE. x402 and MCP are left exactly as they are.",
-  url: "https://kairos.dev",
-  twitter: "@kairos",
-  repo: "https://github.com/Venkat5599/kairos",
-  gateway: "https://agentfabric-api.187.127.137.136.sslip.io",
-  vault: "0xe417e9e36291a2d74121db0d3ce013854f5123cc",
-  vaultExplorer:
-    "https://sepolia.etherscan.io/address/0xe417e9e36291a2d74121db0d3ce013854f5123cc",
+    "Requirements frozen at intake, evidence read back after the case opened, and a charge released only by a grade that passes. The pipeline writes down what it could not confirm instead of guessing.",
+  url: "https://aware-jellyfish-285.convex.site",
+  cloud: "https://aware-jellyfish-285.convex.cloud",
+  repo: "https://github.com/subheeksh5599/bailiff",
+  twitter: "@subheeksh5599",
   nav: {
-    cta: { text: "Open dashboard", href: "/dashboard" },
+    cta: { text: "Open the board", href: "/dashboard.html" },
   },
 };
 
 export const heroConfig = {
   /* Two lines. A display line that wraps to three or four is a staircase, not
      a composition. */
-  headline: ["A budget your agent", "cannot exceed or reveal"],
+  headline: ["A case closes when", "the outcome is verified"],
   subheadline:
-    "Enforce an agent's spending cap on-chain while the cap, the balance and every settlement amount stay encrypted. The comparison happens inside the TEE; the chain only ever stores handles.",
-  primary: { text: "Open dashboard", href: "/dashboard" },
+    "Requirements are frozen the moment a case opens, before anyone knows how the call will go. They can only be satisfied by a record read back afterwards, and the charge is released only by a grade that passes.",
+  primary: { text: "Open the board", href: "/dashboard.html" },
   secondary: { text: "Verify it yourself", href: "#verify" },
 };
 
@@ -37,18 +35,20 @@ export const techStackConfig = {
   /* "Built on", never "used by" — these are dependencies, not customers. */
   title: "Built on",
   items: [
-    { name: "iExec Nox", description: "Confidential compute in a TEE" },
-    { name: "Ethereum Sepolia", description: "Settlement and session keys" },
-    { name: "x402", description: "HTTP 402 metering per call" },
-    { name: "MCP", description: "Agent tool discovery" },
-    { name: "Safe", description: "Spends from an unmodified Safe" },
+    { name: "Convex", description: "The case, the evidence and the audit trail" },
+    { name: "Vapi", description: "The phone line a case is opened on" },
+    { name: "Firecrawl", description: "Fetching a page as evidence" },
+    { name: "AgentMail", description: "The mailbox a case writes to and reads from" },
+    { name: "OpenAI", description: "Reading a call into claims" },
+    { name: "Scorecard", description: "An outside evaluator for the same run" },
+    { name: "Autumn", description: "Metering a released charge" },
   ],
 };
 
-/** One row of a settlement ledger: field, value, and what it gives away. */
+/** One row of a ledger: field, value, and what it gives away. */
 export type LedgerRow = readonly [field: string, value: string, note: string];
 
-/** The problem, shown rather than asserted. Both columns are real log shapes. */
+/** The problem, shown rather than asserted. Both columns are real case shapes. */
 export const leakConfig: {
   statement: string;
   body: string;
@@ -57,130 +57,134 @@ export const leakConfig: {
 } = {
   /* Two lines at display size. A headline that wraps to four is a staircase
      of short rows, not a composition. */
-  statement: "Every metered call leaves an operational diary.",
-  body: "Run a fleet of agents against metered APIs over x402 and the chain records it all in the open. Which agent is active, how often, against which vendor, for how much, and how much of its allowance is left. Anyone can read it. For a company that is a competitive leak before it is a privacy problem. The naive fix — don't enforce the budget on-chain — is worse: then the cap is a suggestion, and one compromised prompt drains the treasury.",
+  statement: "A closure is worth exactly what it rests on.",
+  body: "Most disputes end the same way: someone says the money moved, someone writes it down, and the case is closed. Nothing is read back, so nothing can be checked later, and the note that closed it is worth as much as the person who wrote it. The other route is worse — waiting indefinitely for a record that never arrives, while whoever is owed carries the cost of the delay.",
   plain: {
-    label: "Plain x402 settlement",
-    caption: "Every field is public, and permanently linkable.",
+    label: "How it usually closes",
+    caption: "A sentence on a call, and a note nobody can check.",
     rows: [
-      ["from", "0x91c4…7a20", "which agent"],
-      ["to", "0x5ef0…13bb", "which vendor"],
-      ["value", "1500 wei", "what it cost"],
-      ["block", "8421907", "exactly when"],
+      ["claim", "\u201calready refunded\u201d", "said on the call"],
+      ["record", "none", "nothing read back"],
+      ["state", "closed", "and the charge released"],
+      ["proof", "a note", "unfalsifiable afterwards"],
     ],
   },
   sealed: {
-    label: "The same settlement on Kairos",
-    caption: "One event. No addresses, no amount, only the epoch.",
+    label: "The same case here",
+    caption: "One requirement, one read-back, and the pointer kept.",
     rows: [
-      ["event", "PrivateSettlement", "that one occurred"],
-      ["epoch", "4", "which batch it joined"],
-      ["amount", "sealed", "never emitted"],
-      ["agent", "sealed", "never emitted"],
+      ["requirement", "frozen at intake", "hashed before the call"],
+      ["evidence", "mail:their reply", "read after the case opened"],
+      ["grade", "pass", "every check printed"],
+      ["charge", "released", "by the grade, and nothing else"],
     ],
   },
 };
 
 /**
- * Source: README, "What is hidden, and what is not". Being precise about this
+ * Source: README, "What is verified, and what is not". Being precise about this
  * matters more than the feature list, so it is reproduced rather than softened.
  */
 export const disclosureConfig = {
-  title: "What is hidden, and what is not",
+  title: "What is verified, and what is not",
   lede: "Being precise about this matters more than any feature list.",
   sealed: {
-    label: "Encrypted",
-    note: "Handles on-chain, decryptable only by permitted accounts.",
+    label: "Verified",
+    note: "Read back after the case opened, hashed, and attached to the case.",
     items: [
-      "The treasury budget and what remains of it",
-      "Each agent's per-call spending cap",
-      "Each agent's cumulative spend",
-      "The amount of any individual settlement",
-      "Whether a settlement was authorized or rejected",
+      "The words of the call, as our own recording of it",
+      "A commitment the caller was given, checked against that recording",
+      "A page of theirs, fetched and stored with the time it was read",
+      "A reply they sent, filed to the case by the mailbox",
+      "Which requirement was satisfied, and by which piece of evidence",
     ],
   },
   open: {
-    label: "Public",
-    note: "Visible to anyone reading the chain.",
+    label: "Not verified",
+    note: "Cannot close a case on its own, however confidently it was stated.",
     items: [
-      "That a settlement occurred, and in which epoch",
-      "How many settlements a batch contained",
-      "The relayer address that submitted the transaction",
-      "The aggregate total of a closed epoch, once flushed",
-      "The vault's existence and its owner",
+      "Anything said on the call about what the other side has already done",
+      "A claim the caller reports second-hand",
+      "A figure with no readable date on it",
+      "A transcript that arrived after the case had already closed",
+      "Any statement whose only source is the party that benefits from it",
     ],
   },
   limitation: {
     label: "Known limitation, stated plainly",
-    body: "msg.sender is inherently public. Kairos routes every settlement through one gateway relayer, so on-chain all settlements share a sender and per-agent activity is not distinguishable — but the relayer itself is visible, and it learns what it relays.",
+    code: "A recording of us talking",
+    body: "A recording of us talking proves what was promised and nothing more. When a case turns on what the other side actually did, it stays open until one of their own records is read back, and the pipeline writes the outstanding requirement onto the case rather than guessing at an answer.",
   },
 };
 
-/** The four movements of a payment. Deliberately not a numbered list on a rail. */
+/** The four movements of a case. Deliberately not a numbered list on a rail. */
 export const pathConfig = {
-  title: "How a payment moves",
-  lede: "Individual debits never move funds on their own. That is what breaks the one-transaction-per-API-call trail.",
+  title: "How a case moves",
+  lede: "Nothing here is decided by the party that benefits from the closure.",
   steps: [
     {
-      key: "settle",
-      title: "Settle",
-      body: "The agent submits an encrypted amount. Two encrypted comparisons run inside the TEE: within cap, and within budget.",
-      detail: "amount ≤ cap · budget ≥ amount",
+      key: "freeze",
+      title: "Freeze",
+      body: "The case opens and its requirements are frozen with a hash before any call is placed. They cannot be rewritten afterwards, by us or by anyone else.",
+      detail: "requirementSetHash = sha256(set)",
     },
     {
-      key: "authorize",
-      title: "Authorize",
-      body: "An encrypted boolean cannot gate a require — reverting would leak the comparison. The contract debits the amount or debits zero, then publishes the outcome as an encrypted flag.",
-      detail: "Nox.select(ok, amount, 0)",
+      key: "read",
+      title: "Read",
+      body: "The call ends, the transcript is filed as our own record, and the mailbox keeps whatever the other side sends. Every read carries the time it happened.",
+      detail: "fetchedAt \u2265 openedAt",
     },
     {
-      key: "accumulate",
-      title: "Accumulate",
-      body: "The debit joins an encrypted epoch total instead of moving money, so no single transaction corresponds to a single API call.",
-      detail: "epochTotal += debited",
+      key: "grade",
+      title: "Grade",
+      body: "Each claim is put against the evidence that could support it. A promise is checked against our own recording; a statement about their behaviour is not, and stays unverified until their record arrives.",
+      detail: "promises_on_record \u00b7 unverified",
     },
     {
-      key: "flush",
-      title: "Flush",
-      body: "The owner closes the epoch. One aggregate is released for public decryption and leaves the Safe as a single transfer covering every payment in the batch.",
-      detail: "one number, N payments",
+      key: "release",
+      title: "Release",
+      body: "Only a passing grade writes a billing row, keyed on the call reference, so a replayed call re-reads one row instead of charging twice. An unreachable meter leaves the row pending, never quietly free.",
+      detail: "call:\u2026 \u2192 one row",
     },
   ],
 };
 
-/** Real commands against the live gateway, with their real response shapes. */
+/** Real commands against the live deployment, with their real response shapes. */
 export const verifyConfig = {
   title: "Verify it yourself",
   lede: "Every claim on this page is checkable from a terminal right now. Nothing here is a mock.",
   checks: [
     {
-      label: "The gateway is on the real chain",
-      command: "curl -s $GATEWAY/chain/status",
-      output: `{ "configured": true,
-  "demoMode": false,
-  "network": "testnet",
-  "chainId": 11155111 }`,
+      label: "The deployment is up, and says which integrations carry a key",
+      command: "curl -s $SITE/health",
+      output: `{ "ok": true, "integrations": {
+  "convex": true, "firecrawl": true, "extraction": true,
+  "grading": true, "metering": true, "email": true,
+  "mailReceives": true, "telephony": true, "hooks": true,
+  "knowledge": false } }`,
     },
     {
-      label: "The vault is live, with its relayer and epoch",
-      command: "curl -s $GATEWAY/nox/status",
-      output: `{ "configured": true,
-  "vaultAddress": "0xe417e9e3…5123cc",
-  "relayer": "0xEEfbC8d6…Ba4eBa",
-  "network": 11155111,
-  "epoch": 1 }`,
+      label: "The board reads the same cases the pipeline wrote",
+      command: "curl -s $SITE/cases",
+      output: `[ { "ref": "live-close-134804", "state": "VERIFIED",
+    "counterparty": "Northwind Utilities",
+    "currency": "GBP", "amountClaimedUnits": 4120 },
+  { "ref": "live-refuse-134804",
+    "state": "REQUIREMENTS_FROZEN", \u2026 } ]`,
     },
     {
-      label: "A closed epoch reveals one aggregate, never a payment",
-      command: "curl -s $GATEWAY/nox/epoch/0",
-      output: `{ "epoch": 0,
-  "closed": true,
-  "totalWei": "38500",
-  "count": 7 }`,
+      label: "A closed case names the evidence that closed it",
+      command: 'curl -s "$SITE/case?ref=live-close-134804"',
+      output: `{ "case": { "state": "VERIFIED", "verifiedAt": \u2026 },
+  "requirements": [ { "key": "their_reply",
+    "satisfied": true,
+    "satisfiedByEvidenceId": "js7fhngx\u2026" } ],
+  "evidence": [ { "kind": "email_reply",
+    "sourceKind": "counterparty", \u2026 } ] }`,
     },
   ],
   footnote:
-    "count is how many settlements the batch absorbed. totalWei covers all of them, and cannot be decomposed back into the payments that produced it.",
+    "knowledge is false because that account has no organization to attach it to, and it is reported rather than hidden. Claims are read from the call platform's own analysis of the call, so extraction does not depend on a model key being present.",
 };
 
 export const footerConfig = {
@@ -188,30 +192,38 @@ export const footerConfig = {
     {
       heading: "Product",
       links: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Confidential vault", href: "/dashboard" },
-        { label: "Workflows", href: "/dashboard/workflows" },
-        { label: "MCP servers", href: "/dashboard/mcp" },
+        { label: "Case board", href: "/dashboard.html" },
+        { label: "Open a case", href: "/dashboard.html?view=new" },
+        { label: "Integrations", href: "/dashboard.html?view=integrations" },
       ],
     },
     {
       heading: "Build",
       links: [
-        { label: "Publish a SKILL.md", href: "/dashboard/create" },
-        { label: "Session keys", href: "/dashboard/session-keys" },
-        { label: "Marketplace", href: "/dashboard/marketplace" },
+        { label: "README", href: "https://github.com/subheeksh5599/bailiff#readme" },
+        {
+          label: "Build log",
+          href: "https://github.com/subheeksh5599/bailiff/blob/master/hackathon.md",
+        },
+        {
+          label: "Integrations note",
+          href: "https://github.com/subheeksh5599/bailiff/blob/master/docs/INTEGRATIONS.md",
+        },
       ],
     },
     {
       heading: "Source",
       links: [
-        { label: "GitHub", href: "https://github.com/Venkat5599/kairos" },
-        { label: "Vault contract", href: siteConfig.vaultExplorer },
-        { label: "iExec Nox", href: "https://docs.iex.ec/nox-protocol" },
+        { label: "GitHub", href: "https://github.com/subheeksh5599/bailiff" },
+        {
+          label: "Deployments",
+          href: "https://github.com/subheeksh5599/bailiff/blob/master/docs/DEPLOYMENTS.md",
+        },
+        { label: "MIT licence", href: "https://github.com/subheeksh5599/bailiff/blob/master/LICENSE" },
       ],
     },
   ],
-  colophon: `Ethereum Sepolia · chain 11155111 · MIT · ${new Date().getFullYear()}`,
+  colophon: `Convex \u00b7 Vapi \u00b7 Firecrawl \u00b7 AgentMail \u00b7 OpenAI \u00b7 Scorecard \u00b7 Autumn \u00b7 MIT \u00b7 ${new Date().getFullYear()}`,
 };
 
 export const features = {

@@ -9,6 +9,7 @@
  */
 
 import type * as billing from "../billing.js";
+import type * as board from "../board.js";
 import type * as cases from "../cases.js";
 import type * as crons from "../crons.js";
 import type * as grades from "../grades.js";
@@ -42,6 +43,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   billing: typeof billing;
+  board: typeof board;
   cases: typeof cases;
   crons: typeof crons;
   grades: typeof grades;

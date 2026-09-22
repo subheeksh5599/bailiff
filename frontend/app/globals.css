@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Kairos palette.
+ * Palette.
  *
  * Every value is pulled out of the fold artwork, so the page and the picture
  * are one surface rather than a picture pasted onto a theme. The sea gives the
@@ -301,7 +301,7 @@ body {
   border-radius: 9999px;
 }
 
-/* Indeterminate progress for values still being decrypted in the Nox TEE.
+/* Indeterminate progress, for a read that has not come back yet.
    Transform only, so it never triggers layout, and it animates an element
    that is already on screen — content is never gated on it. */
 @keyframes shimmer {

@@ -28,7 +28,7 @@ export function VerifySection(): ReactNode {
             {verifyConfig.title}
           </h2>
           <p className="data min-w-0 text-[0.875rem] break-all text-ink-3">
-            GATEWAY={siteConfig.gateway}
+            SITE={siteConfig.url}
           </p>
         </div>
 

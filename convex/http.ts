@@ -1,6 +1,6 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { parseInbound } from "./integrations/agentmail";
 import { configured } from "./lib/config";
 import { registerStaticRoutes } from "@convex-dev/static-hosting";
@@ -261,6 +261,50 @@ export function extractCaseRef(text: string): string | null {
   const match = text.match(/\[case:([A-Za-z0-9._-]+)\]/);
   return match ? match[1] : null;
 }
+
+/**
+ * The board's own address, in the form a person would type.
+ *
+ * The app is exported as one file, and the static layer serves exact paths only,
+ * so the clean path would otherwise fall through to the landing page. This sends
+ * it to the app instead, and keeps the nicer URL working for anyone who shortens
+ * it by hand.
+ */
+http.route({
+  path: "/dashboard",
+  method: "GET",
+  handler: httpAction(async () => new Response(null, { status: 302, headers: { location: "/dashboard.html" } })),
+});
+
+/**
+ * The board, as JSON.
+ *
+ * Public on purpose: every case row here is the same row the site renders, so a
+ * claim about what the board shows can be checked with a single request instead
+ * of taken on faith. It reads; it cannot write.
+ */
+http.route({
+  path: "/cases",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    const rows = await ctx.runQuery(api.cases.board, { limit: 50 });
+    return json(rows);
+  }),
+});
+
+/** One case, with everything attached to it: same snapshot the board renders. */
+http.route({
+  path: "/case",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const ref = new URL(request.url).searchParams.get("ref");
+    if (!ref) return json({ ok: false, error: "ref is required" }, 400);
+    const snapshot = await ctx.runQuery(api.cases.get, { ref });
+    if (!snapshot) return json({ ok: false, error: `no case ${ref}` }, 404);
+    const audit = await ctx.runQuery(api.ops.auditForCase, { caseRef: ref });
+    return json({ case: snapshot.case, requirements: snapshot.requirements, evidence: snapshot.evidence, claims: snapshot.claims, grades: snapshot.grades, billing: snapshot.billing, audit });
+  }),
+});
 
 // Last, so every exact route above wins: unknown paths fall through to the built
 // site, which is what makes a browser refresh on /board work.

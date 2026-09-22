@@ -1,5 +1,5 @@
 import { Action } from "@/components/action";
-import { KairosMark } from "@/components/kairos-logo";
+import { BailiffMark } from "@/components/logo";
 import { footerConfig, siteConfig } from "@/lib/config";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
  * plate with a scrim only where the type sits is the version worth shipping.
  *
  * The fourth column carries live contract facts rather than an email capture.
- * Kairos has no mailing list, so a signup field here would be a control that
+ * This product has no mailing list, so a signup field here would be a control that
  * looks interactive and does nothing — broken, not decorative.
  */
 
@@ -82,17 +82,17 @@ export function Footer(): ReactNode {
               aria-label={`${siteConfig.name} home`}
               className="focus-ring inline-flex text-surface"
             >
-              <KairosMark className="h-6 w-auto" />
+              <BailiffMark className="h-6 w-auto" />
             </Link>
             <p className="mt-5 max-w-[32ch] text-[0.9375rem] leading-[1.6] text-[#9db2b4]">
-              {siteConfig.tagline}. Built for the WTF Hackathon, Summer Edition — iExec Nox
+              {siteConfig.tagline}. Built for the Convex All Gas Hackathon — Convex
               track.
             </p>
             <a
               href={siteConfig.repo}
               target="_blank"
               rel="noreferrer"
-              aria-label="Kairos on GitHub"
+              aria-label="Bailiff on GitHub"
               className="focus-ring mt-6 inline-flex text-[#9db2b4] transition-colors duration-200 hover:text-surface"
             >
               <GitHubMark />
@@ -136,35 +136,35 @@ export function Footer(): ReactNode {
           {/* Where a newsletter box would sit. Real, checkable facts instead —
               the same visual weight, without a control that does nothing. */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-5">
-            <h2 className="text-[0.9375rem] font-medium text-surface">Live on Sepolia</h2>
+            <h2 className="text-[0.9375rem] font-medium text-surface">Live deployment</h2>
             <p className="mt-3 max-w-[46ch] text-[0.9375rem] leading-[1.6] text-[#9db2b4]">
-              The vault below is deployed and settling. Every number on this page can be read
-              straight off the chain.
+              The deployment below is live. Every number on this page can be read straight off it
+              with a single request.
             </p>
             <dl className="mt-5 flex flex-col gap-2.5">
               <div className="flex flex-wrap items-baseline gap-x-3">
-                <dt className="w-20 shrink-0 text-[0.8125rem] text-[#6d8386]">Vault</dt>
+                <dt className="w-20 shrink-0 text-[0.8125rem] text-[#6d8386]">Site</dt>
                 <dd className="min-w-0">
                   <a
-                    href={siteConfig.vaultExplorer}
+                    href={siteConfig.url}
                     target="_blank"
                     rel="noreferrer"
                     className="focus-ring data text-[0.8125rem] break-all text-[#a8c2c5] transition-colors duration-200 hover:text-surface"
                   >
-                    {siteConfig.vault}
+                    {siteConfig.url.replace(/^https?:\/\//, "")}
                   </a>
                 </dd>
               </div>
               <div className="flex flex-wrap items-baseline gap-x-3">
-                <dt className="w-20 shrink-0 text-[0.8125rem] text-[#6d8386]">Gateway</dt>
+                <dt className="w-20 shrink-0 text-[0.8125rem] text-[#6d8386]">Backend</dt>
                 <dd className="min-w-0">
                   <a
-                    href={`${siteConfig.gateway}/nox/status`}
+                    href={`${siteConfig.cloud}/version`}
                     target="_blank"
                     rel="noreferrer"
                     className="focus-ring data text-[0.8125rem] break-all text-[#a8c2c5] transition-colors duration-200 hover:text-surface"
                   >
-                    /nox/status
+                    /version
                   </a>
                 </dd>
               </div>
