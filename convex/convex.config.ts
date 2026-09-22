@@ -1,5 +1,6 @@
 import { defineApp } from "convex/server";
 import staticHosting from "@convex-dev/static-hosting/convex.config";
+import rateLimiter from "@convex-dev/rate-limiter/convex.config.js";
 
 /**
  * The static site and the backend live on one deployment.
@@ -13,5 +14,9 @@ import staticHosting from "@convex-dev/static-hosting/convex.config";
  */
 const app = defineApp();
 app.use(staticHosting);
+// The public hooks are the only way evidence gets in, so they are the surface that
+// needs a ceiling: a runaway integration or a loop should not be able to hammer one
+// case or the deployment.
+app.use(rateLimiter);
 
 export default app;

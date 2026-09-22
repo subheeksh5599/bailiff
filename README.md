@@ -37,6 +37,7 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 | Metering | **LIVE** | a metered event accepted, keyed on the call reference that justified it |
 | OpenAI | **KEYED, 402** | the provider answers `402 insufficient_quota` until credit lands. It does not block the pipeline: claims come from the call platform's own end-of-call analysis, so money is decided without any model key |
 | Inkeep | **OFF** | that account belongs to no organization. `/health` reports it `false` rather than pretending |
+| The public hooks | **BOUNDED** | two token buckets, one per case (30/min, burst 10) and one for the deployment (240/min, burst 60). A burst of 16 was refused live, naming the limit and the retry |
 | The build, posted | **LIVE** | [https://x.com/KomariS18774/status/2102368912549753004](https://x.com/KomariS18774/status/2102368912549753004) — tagged to the four sponsors, as the event asks |
 
 ## ▶ Demo
@@ -208,6 +209,7 @@ OPEN ──► FROZEN ──► CHASING ──► VERIFIED
 | `convex/insights.ts` | Outcomes rather than counts: time to closure, why closures are refused, who keeps coming back |
 | `convex/selftest.ts` | The deployment checking itself, storage round trip included |
 | `convex/http/*.ts` | The HTTP surface: reads anyone may make, hooks that run only with a shared secret |
+| `convex/limits.ts`, `convex/lib/limits.ts` | The ceilings on those hooks, enforced through the rate-limiter component |
 | `convex/integrations/*` | One module per vendor, each with a stubbed-transport test and a live probe |
 
 ### The HTTP surface
@@ -332,10 +334,11 @@ The landing page states what is verified and what is not, side by side, because 
 - **The browser is not trusted.** Reads happen on the server. The client can attach the owner's own document and nothing else; it cannot assert what a page said.
 - **Uploads are bounded.** A type or size the rule does not accept is refused with the reason, and a refused upload is deleted rather than left in storage.
 - **The money path is keyed.** The charge is written once, keyed on the call reference, so a retry or a replay cannot bill twice.
+- **The hooks are bounded.** Each carries its own shared secret, and each spends from two token buckets — one per case and one for the deployment — so a provider retrying or a loop in someone else's cron cannot hammer a case or the deployment. A flood aimed at one case does not touch another case's allowance.
 
 ## Tech stack
 
-**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 132 across 13 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
+**Backend** Convex — database, functions, crons, HTTP actions, file storage, static hosting, and two components (static hosting, rate limiter) · **Frontend** Next.js App Router, static export · **Language** TypeScript end to end, types generated from the schema · **Tests** Vitest, 132 across 13 files · **Sponsors** OpenAI, Firecrawl, AgentMail · **Also wired** the call platform, metering, tracing.
 
 ## Project layout
 

@@ -1,4 +1,4 @@
-import { httpAction } from "../_generated/server";
+import { httpAction, type ActionCtx } from "../_generated/server";
 import { parseInbound } from "../integrations/agentmail";
 import { internal } from "../_generated/api";
 import { json } from "./json";
@@ -12,6 +12,38 @@ import type { HttpRouter } from "convex/server";
  * recording anything. Each carries its own secret, because the caller that ends a
  * call and the caller that forwards a reply are not the same caller.
  */
+/**
+ * Spend one token against the deployment's ceiling and one against this case's.
+ *
+ * Returns the refusal to send when either is exhausted, so a route reads as
+ * `const stop = await limited(ctx, caseRef); if (stop) return stop;` and the ceiling
+ * is a property of the route rather than something each handler remembers to do.
+ */
+async function limited(ctx: ActionCtx, caseRef: string): Promise<Response | null> {
+  const global = await ctx.runMutation(internal.limits.consume, { name: "hookAll", key: "all" });
+  if (!global.ok) {
+    return json(
+      { ok: false, error: `rate limited: ${global.limit}`, retryAfterMs: global.retryAfter },
+      429
+    );
+  }
+  const perCase = await ctx.runMutation(internal.limits.consume, {
+    name: "hookPerCase",
+    key: caseRef,
+  });
+  if (!perCase.ok) {
+    return json(
+      {
+        ok: false,
+        error: `rate limited: ${perCase.limit} for ${caseRef}`,
+        retryAfterMs: perCase.retryAfter,
+      },
+      429
+    );
+  }
+  return null;
+}
+
 export function registerHooks(http: HttpRouter): void {
 /** A finished call. The transcript is stored as evidence; it is never paraphrased into it. */
 http.route({
@@ -42,6 +74,8 @@ http.route({
     const callRef = message?.call?.id;
 
     if (!callRef || !caseRef) return json({ ok: false, error: "call id and metadata.caseRef are required" }, 400);
+    const stop = await limited(ctx, caseRef);
+    if (stop) return stop;
     if (!transcript || transcript.trim().length === 0) {
       return json({ ok: false, error: "no transcript on the payload; nothing to store" }, 400);
     }
@@ -85,6 +119,8 @@ http.route({
     if (!payload.caseRef || !payload.text) {
       return json({ ok: false, error: "caseRef and text are required" }, 400);
     }
+    const stop = await limited(ctx, payload.caseRef);
+    if (stop) return stop;
     const result = await ctx.runMutation(internal.ingest.ingestReply, {
       caseRef: payload.caseRef,
       from: payload.from ?? "unknown",
@@ -128,6 +164,8 @@ http.route({
       return json({ ok: false, error: "metadata.caseRef is required so a read can be filed against a case" }, 400);
     }
 
+    const stop = await limited(ctx, caseRef);
+    if (stop) return stop;
     const snapshot = await ctx.runQuery(internal.ops.caseSnapshot, { caseRef });
     if (!snapshot) return json({ ok: false, error: `no case ${caseRef}` }, 404);
 
@@ -228,7 +266,9 @@ http.route({
       return json({ ok: false, error: "no case reference in the message; cannot file it against a case" }, 400);
     }
 
-    const result = await ctx.runMutation(internal.ingest.ingestReply, {
+        const stop = await limited(ctx, caseRef!);
+    if (stop) return stop;
+const result = await ctx.runMutation(internal.ingest.ingestReply, {
       caseRef,
       from: reply.from,
       subject: reply.subject,

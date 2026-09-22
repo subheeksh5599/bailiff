@@ -27,6 +27,7 @@
 | Claim verdicts, evidence freshness and authority rules | Real, covered by tests |
 | Billing gate, exactly-once charge, retry of a failed delivery | Real, covered by tests |
 | Webhooks (call ended, inbound mail, assistant tools) | Real, fail-closed without the shared secret |
+| Hook rate limits | Real: the rate-limiter component is mounted and every hook spends from a per-case and a deployment-wide token bucket. A 16-request burst was refused live with the limit named |
 | Operator sessions | Real: a passphrase is exchanged for a token stored only as a hash, sessions expire, and every action that closes, charges, dials or takes a file refuses without one. The reads stay public |
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
 | Firecrawl reads | Keyed and reachable (verified against the vendor) |

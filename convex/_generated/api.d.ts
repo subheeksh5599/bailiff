@@ -38,11 +38,13 @@ import type * as lib_checks from "../lib/checks.js";
 import type * as lib_config from "../lib/config.js";
 import type * as lib_files from "../lib/files.js";
 import type * as lib_hash from "../lib/hash.js";
+import type * as lib_limits from "../lib/limits.js";
 import type * as lib_messages from "../lib/messages.js";
 import type * as lib_metrics from "../lib/metrics.js";
 import type * as lib_rules from "../lib/rules.js";
 import type * as lib_session from "../lib/session.js";
 import type * as lib_states from "../lib/states.js";
+import type * as limits from "../limits.js";
 import type * as ops from "../ops.js";
 import type * as orchestrator from "../orchestrator.js";
 import type * as recheck from "../recheck.js";
@@ -86,11 +88,13 @@ declare const fullApi: ApiFromModules<{
   "lib/config": typeof lib_config;
   "lib/files": typeof lib_files;
   "lib/hash": typeof lib_hash;
+  "lib/limits": typeof lib_limits;
   "lib/messages": typeof lib_messages;
   "lib/metrics": typeof lib_metrics;
   "lib/rules": typeof lib_rules;
   "lib/session": typeof lib_session;
   "lib/states": typeof lib_states;
+  limits: typeof limits;
   ops: typeof ops;
   orchestrator: typeof orchestrator;
   recheck: typeof recheck;
@@ -126,4 +130,5 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   staticHosting: import("@convex-dev/static-hosting/_generated/component.js").ComponentApi<"staticHosting">;
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
 };
