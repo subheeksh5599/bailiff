@@ -3,6 +3,8 @@ import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { parseInbound } from "./integrations/agentmail";
 import { configured } from "./lib/config";
+import { registerStaticRoutes } from "@convex-dev/static-hosting";
+import { components } from "./_generated/api";
 
 /**
  * The only doors into the ledger.
@@ -255,5 +257,9 @@ export function extractCaseRef(text: string): string | null {
   const match = text.match(/\[case:([A-Za-z0-9._-]+)\]/);
   return match ? match[1] : null;
 }
+
+// Last, so every exact route above wins: unknown paths fall through to the built
+// site, which is what makes a browser refresh on /board work.
+registerStaticRoutes(http, components.staticHosting);
 
 export default http;
