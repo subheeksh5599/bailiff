@@ -15,7 +15,7 @@ Bailiff is what you use when a company owes you money and the answer is always *
 
 ### ▶ Live on the deployment — every claim below is one click or one curl away
 
-**[ Open the board ↗ ](https://aware-jellyfish-285.convex.site/dashboard)** · **[ Check it yourself ↓ ](#-check-it-yourself)** · **[ How a case moves ↓ ](#how-a-case-moves)** · **[ Honesty table ↓ ](#whats-real-and-what-is-not)** · **[ Watch the demo ↗ ](https://youtu.be/nlCXhzFYia4)**
+**[ Open the board ↗ ](https://aware-jellyfish-285.convex.site/dashboard)** · **[ Check it yourself ↓ ](#-see-it-in-one-command)** · **[ How a case moves ↓ ](#how-a-case-moves)** · **[ Honesty table ↓ ](#whats-real-and-what-is-not)** · **[ Watch the demo ↗ ](https://youtu.be/nlCXhzFYia4)**
 
 Built for the **Convex All Gas Hackathon** · *Convex · OpenAI · Firecrawl · AgentMail*. MIT licensed.
 
