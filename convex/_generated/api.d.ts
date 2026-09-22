@@ -14,6 +14,7 @@ import type * as crons from "../crons.js";
 import type * as grades from "../grades.js";
 import type * as http from "../http.js";
 import type * as ingest from "../ingest.js";
+import type * as integrations_agentmail from "../integrations/agentmail.js";
 import type * as integrations_autumn from "../integrations/autumn.js";
 import type * as integrations_endpoints from "../integrations/endpoints.js";
 import type * as integrations_firecrawl from "../integrations/firecrawl.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   grades: typeof grades;
   http: typeof http;
   ingest: typeof ingest;
+  "integrations/agentmail": typeof integrations_agentmail;
   "integrations/autumn": typeof integrations_autumn;
   "integrations/endpoints": typeof integrations_endpoints;
   "integrations/firecrawl": typeof integrations_firecrawl;

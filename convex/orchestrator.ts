@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { action, internalAction, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { gradeVerdict, type GradeCheck } from "./lib/rules";
-import { has } from "./lib/config";
+import { emailPath, has } from "./lib/config";
 import type { Extracted } from "./integrations/openai";
 
 /**
@@ -212,14 +212,17 @@ export const deriveOutcome = internalAction({
     }
 
     let emailed = false;
-    if (has(process.env, "resend")) {
+    // A mailbox that can also receive is preferred, so the counterparty's reply has
+    // somewhere to arrive: a one-way sender can issue a case but can never hear back.
+    const mailPath = emailPath();
+    if (mailPath) {
       const owner = process.env.OWNER_EMAIL;
       if (!owner) {
         await ctx.runMutation(internal.ops.audit, {
           caseId: snapshot.case._id,
           action: "pipeline.stopped",
           actor: "orchestrator",
-          detail: "email is configured but OWNER_EMAIL is not set, so no report was sent",
+          detail: `mail is configured (${mailPath}) but OWNER_EMAIL is not set, so no report was sent`,
         });
       } else {
         const report = [
@@ -233,13 +236,31 @@ export const deriveOutcome = internalAction({
           "",
           verdict === "pass" ? "Billable, once." : "Not billable.",
         ].join("\n");
-        const sent = await ctx.runAction(internal.integrations.resend.sendEmail, {
-          to: owner,
-          purpose: `call report for ${args.caseRef}`,
-          subject: verdict === "pass" ? `Resolved call, billable: ${args.caseRef}` : `Call not billable (${verdict}): ${args.caseRef}`,
-          text: report,
-        });
+        const subject =
+          (verdict === "pass"
+            ? `Resolved call, billable: ${args.caseRef}`
+            : `Call not billable (${verdict}): ${args.caseRef}`) + ` [case:${args.caseRef}]`;
+        const sent =
+          mailPath === "agentmail"
+            ? await ctx.runAction(internal.integrations.agentmail.sendMessage, {
+                to: owner,
+                subject,
+                text: report,
+                purpose: `call report for ${args.caseRef}`,
+              })
+            : await ctx.runAction(internal.integrations.resend.sendEmail, {
+                to: owner,
+                subject,
+                text: report,
+                purpose: `call report for ${args.caseRef}`,
+              });
         emailed = sent.sent;
+        await ctx.runMutation(internal.ops.audit, {
+          caseId: snapshot.case._id,
+          action: "email.sent",
+          actor: mailPath,
+          detail: `${subject} to ${owner}`,
+        });
       }
     }
 

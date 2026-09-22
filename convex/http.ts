@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { parseInbound } from "./integrations/agentmail";
 
 /**
  * The only doors into the ledger.
@@ -217,5 +218,54 @@ http.route({
     return json({ results });
   }),
 });
+
+/**
+ * The counterparty's reply, arriving by mail.
+ *
+ * This is the path that turns a chase into evidence: the reply is the other side's
+ * own words, stored verbatim and hashed, and the case's requirements are
+ * re-examined against it. A delivery with nothing readable in it is refused
+ * rather than recorded as a reply.
+ */
+http.route({
+  path: "/hooks/agentmail",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const secret = process.env.AGENTMAIL_WEBHOOK_SECRET;
+    if (!secret) {
+      return json({ ok: false, error: "AGENTMAIL_WEBHOOK_SECRET is not configured; refusing the delivery" }, 503);
+    }
+    const presented = request.headers.get("x-webhook-secret") ?? request.headers.get("x-agentmail-signature");
+    if (presented !== secret) return json({ ok: false, error: "bad signature" }, 401);
+
+    const payload = await request.json();
+    const reply = parseInbound(payload);
+    if (!reply) {
+      return json({ ok: false, error: "no sender or no readable body; nothing recorded" }, 400);
+    }
+
+    // The case is found from the subject line or a header the sender kept, both of
+    // which the outgoing message sets. Without a reference the reply cannot be filed.
+    const envelope = payload as { caseRef?: string; message?: { case_ref?: string } };
+    const caseRef = envelope.caseRef ?? envelope.message?.case_ref ?? extractCaseRef(reply.subject) ?? extractCaseRef(reply.text);
+    if (!caseRef) {
+      return json({ ok: false, error: "no case reference in the message; cannot file it against a case" }, 400);
+    }
+
+    const result = await ctx.runMutation(internal.ingest.ingestReply, {
+      caseRef,
+      from: reply.from,
+      subject: reply.subject,
+      text: reply.text,
+    });
+    return json({ ok: true, caseRef, ...result });
+  }),
+});
+
+/** The reference is carried in the subject so any reply keeps it. */
+export function extractCaseRef(text: string): string | null {
+  const match = text.match(/\[case:([A-Za-z0-9._-]+)\]/);
+  return match ? match[1] : null;
+}
 
 export default http;

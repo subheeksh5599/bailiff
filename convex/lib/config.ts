@@ -15,16 +15,32 @@ export const KEYS = {
   scorecard: "SCORECARD_API_KEY",
   autumn: "AUTUMN_SECRET_KEY",
   resend: "RESEND_API_KEY",
+  agentmail: "AGENTMAIL_API_KEY",
   inkeep: "INKEEP_API_KEY",
   vapi: "VAPI_API_KEY",
   vapiSecret: "VAPI_WEBHOOK_SECRET",
   resendSecret: "RESEND_WEBHOOK_SECRET",
+  agentmailSecret: "AGENTMAIL_WEBHOOK_SECRET",
   turnstile: "TURNSTILE_SECRET_KEY",
 } as const;
 
 export function has(env: Env, key: keyof typeof KEYS): boolean {
   const value = env[KEYS[key]];
   return typeof value === "string" && value.trim().length > 0;
+}
+
+/**
+ * Which way the case's mail goes.
+ *
+ * A mailbox that can also receive is preferred, because a reply from the
+ * counterparty is evidence and a one-way sender cannot deliver one. Returning
+ * null is a real answer: no mail path is configured, so the pipeline says so
+ * rather than pretending a message was sent.
+ */
+export function emailPath(env: Env = process.env): "agentmail" | "resend" | null {
+  if (has(env, "agentmail") && (env.AGENTMAIL_INBOX_ID ?? "").trim().length > 0) return "agentmail";
+  if (has(env, "resend") && (env.RESEND_FROM ?? "").trim().length > 0) return "resend";
+  return null;
 }
 
 export function configured(env: Env = process.env): Record<string, boolean> {
@@ -34,10 +50,13 @@ export function configured(env: Env = process.env): Record<string, boolean> {
     extraction: has(env, "openai"),
     grading: has(env, "scorecard"),
     metering: has(env, "autumn"),
-    email: has(env, "resend"),
+    email: emailPath(env) !== null,
+    mailReceives: emailPath(env) === "agentmail",
     knowledge: has(env, "inkeep"),
     telephony: has(env, "vapi"),
-    hooks: has(env, "vapiSecret") && has(env, "resendSecret"),
+    hooks:
+      has(env, "vapiSecret") &&
+      (has(env, "resendSecret") || has(env, "agentmailSecret")),
   };
 }
 
