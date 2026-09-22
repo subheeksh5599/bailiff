@@ -66,6 +66,7 @@ The second wound is quieter. Somebody on a call says "that's sorted" and everyon
 - [Verify every claim in one command](#verify-every-claim-in-one-command)
 - [What BAILIFF is NOT](#what-bailiff-is-not)
 - [The problem I set out to solve](#the-problem-i-set-out-to-solve)
+- [How each sponsor is used](#how-each-sponsor-is-used)
 - [What I built](#what-i-built)
 - [Architecture](#architecture)
 - [The close loop, step by step](#the-close-loop-step-by-step)
@@ -157,6 +158,83 @@ The `proof` block on a single case is the whole claim in a size you can diff: th
 Unexplained-message disputes are one-sided by construction. You can prove what you sent. You cannot prove what they never said, and the arithmetic of "did the refund actually move" lives entirely in their systems. The asymmetry is the whole problem: the party with the information has no reason to hand it over, and the party without it has no way to force the question.
 
 Software usually answers this with a nicer inbox. That is a filing cabinet. Filing cabinets do not close anything — they just make the silence tidier. The question I wanted answered was narrower and harder: **what would it take for this to be over, and can that condition be checked without trusting either side's account of it?**
+
+### The same problem, in their words
+
+I went looking for people describing this before writing anything, and the complaints are the same
+shape over and over: a claim that the money moved, and nothing the person waiting can check.
+
+**r/CashApp**, on $800 that the app insisted was refunded (19 May 2025):
+
+> "I waited the 3-5 business days and still did not have the $800 posted to either my Chase checking
+> account or my Cash App balance... My Cash App account says the refund was completed, but it wasn't.
+> I've been out $800 for over a month now because of this."
+
+> "Chase keeps telling me to deal with Cash App, Cash App keeps telling me to deal with Chase."
+
+https://www.reddit.com/r/CashApp/comments/1kqeg3s/
+
+A status screen is not a payment record. Under this product's rules the two are different kinds of
+evidence: a status page is read as `page_fetch` and can corroborate a requirement, while a record of
+the money is a different kind that a page cannot satisfy. Her case would not have closed on the app
+saying "completed", which is exactly the sentence that was wrong.
+
+**r/whatdoIdo**, $120 paid and cancelled on three times (20 March 2025, 14.8k upvotes):
+
+> "I still have yet to get my refund let alone see proof of a refund after asking countless times."
+
+https://www.reddit.com/r/whatdoIdo/comments/1jfugwv/
+
+"Proof of a refund" is the product in five words. She had already walked every transaction in her
+account by hand, which is what people do when no system will do it for them.
+
+**r/uphold**, a deadline that passed in silence (6 August 2026):
+
+> "I received an email stating my funds would be removed and refunded within 24 business hours. That
+> timeline has passed, and the USD is still sitting completely stuck inside my restricted Uphold
+> account... I have not received a response or an update since."
+
+https://www.reddit.com/r/uphold/comments/1vh87iw/
+
+A stated deadline, a missed deadline, and nobody keeping score. A case here keeps its own clock: it
+schedules its first chase when the requirements freeze, sweeps hourly, chases three times at most,
+and then abandons with a reason rather than trailing off.
+
+**Trustpilot**, a returned mattress and £319 (Argos, review "A nightmare trying to get a refund"):
+
+> "They acknowledged receiving the mattress and confirmed that a refund was being processed. Twelve
+> days later, after numerous pointless live chats and customer service calls, I still haven't received
+> the £319 refund. I was told their Finance Team would contact me within 48 hours. That never happened."
+
+> "Argos are also refusing to provide the ARN for the refund they claim to have issued, even though
+> they can't tell me exactly when it was issued."
+
+https://www.trustpilot.com/review/www.argos.co.uk
+
+That last sentence is the whole product. An ARN is the one identifier that would let either side find
+the refund. Withheld, and with no date, the refund is claimed and unsupported at the same time, and
+the person waiting has no way to tell whether it exists.
+
+### That case, run through this deployment
+
+Not a scenario in a slide: a case built to mirror the last complaint, live and readable right now at
+[`/case?ref=case-arn-319`](https://aware-jellyfish-285.convex.site/case?ref=case-arn-319).
+
+The requirement is the refund's own identifier, sent by the counterparty after the case opened, of
+kind `email_reply`. That kind can only be carried by an inbound reply from the counterparty, so a
+status page saying "issued" can never close it. The requirement set was frozen and hashed, and then
+the close was attempted:
+
+```
+attempt to close: {"closed": false,
+  "unsatisfied": [{"key": "refund_identifier",
+    "reason": "no evidence of this kind has been read back"}]}
+```
+
+The case's own audit trail carries that refusal with the case id, the set hash
+`98dd7a98f43474c2f35ea42419249d2a180dd12573f9b3e20e59d00cd099f3b9`, and the sentence above. This is
+the same refusal the product returns when asked to call something done without a record behind it,
+and it is the same refusal a charge would meet, since no charge moves without a grade that passes.
 
 ## What I built
 
@@ -341,6 +419,33 @@ The landing page states what is verified and what is not, side by side, because 
 - **The board is a subscription, not a snapshot.** It reads the deployment's rows and re-renders when they change, so a case that a webhook moves, a cron sweep chases, or another tab closes appears without a refresh.
 - **The board is a subscription, not a snapshot.** It reads the deployment's rows and re-renders when they change, so a case a webhook moves, a sweep chases, or another tab closes appears without a refresh.
 - **The hooks are bounded.** Each carries its own shared secret, and each spends from two token buckets — one per case and one for the deployment — so a provider retrying or a loop in someone else's cron cannot hammer a case or the deployment. A flood aimed at one case does not touch another case's allowance.
+
+## How each sponsor is used
+
+The three the event names, first, because the criterion is that they do real work rather than sit
+in the README. Every row below is a call the product makes while a case is being worked, and the
+last column is where it lives.
+
+| Sponsor | What it does in a live run | Where |
+|---|---|---|
+| **OpenAI** | Reads a call transcript into claims: what the caller wanted, what was promised, what was stated as fact, resolved or not. Temperature 0, fixed shape, and it is never asked whether a claim is true. First reader in the chain, with `read_by` recorded on the case | `convex/integrations/readers.ts`, called from `convex/orchestrator.ts` |
+| **Firecrawl** | Reads the counterparty's own page as evidence when an operator asks for a read, and on the hook path. Stored with the URL, the time it was read and the hash of what came back, as `page_fetch` from the counterparty | `convex/board.ts` (`readSource`), `convex/http/hooks.ts`, `convex/integrations/firecrawl.ts` |
+| **AgentMail** | The case's mailbox. It sends the report to the counterparty and the chase when a case is stuck, and the reply that comes back is ingested as `email_reply` from the counterparty, one of the two kinds either side's own record can carry (the other is a page read from their own site) | `convex/orchestrator.ts`, `convex/chase.ts`, `convex/http/hooks.ts`, `convex/ingest.ts` |
+
+Then everything else that is wired, so the deployment's own report is not a mystery.
+
+| Integration | What it does | Where |
+|---|---|---|
+| **Convex** | The database and the whole engine: queries, mutations, actions, HTTP routes, scheduled functions, file storage, and the app's own hosting. The board is a live subscription, so a case that moves in another tab, from a webhook or on the sweep appears without a refresh | `convex/schema.ts`, `convex/cases.ts`, `convex/orchestrator.ts`, `convex/crons.ts`, `convex/http/*.ts`, `convex/attachments.ts` |
+| **Vapi** | The case's phone line. A finished call arrives on the hook and its transcript is filed as `call_transcript`. The assistant's two tools reach the backend and only the backend, so it cannot state a number that was never read | `convex/integrations/vapi.ts`, `convex/http/hooks.ts`, `convex/ingest.ts` |
+| **Autumn** | Meters a resolution, and only when a grade passes. A failed or unverified grade bills nothing | `convex/orchestrator.ts` (`trackUsage`) |
+| **Scorecard** | Receives the trace of a graded run over OTLP, so a grade that decided money left a record elsewhere too | `convex/integrations/scorecard.ts`, `convex/orchestrator.ts` |
+| **Resend** | The mail fallback: used when no receiving mailbox is configured, in which case nothing can come back and the pipeline says so | `convex/chase.ts`, `convex/orchestrator.ts` |
+| **rate-limiter** (Convex component) | Every public hook spends from a token bucket: per case and per deployment, plus a budget for operator actions. A burst that exceeds it is refused with the limit named | `convex/convex.config.ts`, `convex/lib/limits.ts`, `convex/limits.ts` |
+| **Inkeep** | Off. That account is not a member of an organization, so the integration cannot be exercised and `/health` reports it as `false` rather than pretending | `convex/integrations/inkeep.ts` |
+
+`/health` reports what carries a key, and which readers would actually read a transcript and in what
+order. That report is a request away, which is the point.
 
 ## Tech stack
 

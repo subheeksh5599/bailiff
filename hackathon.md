@@ -93,6 +93,70 @@ Extraction was the pipeline's single point of vendor failure: one provider, one 
 
 Exercising it live found three things worth keeping. The first reader refused with `402 insufficient quota` and the chain reached the second, which is what the aggregated error showed. The second reader refused the model I had chosen with `MODEL_NOT_IN_PLAN`, which is a fact about a subscription rather than a bug, and probing the catalogue found six models the plan will actually serve. And one of those models wraps its JSON in a code fence every single time, which the parser had been treating as a refusal — a correct answer thrown away. It is read now, and there is a test for exactly that shape because it was observed rather than imagined.
 
+## The complaints the rules come from
+
+I read people describing this before writing anything, and each rule in the case engine exists
+because of something specific in what they said.
+
+**A status screen is not a payment record.** On r/CashApp a user was out $800 while the app's own
+screen said the refund was completed: "My Cash App account says the refund was completed, but it
+wasn't." (https://www.reddit.com/r/CashApp/comments/1kqeg3s/) That is why evidence has a kind, and why
+a requirement is only satisfied by evidence of its own kind. A page read from the counterparty can
+corroborate a requirement; it cannot satisfy one about their money.
+
+**"Proof of a refund" is the whole ask.** On r/whatdoIdo, after being cancelled on three times:
+"I still have yet to get my refund let alone see proof of a refund after asking countless times."
+(https://www.reddit.com/r/whatdoIdo/comments/1jfugwv/) That is why every read keeps its source, the
+time it was read and the hash of what came back, and why the case page offers the file itself back
+rather than a summary of it.
+
+**A deadline that passes in silence is the failure mode.** On r/uphold: "I received an email stating
+my funds would be removed and refunded within 24 business hours. That timeline has passed... I have
+not received a response or an update since." (https://www.reddit.com/r/uphold/comments/1vh87iw/) That
+is why the case keeps its own clock: a first chase scheduled when the requirements freeze, an hourly
+sweep, three chases at most, then abandonment with a written reason.
+
+**A refund claimed and unsupported at the same time.** On Trustpilot, about £319 and a returned
+mattress: they "confirmed that a refund was being processed", nobody called back, and then, the
+sentence that decided the framing: "refusing to provide the ARN for the refund they claim to have
+issued, even though they can't tell me exactly when it was issued."
+(https://www.trustpilot.com/review/www.argos.co.uk) An ARN is the one identifier that would let
+either side find the refund. That is why an unverifiable claim bills nothing, and why a case cannot
+close on a claim about the money.
+
+### That last one, run on this deployment
+
+A case built to mirror it is live and readable at
+`https://aware-jellyfish-285.convex.site/case?ref=case-arn-319`. Its single requirement is the
+refund's own identifier, sent by the counterparty after the case opened, of kind `email_reply`, which
+only an inbound reply from them can carry. The set was frozen and hashed, and the close was attempted
+on the live deployment:
+
+```
+{"closed": false,
+ "unsatisfied": [{"key": "refund_identifier",
+   "reason": "no evidence of this kind has been read back"}]}
+```
+
+Requirement set hash `98dd7a98f43474c2f35ea42419249d2a180dd12573f9b3e20e59d00cd099f3b9`, and the
+refusal is in the case's own audit trail as `close.refused`. Both are in that JSON, which anyone can
+fetch. The case cannot be called done while that requirement is unsatisfied, and no charge can be
+released without a grade that passes, which is the same guarantee the rest of the product rests on.
+
+## How each sponsor is used
+
+| Sponsor | What it does in a live run | Where |
+|---|---|---|
+| **OpenAI** | Reads a transcript into claims at temperature 0 in a fixed shape, and is never asked whether a claim is true. First reader in the chain, recorded on the case as `read_by` | `convex/integrations/readers.ts`, called from `convex/orchestrator.ts` |
+| **Firecrawl** | Reads the counterparty's own page as evidence, stored with the URL, the time and the hash of what came back, as `page_fetch` from the counterparty | `convex/board.ts`, `convex/http/hooks.ts`, `convex/integrations/firecrawl.ts` |
+| **AgentMail** | The case's mailbox: sends the report and the chase, and the reply that comes back is ingested as `email_reply` from the counterparty, one of the two kinds either side's own record can carry | `convex/orchestrator.ts`, `convex/chase.ts`, `convex/http/hooks.ts`, `convex/ingest.ts` |
+| **Convex** | The engine and the host: database, queries, mutations, actions, HTTP routes, crons, file storage, static hosting, live subscriptions, and the two mounted components | `convex/`, `convex/convex.config.ts` |
+| **Vapi** | The phone line. A finished call's transcript is filed as `call_transcript`, and the assistant's tools reach the backend only | `convex/integrations/vapi.ts`, `convex/ingest.ts` |
+| **Autumn** | Meters a resolution only when a grade passes; a failed grade bills nothing | `convex/orchestrator.ts` |
+| **Scorecard** | Receives the trace of a graded run over OTLP | `convex/integrations/scorecard.ts` |
+| **Resend** | The mail fallback when no receiving mailbox is configured | `convex/chase.ts` |
+| **Inkeep** | Off: that account is in no organization, so `/health` reports it false instead of pretending | `convex/integrations/inkeep.ts` |
+
 ## How the mechanism works
 
 1. **Open a case.** A reference, a company, what is owed.
