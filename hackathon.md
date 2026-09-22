@@ -9,8 +9,9 @@
 - **Stack:** Convex (ledger, workflow, crons, HTTP hooks), OpenAI (transcript to
   claims), Firecrawl (reads the counterparty's own pages), AgentMail (the case's
   mailbox: sends the report, receives the reply that becomes evidence).
-- **Live app:** not deployed yet — deployment created, functions to be pushed on the
-  first run of `./scripts/deploy.sh`.
+- **Live app:** https://aware-jellyfish-285.convex.site — landing, the board, `/health`,
+  and the JSON routes `/cases` and `/case?ref=`. Every claim in this repository was
+  checked against that deployment, not against a local run.
 - **Demo video:** `demo/bailiff-demo.mp4` — 100 seconds. The open and the close are rendered motion pieces; everything between them is the live deployment, captured while it was driven by hand. Shot by shot in `demo/SCRIPT.md`.
 - **Repo:** this repository, public.
 
@@ -24,11 +25,12 @@
 | Webhooks (call ended, inbound mail, assistant tools) | Real, fail-closed without the shared secret |
 | Daily re-check withdrawing an aged closure | Real, covered by tests |
 | Firecrawl reads | Keyed and reachable (verified against the vendor) |
-| AgentMail send + inbound reply | Code complete and unit-tested on our side; **key not yet set** |
+| AgentMail send + inbound reply | Real: the report is sent and the reply that comes back becomes evidence. Verified live, message id and all |
 | Extraction (OpenAI) | Keyed and reachable; the provider answers `402 insufficient quota` until credits land on the 24th, and that refusal is recorded on the case as `extraction.failed` |
 | Metering (Autumn) | Keyed and reachable (verified) |
-| Telephony (Vapi) | Keyed, assistant exists, **no phone number on the account yet** |
-| Live URL | Not deployed |
+| Telephony (Vapi) | Real: a number answers on this project's own assistant, which carries the server URL, the shared secret and both tools. Outbound is refused by the platform's own daily limit; inbound is what the demo uses |
+| Live URL | Live, and every row above was run against it |
+| Inkeep | Off: that account is not a member of any organization, so the integration cannot be exercised. `/health` reports it as `false` rather than pretending |
 
 Nothing above is claimed as proven that has not been run, and no screen in this
 project renders a value that did not come from a real read.
