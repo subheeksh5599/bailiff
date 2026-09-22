@@ -348,7 +348,7 @@ The landing page states what is verified and what is not, side by side, because 
 convex/            the case, the pipeline, the gates, the adapters, the routes
 frontend/          the site: the landing page and the board
 demo/              the videos: the recording, the click-through, the motion piece, the click sheet
-tests/             132 tests across 13 files
+tests/             184 tests across 25 files
 docs/              integrations, deployments, the demo, what a live run printed
 scripts/           deploy, the live end-to-end run, the video assembly
 hackathon.md       the build log, including what a live deployment found
@@ -357,7 +357,7 @@ hackathon.md       the build log, including what a live deployment found
 ## Full command reference
 
 ```bash
-npm test                      # the rules, 132 tests, no vendor keys needed
+npm test                      # the rules, 184 tests, no vendor keys needed
 npm run typecheck             # no errors
 npx convex dev                # the backend, against your own deployment
 cd frontend && npm run dev    # the site (build refuses without NEXT_PUBLIC_CONVEX_URL)
@@ -403,7 +403,7 @@ which the passphrase is visible — on camera, a passphrase is published.
 ## Tests
 
 ```bash
-npm test                       # 132 tests across 13 files
+npm test                       # 184 tests across 25 files
 ```
 
 Each integration has a stubbed-transport test *and* a live probe, so the code is covered without pretending a vendor was reached. The rules that decide money — evidence freshness, authority, the grade, the exactly-once charge — are tested per rule rather than per file, because a rule with no test is a rule you are only claiming.
