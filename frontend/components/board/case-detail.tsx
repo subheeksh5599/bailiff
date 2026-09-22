@@ -7,6 +7,7 @@ import {
   money,
   when,
   type AuditRow,
+  readableError,
   type ReadResult,
   type RunResult,
   type Snapshot,
@@ -76,7 +77,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
       const value = await work();
       if (done) done(value);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(readableError(caught));
     } finally {
       setBusy(null);
     }

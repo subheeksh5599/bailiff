@@ -17,7 +17,7 @@ export const siteConfig = {
   repo: "https://github.com/subheeksh5599/bailiff",
   twitter: "@subheeksh5599",
   nav: {
-    cta: { text: "Open the board", href: "/dashboard.html" },
+    cta: { text: "Open the board", href: "/dashboard" },
   },
 };
 
@@ -27,7 +27,7 @@ export const heroConfig = {
   headline: ["A case closes when", "the outcome is verified"],
   subheadline:
     "Requirements are frozen the moment a case opens, before anyone knows how the call will go. They can only be satisfied by a record read back afterwards, and the charge is released only by a grade that passes.",
-  primary: { text: "Open the board", href: "/dashboard.html" },
+  primary: { text: "Open the board", href: "/dashboard" },
   secondary: { text: "Verify it yourself", href: "#verify" },
 };
 
@@ -192,9 +192,9 @@ export const footerConfig = {
     {
       heading: "Product",
       links: [
-        { label: "Case board", href: "/dashboard.html" },
-        { label: "Open a case", href: "/dashboard.html?view=new" },
-        { label: "Integrations", href: "/dashboard.html?view=integrations" },
+        { label: "Case board", href: "/dashboard" },
+        { label: "Open a case", href: "/dashboard?view=new" },
+        { label: "Integrations", href: "/dashboard?view=integrations" },
       ],
     },
     {

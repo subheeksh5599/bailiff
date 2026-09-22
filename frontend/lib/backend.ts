@@ -218,6 +218,25 @@ export function stateSettled(state: string): boolean {
   return state === "VERIFIED";
 }
 
+/**
+ * What a person should read when a call to the backend fails.
+ *
+ * A Convex error arrives wrapped in a request envelope and a stack frame. None of
+ * that is the reason: the reason is the provider's own sentence in the middle. The
+ * envelope is stripped so a refusal reads as a refusal, and the full text is still
+ * what the backend recorded.
+ */
+export function readableError(input: unknown): string {
+  const message = input instanceof Error ? input.message : String(input);
+  return message
+    .replace(/^\[CONVEX[^\]]*\]\s*/i, "")
+    .replace(/\[Request ID:[^\]]*\]\s*/i, "")
+    .replace(/^(Server Error|Uncaught Error):\s*/i, "")
+    .replace(/\s*at handler \([^)]*\)/g, "")
+    .replace(/\s*Called by client\.?\s*$/i, "")
+    .trim();
+}
+
 export function when(value: number | null | undefined): string {
   if (!value) return "—";
   const at = new Date(value);

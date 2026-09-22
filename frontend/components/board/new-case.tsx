@@ -2,7 +2,7 @@
 
 import { useMutation } from "convex/react";
 import { useState, type ReactNode } from "react";
-import { api } from "@/lib/backend";
+import { api, readableError } from "@/lib/backend";
 import { Button, Chip, Field, Input, Panel } from "@/components/fabric/ui";
 
 /**
@@ -68,7 +68,7 @@ export function NewCaseView(): ReactNode {
       })) as { caseId: string; duplicate: boolean };
       setCaseId(result.caseId);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(readableError(caught));
     } finally {
       setBusy(false);
     }
@@ -86,7 +86,7 @@ export function NewCaseView(): ReactNode {
       })) as { hash: string; count: number };
       setHash(result.hash);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(readableError(caught));
     } finally {
       setBusy(false);
     }
