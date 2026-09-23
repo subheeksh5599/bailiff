@@ -1,7 +1,7 @@
 "use client";
 
 import { useAction, useMutation, useQuery } from "convex/react";
-import { useSession } from "./session";
+import { useSession, OperatorGate } from "./session";
 import { useState, type ReactNode } from "react";
 import {
   api,
@@ -200,6 +200,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
 
           <Panel>
             <h2 className="text-[1.0625rem] text-white">What an operator can start</h2>
+            <OperatorGate label="Sign in to add evidence or change this case">
             {settled ? (
               <div className="mt-4 space-y-4">
                 <p className="text-[13px] leading-relaxed text-neutral-400">
@@ -509,6 +510,7 @@ export function CaseView({ caseRef }: { caseRef: string }): ReactNode {
                 </div>
               </div>
             )}
+            </OperatorGate>
 
             {note && <p className="mt-4 text-[12px] text-neutral-400">{note}</p>}
             {error && (

@@ -110,16 +110,13 @@ export function useSession(): SessionValue {
   return value;
 }
 
-export function SignInGate({ children }: { children: ReactNode }): ReactNode {
+/** Read views stay public; only the controls that change a case sit behind this gate. */
+export function OperatorGate({ children, label = "Operator action" }: { children: ReactNode; label?: string }): ReactNode {
   const { signedIn, ready } = useSession();
   const deployment = useQuery(api.authState, {});
-  if (!ready) return null;
-  if (!signedIn) {
-    if (deployment === undefined) return null;
-    // No operator yet: the first visitor sets the passphrase, from the browser.
-    return deployment.claimable ? <ClaimForm /> : <SignIn />;
-  }
-  return <>{children}</>;
+  if (!ready || deployment === undefined) return null;
+  if (signedIn) return <>{children}</>;
+  return deployment.claimable ? <ClaimForm /> : <SignInPanel label={label} />;
 }
 
 /**
@@ -311,25 +308,18 @@ export function ChangePassphrase(): ReactNode {
  * for a secret: the reads are open, the actions are not, and that is a deliberate
  * split rather than a general-purpose login.
  */
-function SignIn(): ReactNode {
+export function SignInPanel({ label = "Sign in to use operator controls" }: { label?: string }): ReactNode {
   const { signIn, error } = useSession();
   const [passphrase, setPassphrase] = useState("");
   const [busy, setBusy] = useState(false);
 
   return (
-    <AuthScreen>
-      <Panel className="p-8">
-        <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">bailiff</p>
-        <h1 className="mt-3 font-display text-3xl leading-tight text-white">
-          This board is the operator&rsquo;s.
-        </h1>
-        <p className="mt-4 text-[13px] leading-relaxed text-neutral-400">
-          Everything that reads is public: <span className="data">/health</span>,{" "}
-          <span className="data">/selftest</span>, <span className="data">/cases</span> and any case
-          as JSON. Closing a case, releasing a charge, spending a call and taking a file are not —
-          those need the passphrase this deployment was configured with.
+    <Panel className="p-5">
+        <p className="text-[13px] font-medium text-white">{label}</p>
+        <p className="mt-1 text-[12px] leading-relaxed text-neutral-500">
+          The board, cases, evidence and grades are public. This action changes the record and needs the operator&rsquo;s passphrase.
         </p>
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 space-y-3">
           <Input
             type="password"
             autoFocus
@@ -354,11 +344,6 @@ function SignIn(): ReactNode {
           </Button>
           {error && <p className="text-[12px] leading-relaxed text-[#f0a8a8]">{error}</p>}
         </div>
-        <p className="mt-6 text-[11px] leading-relaxed text-neutral-500">
-          Sessions last a working day and the deployment stores only their hashes. The public reads
-          above stay open with no session at all.
-        </p>
-      </Panel>
-    </AuthScreen>
+    </Panel>
   );
 }

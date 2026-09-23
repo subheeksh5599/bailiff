@@ -8,7 +8,7 @@ import { CaseView } from "@/components/board/case-detail";
 import { IntegrationsView } from "@/components/board/integrations";
 import { useBackend } from "@/components/providers";
 import { Panel } from "@/components/fabric/ui";
-import { SessionProvider, SignInGate } from "@/components/board/session";
+import { SessionProvider } from "@/components/board/session";
 
 /**
  * The board, as one page.
@@ -63,7 +63,7 @@ export default function DashboardPage(): ReactNode {
   const heading: Record<ViewKey, { title: string; lede: string }> = {
     board: {
       title: "Case board",
-      lede: "Every case the pipeline has touched, in the order they were opened. Nothing closes on a note; a case closes when the other side's own record satisfies what was frozen at intake.",
+      lede: "Public board. Browse every case, its evidence, grades and audit trail without signing in. The passphrase is only for operator actions.",
     },
     new: {
       title: "Open a case",
@@ -79,18 +79,17 @@ export default function DashboardPage(): ReactNode {
     },
   };
 
-  // The public reads are served as JSON by the deployment; this screen is the
-  // operator's, so it sits behind a session and says so on the way in.
+  // Reading the board, cases, evidence and grades is public. Only controls that
+  // change an existing case are gated in their own panels, so a judge can inspect
+  // the real product before deciding whether to claim operator access.
   return (
     <SessionProvider>
-      <SignInGate>
-        <Shell view={route.view} title={heading[route.view].title} lede={heading[route.view].lede}>
-          {route.view === "board" && <BoardView />}
-          {route.view === "new" && <NewCaseView />}
-          {route.view === "case" && (route.ref ? <CaseView caseRef={route.ref} /> : <BoardView />)}
-          {route.view === "integrations" && <IntegrationsView />}
-        </Shell>
-      </SignInGate>
+      <Shell view={route.view} title={heading[route.view].title} lede={heading[route.view].lede}>
+        {route.view === "board" && <BoardView />}
+        {route.view === "new" && <NewCaseView />}
+        {route.view === "case" && (route.ref ? <CaseView caseRef={route.ref} /> : <BoardView />)}
+        {route.view === "integrations" && <IntegrationsView />}
+      </Shell>
     </SessionProvider>
   );
 }

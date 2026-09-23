@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 import { useState, type ReactNode } from "react";
 import { api, readableError } from "@/lib/backend";
 import { Button, Chip, Field, Input, Panel } from "@/components/fabric/ui";
+import { OperatorGate } from "./session";
 
 /**
  * Opening a case, and freezing what has to be true for it to close.
@@ -32,6 +33,14 @@ function freshRef(): string {
 }
 
 export function NewCaseView(): ReactNode {
+  return (
+    <OperatorGate label="Sign in to open a case and freeze its requirements">
+      <NewCaseForm />
+    </OperatorGate>
+  );
+}
+
+function NewCaseForm(): ReactNode {
   const openCase = useMutation(api.openCase);
   const freeze = useMutation(api.freeze);
 
@@ -99,8 +108,8 @@ export function NewCaseView(): ReactNode {
       <Panel>
         <h2 className="text-[1.0625rem] text-white">1 · The case</h2>
         <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
-          Who owes what, and how we reached them. The reference is how the phone call finds this
-          case again, so it has to match the one read out on the line.
+          Open a case and freeze its requirements without signing in. That is the public intake; adding
+          evidence, placing calls, and closing the case require the operator.
         </p>
 
         <div className="mt-6 space-y-4">

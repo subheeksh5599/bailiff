@@ -26,6 +26,18 @@ repaints, so each one is held for the interval it was genuinely on screen — a 
 gap is stillness. `scripts/record_demo.py` performs the session; `scripts/assemble_recording.py`
 cuts it and places each narration line at the moment its step began.
 
+## What a judge can do without a passphrase
+
+The board is public to browse. `/dashboard` shows the live case list, and each case opens to its
+requirements, evidence, claims, grade, billing state and audit trail. Reads stay public by design.
+A passphrase is asked for only inside the case view, when someone chooses an operator action such as
+reading a new page, starting a call, uploading evidence, reopening a settled case or trying to close
+one. The new-case workflow also asks for an operator session before it opens and freezes a case.
+
+This is not an account wall around the demo. The judge can inspect the system first, and decide whether
+to exercise the controls afterwards. The public JSON routes (`/health`, `/selftest`, `/cases`, and
+`/case?ref=`) remain available without a session.
+
 ## What is real right now, and what is not
 
 | Piece | State |

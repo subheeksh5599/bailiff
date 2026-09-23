@@ -28,7 +28,7 @@ There is no `CLOSED_WITH_WARNINGS`. Either the requirement was satisfied by mate
 | Surface | Status | The evidence |
 |---|---|---|
 | The deployment | **LIVE** | `/health` reports **9 of 10** integrations carrying a key; the tenth says so itself |
-| The board | **LIVE** | behind an operator session, and a live subscription rather than a snapshot: a case that moves in another tab, from a webhook or on the sweep lands here without a refresh |
+| The board | **LIVE** | public read-only board and case details; only case-changing controls ask for an operator session. A live subscription, not a snapshot: a case that moves in another tab, from a webhook or on the sweep lands here without a refresh |
 | The self-test | **LIVE** | 5 checks: integrations, **storage written and read back**, mail path, 20 cases readable, the grade's rubric intact |
 | A case closing | **LIVE** | a case that was refused closed only once the counterparty's own reply arrived, and it names that reply |
 | Firecrawl | **LIVE** | a real page fetched, its text stored with the time and a hash of what came back |

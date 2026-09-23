@@ -6,7 +6,7 @@ import { verifyConfig } from "@/lib/config";
 import { Chip, Panel } from "@/components/fabric/ui";
 import { Reading } from "@/components/board/board";
 import type { ReactNode } from "react";
-import { ChangePassphrase } from "./session";
+import { ChangePassphrase, OperatorGate } from "./session";
 
 /**
  * What is switched on, what is not, and how to check both.
@@ -164,7 +164,9 @@ export function IntegrationsView(): ReactNode {
                 </p>
               </div>
             </div>
-                  <ChangePassphrase />
+                  <OperatorGate label="Sign in to change the operator passphrase">
+                    <ChangePassphrase />
+                  </OperatorGate>
       </Panel>
         </div>
       </div>
